@@ -70,8 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             if (response.ok) {
-                showDashboard(data.user);
-                loginForm.reset();
+                window.location.href = '/timetable';
             } else {
                 errorElement.textContent = data.message;
             }
@@ -110,8 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             if (response.ok) {
-                showDashboard(data.user);
-                registerForm.reset();
+                window.location.href = '/timetable';
             } else {
                 errorElement.textContent = data.message;
             }
@@ -124,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    logoutBtn.addEventListener('click', async () => {
+    logoutBtn?.addEventListener('click', async () => {
         const originalText = logoutBtn.innerHTML;
         
         try {
@@ -136,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                showAuthForms();
+                window.location.href = '/';
             }
         } catch (error) {
             console.error('Logout failed:', error);
@@ -154,13 +152,10 @@ async function checkAuthStatus() {
         });
 
         if (response.ok) {
-            const data = await response.json();
-            showDashboard(data.user);
-        } else {
-            showAuthForms();
+            window.location.href = '/timetable';
         }
     } catch (error) {
-        showAuthForms();
+        console.error('Auth check failed:', error);
     }
 }
 
