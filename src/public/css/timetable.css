@@ -519,4 +519,35 @@ body {
     background-color: rgba(255, 255, 255, 0.7);
     padding: 1px 3px;
     border-radius: 2px;
+}
+
+/* Demo button styles */
+.demo-button-container {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.demo-btn {
+    padding: 0.75rem 1.5rem;
+    background-color: #f39c12; /* Orange color to make it stand out */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-size: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.demo-btn:hover {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.demo-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 } 

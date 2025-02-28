@@ -9,10 +9,35 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeDayFilters(); // Add day filters
     loadUserInfo();
     setupLogout();
+    setupDemoButton(); // Add demo button functionality
 
     // Load course data from external file instead of hardcoding
     loadCourseData();
 });
+
+// Setup the demo button click handler
+function setupDemoButton() {
+    const demoButton = document.getElementById('loadDemoButton');
+    if (demoButton) {
+        demoButton.addEventListener('click', () => {
+            // Show loading text on the button
+            demoButton.textContent = 'Loading Demo...';
+            demoButton.disabled = true;
+            
+            // Reset semester buttons
+            const semesterButtons = document.querySelectorAll('.semester-btn');
+            semesterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Load demo data
+            loadDemoDataFromAPI()
+                .finally(() => {
+                    // Reset button text and enable it
+                    demoButton.textContent = 'Load Demo Data';
+                    demoButton.disabled = false;
+                });
+        });
+    }
+}
 
 // Function to load course data from external file
 function loadCourseData(semester = 'current') {
