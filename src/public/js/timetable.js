@@ -10,7 +10,101 @@ document.addEventListener('DOMContentLoaded', () => {
     loadUserInfo();
     setupLogout();
 
-    // Sample courses based on the screenshot
+    // Load course data from external file instead of hardcoding
+    loadCourseData();
+});
+
+// Function to load course data from external file
+function loadCourseData(semester = 'current') {
+    // Show loading indicator
+    const courseItems = document.querySelector('.course-items');
+    courseItems.innerHTML = '<div class="loading-indicator">Loading courses...</div>';
+    
+    // First check if the course-data directory exists and is accessible
+    fetch('/api/courses/check')
+        .then(response => response.json())
+        .then(data => {
+            console.log('Course data directory check:', data);
+            
+            if (!data.exists) {
+                // If directory doesn't exist, try to load demo data directly
+                return loadDemoDataFromAPI();
+            }
+            
+            // Directory exists, try to load semester data
+            return loadSemesterData(semester);
+        })
+        .catch(error => {
+            console.error('Error checking course data directory:', error);
+            loadDemoDataFromAPI();
+        });
+}
+
+// Function to load semester-specific data
+function loadSemesterData(semester) {
+    // Fetch course data from the server
+    return fetch(`/api/courses/${semester}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Failed to load ${semester} semester data (${response.status}: ${response.statusText})`);
+            }
+            return response.json();
+        })
+        .then(courses => {
+            // Store courses globally for filtering
+            window.coursesData = courses;
+            
+            // Populate course list
+            populateCourseList(courses);
+            
+            // Display selected courses on the timetable
+            updateTimetableDisplay(courses);
+        })
+        .catch(error => {
+            console.error('Error loading semester course data:', error);
+            const courseItems = document.querySelector('.course-items');
+            courseItems.innerHTML = `<div class="error-message">
+                Failed to load ${semester} semester data: ${error.message}
+                <button id="loadDemoData">Load Demo Data</button>
+            </div>`;
+            
+            // Add event listener to load demo data
+            document.getElementById('loadDemoData').addEventListener('click', () => {
+                loadDemoDataFromAPI();
+            });
+        });
+}
+
+// Function to load demo data directly from API
+function loadDemoDataFromAPI() {
+    console.log('Loading demo data from API');
+    return fetch('/api/courses/demo')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to load demo data');
+            }
+            return response.json();
+        })
+        .then(courses => {
+            // Store courses globally for filtering
+            window.coursesData = courses;
+            
+            // Populate course list
+            populateCourseList(courses);
+            
+            // Display selected courses on the timetable
+            updateTimetableDisplay(courses);
+        })
+        .catch(error => {
+            console.error('Error loading demo data from API:', error);
+            // If even the demo API fails, fall back to hardcoded demo data
+            loadDemoData();
+        });
+}
+
+// Ultimate fallback function with hardcoded demo data
+function loadDemoData() {
+    console.log('Loading hardcoded demo data');
     const courses = [
         { 
             id: 'CSCI 3100',
@@ -89,9 +183,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     populateCourseList(courses);
     
-    // Initially display selected courses on the timetable
+    // Display selected courses on the timetable
     updateTimetableDisplay(courses);
-});
+}
 
 function createTimeSlots() {
     const tbody = document.querySelector('.timetable tbody');
@@ -151,7 +245,10 @@ function initializeSemesterButtons() {
         button.addEventListener('click', () => {
             buttons.forEach(b => b.classList.remove('active'));
             button.classList.add('active');
-            // Add logic to load semester-specific courses
+            
+            // Load semester-specific courses
+            const semester = button.dataset.semester || 'current';
+            loadCourseData(semester);
         });
     });
 }
@@ -177,11 +274,17 @@ function populateCourseList(courses) {
         const courseItem = document.createElement('div');
         courseItem.className = 'course-item';
         
+        // Add a placeholder indicator if this course has placeholder schedules
+        if (course.isPlaceholder) {
+            courseItem.classList.add('placeholder-course');
+        }
+        
         courseItem.innerHTML = `
             <input type="checkbox" id="${course.id}" ${course.selected ? 'checked' : ''}>
             <label for="${course.id}">
                 ${course.id}
                 <div class="course-name">${course.name}</div>
+                ${course.isPlaceholder ? '<div class="placeholder-indicator">(Schedule TBA)</div>' : ''}
             </label>
         `;
 
@@ -229,6 +332,7 @@ function showCourseDetails(course) {
     detailsContent.innerHTML = `
         <h4>${course.id}</h4>
         <p class="course-name-details">${course.name}</p>
+        ${course.isPlaceholder ? '<p class="placeholder-warning">Note: Schedule information is not yet available. Times shown are placeholders.</p>' : ''}
         <div class="course-schedule">
             <p><strong>Schedule:</strong></p>
             ${schedulesHTML}
@@ -320,6 +424,11 @@ function displayCoursesOnTimetable(courses) {
             // Create course element
             const courseElement = document.createElement('div');
             courseElement.className = 'course-block';
+            
+            // Add placeholder class if this is a placeholder schedule
+            if (course.isPlaceholder || schedule.type.includes('Placeholder')) {
+                courseElement.classList.add('placeholder-block');
+            }
             
             // Set height based on duration
             if (durationHours > 1) {

@@ -9,6 +9,8 @@ services:
     depends_on:
       - mongodb
     restart: unless-stopped
+    volumes:
+      - ./course-data:/usr/src/app/course-data
 
   mongodb:
     image: mongo:7

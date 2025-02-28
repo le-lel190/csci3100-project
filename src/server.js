@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth');
+const coursesRoutes = require('./routes/courses');
 const path = require('path');
 const { auth } = require('./middleware/auth');
 
@@ -34,6 +35,9 @@ app.get('/timetable', auth, (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Courses API routes
+app.use('/api/courses', coursesRoutes);
 
 // API route to check registered users (for admin/debug purposes only)
 app.get('/api/users', auth, async (req, res) => {
