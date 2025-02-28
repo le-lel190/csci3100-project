@@ -148,6 +148,11 @@ body {
 .course-item {
     padding: 0.5rem;
     border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.course-item:hover {
+    background-color: var(--primary-light);
 }
 
 .course-item label {
@@ -183,9 +188,93 @@ body {
 }
 
 .timetable th {
-    background: var(--primary-light);
+    background-color: var(--primary-light);
     color: var(--primary-color);
     font-weight: 600;
+}
+
+/* Course block styles */
+.course-block {
+    background-color: var(--primary-light);
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin: 0.2rem 0;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.course-block.multi-hour {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    z-index: 1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure courses that start on their own row display properly */
+.timetable td[data-multi-hour-above="true"] {
+    background-color: rgba(0, 0, 0, 0.03);
+    pointer-events: none; /* Prevent interaction with cells below multi-hour courses */
+}
+
+.timetable td[data-multi-hour-above="true"] .course-block {
+    position: relative;
+    z-index: 2;
+}
+
+.course-block:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+.timetable td {
+    position: relative;
+    height: 60px;
+    min-width: 120px;
+    vertical-align: top;
+    padding: 2px;
+}
+
+/* To ensure all time slots have consistent height */
+.timetable tr {
+    height: 60px;
+}
+
+/* Occupied cell styling */
+.timetable td[data-occupied="true"] {
+    background-color: transparent;
+}
+
+.course-title {
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+}
+
+.course-type {
+    font-style: italic;
+    color: var(--text-light);
+    font-size: 0.75rem;
+}
+
+.course-time {
+    font-size: 0.75rem;
+    margin: 0.2rem 0;
+}
+
+.course-location {
+    font-size: 0.7rem;
+    color: var(--text-light);
 }
 
 /* Course Details Styles */
@@ -203,8 +292,30 @@ body {
     background: var(--primary-light);
     padding: 1rem;
     border-radius: 4px;
-    color: var(--text-light);
+    color: var(--text-color);
     font-size: 0.9rem;
+}
+
+.details-content h4 {
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.course-name-details {
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.course-schedule p {
+    margin: 0.25rem 0;
+}
+
+.course-schedule .location {
+    color: var(--text-light);
+    font-size: 0.8rem;
+    margin-top: 0;
+    margin-bottom: 0.8rem;
+    margin-left: 1rem;
 }
 
 .smart-scheduler {
