@@ -1,8 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize day filters (all days visible by default)
+    window.visibleDays = [0, 1, 2, 3, 4, 5, 6]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
+    
     // Initialize timetable
     createTimeSlots();
     initializeSemesterButtons();
     initializeSearch();
+    initializeDayFilters(); // Add day filters
     loadUserInfo();
     setupLogout();
 
@@ -80,6 +84,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     ];
 
+    // Store courses globally for filtering
+    window.coursesData = courses;
+    
     populateCourseList(courses);
     
     // Initially display selected courses on the timetable
@@ -101,7 +108,7 @@ function createTimeSlots() {
     headerRow.appendChild(timeHeader);
     
     // Add day headers
-    const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', '*', '*'];
+    const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
     days.forEach(day => {
         const dayHeader = document.createElement('th');
         dayHeader.textContent = day;
@@ -111,8 +118,8 @@ function createTimeSlots() {
     thead.appendChild(headerRow);
     
     // Create time slots
-    const startTime = 8 * 60 + 30; // 8:30 AM in minutes
-    const endTime = 17 * 60 + 30; // 5:30 PM in minutes
+    const startTime = 8 * 60 + 30; // 8:30 AM
+    const endTime = 19 * 60 + 30; // now shows 6:30 PM
     const interval = 60; // 60 minutes per slot (1 hour)
 
     for (let time = startTime; time < endTime; time += interval) {
@@ -179,17 +186,22 @@ function populateCourseList(courses) {
         `;
 
         const checkbox = courseItem.querySelector('input');
+        
+        // Separate the checkbox click handling from the label hover
         checkbox.addEventListener('change', (e) => {
             course.selected = e.target.checked;
-            if (e.target.checked) {
-                // Show course details
-                showCourseDetails(course);
-            } else {
-                // Hide course details
-                hideCourseDetails();
-            }
             // Update the timetable display
             updateTimetableDisplay(courses);
+        });
+        
+        // Add hover event to show course details
+        courseItem.addEventListener('mouseenter', () => {
+            showCourseDetails(course);
+        });
+        
+        courseItem.addEventListener('mouseleave', () => {
+            // Don't hide the details when moving away from the course item
+            // This way details remain visible until hovering over another course
         });
 
         courseItems.appendChild(courseItem);
@@ -197,6 +209,9 @@ function populateCourseList(courses) {
 }
 
 function updateTimetableDisplay(courses) {
+    // Store courses globally for filtering
+    window.coursesData = courses;
+    
     // Only display selected courses
     const selectedCourses = courses.filter(course => course.selected);
     displayCoursesOnTimetable(selectedCourses);
@@ -219,6 +234,17 @@ function showCourseDetails(course) {
             ${schedulesHTML}
         </div>
     `;
+    
+    // Highlight this course in the list
+    const courseItems = document.querySelectorAll('.course-item');
+    courseItems.forEach(item => {
+        const itemId = item.querySelector('input').id;
+        if (itemId === course.id) {
+            item.classList.add('highlighted');
+        } else {
+            item.classList.remove('highlighted');
+        }
+    });
 }
 
 function hideCourseDetails() {
@@ -270,6 +296,10 @@ function displayCoursesOnTimetable(courses) {
         
         sortedSchedules.forEach(schedule => {
             const dayIndex = dayMap[schedule.day];
+            
+            // Skip if this day is filtered out
+            if (!window.visibleDays.includes(dayIndex)) return;
+            
             const startTimeMinutes = timeToMinutes(schedule.start);
             const endTimeMinutes = timeToMinutes(schedule.end);
             
@@ -296,19 +326,29 @@ function displayCoursesOnTimetable(courses) {
                 // Calculate the actual time span in minutes
                 const timeSpanMinutes = endTimeMinutes - startTimeMinutes;
                 
-                // Calculate the exact height by using the number of rows that the course spans
-                if (rows.length > 1) {
-                    const lastRowIndex = Math.min(rows.length - 1, durationHours - 1);
-                    const lastRow = rows[lastRowIndex];
-                    
-                    // Calculate height from top of first row to bottom of last row
-                    const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 4; // -4px for borders
-                    courseElement.style.height = `${totalHeight}px`;
-                } else {
-                    // Fallback to the previous calculation if only one row is found
-                    const rowHeight = rows[0].offsetHeight;
-                    courseElement.style.height = `${rowHeight * durationHours - 4}px`; // -4px for borders
-                }
+                // Only attempt to calculate dynamic heights once the DOM is fully rendered
+                // and elements have their computed heights
+                setTimeout(() => {
+                    try {
+                        // Calculate the exact height by using the number of rows that the course spans
+                        if (rows.length > 1) {
+                            const lastRowIndex = Math.min(rows.length - 1, durationHours - 1);
+                            const lastRow = rows[lastRowIndex];
+                            
+                            // Calculate height from top of first row to bottom of last row
+                            const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 4; // -4px for borders
+                            courseElement.style.height = `${totalHeight}px`;
+                        } else {
+                            // Fallback to a proportional height based on duration
+                            const baseRowHeight = Math.max(rows[0].offsetHeight, 60); // Minimum height of 60px
+                            courseElement.style.height = `${baseRowHeight * durationHours - 4}px`;
+                        }
+                    } catch (e) {
+                        console.error('Error calculating course block height:', e);
+                        // Fallback to minimum height
+                        courseElement.style.height = `${60 * durationHours - 4}px`;
+                    }
+                }, 0);
                 
                 // Position absolutely
                 courseElement.style.position = 'absolute';
@@ -333,10 +373,22 @@ function displayCoursesOnTimetable(courses) {
             // Add hover effect to show more details
             courseElement.addEventListener('mouseenter', () => {
                 showCourseScheduleDetails(course, schedule);
+                
+                // Also highlight this course in the list
+                const courseItems = document.querySelectorAll('.course-item');
+                courseItems.forEach(item => {
+                    const itemId = item.querySelector('input').id;
+                    if (itemId === course.id) {
+                        item.classList.add('highlighted');
+                    } else {
+                        item.classList.remove('highlighted');
+                    }
+                });
             });
             
             courseElement.addEventListener('mouseleave', () => {
-                hideCourseDetails();
+                // We no longer hide course details on mouse leave
+                // This allows details to persist until another course is hovered
             });
             
             // Mark this cell as occupied
@@ -448,4 +500,119 @@ function setupLogout() {
             console.error('Logout failed:', error);
         }
     });
+}
+
+function initializeDayFilters() {
+    // Create the day filter container if it doesn't exist
+    let dayFilterContainer = document.querySelector('.day-filter-container');
+    if (!dayFilterContainer) {
+        dayFilterContainer = document.createElement('div');
+        dayFilterContainer.className = 'day-filter-container';
+        
+        // Insert it after the search box
+        const searchBox = document.querySelector('.search-box');
+        if (searchBox) {
+            searchBox.parentNode.insertBefore(dayFilterContainer, searchBox.nextSibling);
+        } else {
+            // Fallback - add to the sidebar
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                sidebar.appendChild(dayFilterContainer);
+            }
+        }
+    }
+    
+    // Create the filter UI
+    dayFilterContainer.innerHTML = `
+        <div class="filter-header">Day Filters</div>
+        <div class="day-filters">
+            <label><input type="checkbox" data-day="0" checked> Mon</label>
+            <label><input type="checkbox" data-day="1" checked> Tue</label>
+            <label><input type="checkbox" data-day="2" checked> Wed</label>
+            <label><input type="checkbox" data-day="3" checked> Thu</label>
+            <label><input type="checkbox" data-day="4" checked> Fri</label>
+            <label><input type="checkbox" data-day="5" checked> Sat</label>
+            <label><input type="checkbox" data-day="6" checked> Sun</label>
+        </div>
+        <div class="filter-actions">
+            <button id="selectAllDays">Select All</button>
+            <button id="clearAllDays">Clear All</button>
+        </div>
+    `;
+    
+    // Add event listeners to checkboxes
+    const dayCheckboxes = dayFilterContainer.querySelectorAll('input[type="checkbox"]');
+    dayCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            updateVisibleDays();
+        });
+    });
+    
+    // Add event listeners to buttons
+    const selectAllBtn = document.getElementById('selectAllDays');
+    const clearAllBtn = document.getElementById('clearAllDays');
+    
+    selectAllBtn.addEventListener('click', () => {
+        dayCheckboxes.forEach(checkbox => {
+            checkbox.checked = true;
+        });
+        updateVisibleDays();
+    });
+    
+    clearAllBtn.addEventListener('click', () => {
+        dayCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        updateVisibleDays();
+    });
+    
+    // Function to update visible days based on checkboxes
+    function updateVisibleDays() {
+        window.visibleDays = [];
+        dayCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                window.visibleDays.push(parseInt(checkbox.dataset.day));
+            }
+        });
+        
+        // Update the table display
+        updateColumnVisibility();
+        
+        // Redisplay courses with the new day filter
+        const courses = window.coursesData || [];
+        updateTimetableDisplay(courses);
+    }
+    
+    // Function to show/hide columns based on visible days
+    function updateColumnVisibility() {
+        const table = document.querySelector('.timetable table');
+        if (!table) return;
+        
+        // Get all rows
+        const rows = table.querySelectorAll('tr');
+        
+        rows.forEach(row => {
+            // Skip if it's the header row (handle separately)
+            if (row.parentElement.tagName === 'THEAD') {
+                const headers = row.querySelectorAll('th');
+                // Skip the first column (time column)
+                for (let i = 1; i < headers.length; i++) {
+                    const dayIndex = i - 1;
+                    headers[i].style.display = window.visibleDays.includes(dayIndex) ? '' : 'none';
+                }
+                return;
+            }
+            
+            // Handle body rows
+            const cells = row.querySelectorAll('td');
+            // Skip the first column (time column)
+            for (let i = 1; i < cells.length; i++) {
+                const dayIndex = i - 1;
+                cells[i].style.display = window.visibleDays.includes(dayIndex) ? '' : 'none';
+            }
+        });
+    }
+    
+    // Initialize column visibility
+    updateColumnVisibility();
 } 
