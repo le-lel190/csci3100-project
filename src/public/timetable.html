@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Planner - Timetable</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/timetable.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-graduation-cap"></i>
+            Course Planner
+        </div>
+        <div class="nav-links">
+            <a href="/timetable" class="active">Timetable</a>
+            <a href="/study-plan">Study Plan</a>
+            <a href="/degree-roadmap">Degree Roadmap</a>
+            <a href="/best-8-calculator">Best-8 Calculator</a>
+            <a href="/config">Config</a>
+        </div>
+        <div class="nav-user">
+            <span id="userUsername"></span>
+            <button id="logoutBtn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="semester-selector">
+                <h3>Semester</h3>
+                <div class="semester-buttons">
+                    <button class="semester-btn active" data-semester="fall">Fall 2023</button>
+                    <button class="semester-btn" data-semester="spring">Spring 2024</button>
+                    <button class="semester-btn" data-semester="summer">Summer 2024</button>
+                </div>
+                <div class="demo-button-container">
+                    <button id="loadDemoButton" class="demo-btn">Load Demo Data</button>
+                </div>
+            </div>
+
+            <div class="course-selector">
+                <div class="search-box">
+                    <input type="text" placeholder="Search Courses..." id="courseSearch">
+                </div>
+
+                <div class="course-list">
+                    <h3>All Courses</h3>
+                    <div class="course-items">
+                        <div class="course-item">
+                            <input type="checkbox" id="BEPS1061-1A">
+                            <label for="BEPS1061-1A">
+                                BEPS1061-1A
+                                <div class="course-name">Introduction to Human Anatomy and Physiology</div>
+                            </label>
+                        </div>
+                        <!-- Add more course items as needed -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="timetable">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>MON</th>
+                            <th>TUE</th>
+                            <th>WED</th>
+                            <th>THU</th>
+                            <th>FRI</th>
+                            <th>*</th>
+                            <th>*</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Time slots from 8:30 to 18:30 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="course-details">
+            <h3>Course Details</h3>
+            <div class="details-content">
+                Course details will be displayed here once you hover or click on a course
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/timetable.js"></script>
+</body>
+</html> 

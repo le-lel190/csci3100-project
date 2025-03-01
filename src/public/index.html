@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Planner - Authentication</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="auth-container">
+            <div class="brand">
+                <i class="fas fa-graduation-cap"></i>
+                <h1>Course Planner</h1>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="login">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <button class="tab-btn" data-tab="register">
+                    <i class="fas fa-user-plus"></i> Register
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <h2><i class="fas fa-user-circle"></i> Welcome Back!</h2>
+                <div class="form-group">
+                    <label for="loginEmail">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="loginEmail" name="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <div class="password-input">
+                        <input type="password" id="loginPassword" name="password" required placeholder="Enter your password">
+                        <i class="fas fa-eye-slash toggle-password"></i>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <div class="error-message" id="loginError"></div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form">
+                <h2><i class="fas fa-user-plus"></i> Create Account</h2>
+                <div class="form-group">
+                    <label for="registerUsername">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input type="text" id="registerUsername" name="username" required minlength="3" placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="registerEmail" name="email" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <div class="password-input">
+                        <input type="password" id="registerPassword" name="password" required minlength="6" placeholder="Choose a password">
+                        <i class="fas fa-eye-slash toggle-password"></i>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+                <div class="error-message" id="registerError"></div>
+            </form>
+        </div>
+
+        <!-- User Dashboard -->
+        <div class="dashboard" style="display: none;">
+            <div class="dashboard-header">
+                <i class="fas fa-user-circle profile-icon"></i>
+                <h2>Welcome, <span id="userUsername"></span>!</h2>
+            </div>
+            <div class="dashboard-content">
+                <div class="user-info">
+                    <p><i class="fas fa-envelope"></i> Email: <span id="userEmail"></span></p>
+                    <p><i class="fas fa-clock"></i> Last Login: Just now</p>
+                </div>
+                <button id="logoutBtn" class="submit-btn logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="/js/auth.js"></script>
+</body>
+</html> 

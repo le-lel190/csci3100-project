@@ -1,0 +1,24 @@
+services:
+  webapp:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb:27017/webapp
+      - PORT=3000
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+    volumes:
+      - ./course-data:/usr/src/app/course-data
+
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongodb_data: 
