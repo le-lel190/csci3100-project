@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    email: document.getElementById('loginEmail').value,
+                    identifier: document.getElementById('loginIdentifier').value,
                     password: document.getElementById('loginPassword').value
                 })
             });
