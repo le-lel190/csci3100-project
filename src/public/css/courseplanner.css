@@ -1,0 +1,466 @@
+/* Define Custom Properties (Variables) */
+:root {
+    --primary-color: #2c7a4f;
+    --primary-light: #e8f5e9;
+    --secondary-color: #4a90e2;
+    --text-color: #2c3e50;
+    --text-light: #7f8c8d;
+    --border-color: #dcdde1;
+    --background-color: #f5f6fa;
+    --white: #ffffff;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Reset and Basic Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* Navbar Styles */
+.navbar {
+    background: var(--white);
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-logout {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.btn-logout:hover {
+    color: var(--primary-color);
+}
+
+/* Container Layout */
+.container {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr) 300px;
+    gap: 1rem;
+    padding: 1rem;
+    height: calc(100vh - 4rem);
+    overflow: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+.semester-selector {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+.semester-selector h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.semester-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.semester-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.semester-btn.active {
+    background: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+.demo-button-container {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.demo-btn {
+    padding: 0.75rem 1.5rem;
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-size: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.demo-btn:hover {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.demo-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.course-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.course-list h3 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.course-items {
+    margin-top: 0.5rem;
+}
+
+.course-item {
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.course-item:hover,
+.course-item.highlighted {
+    background-color: var(--primary-light);
+}
+
+.course-item label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    cursor: pointer;
+}
+
+.course-name {
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+/* Main Content and Timetable Styles - Adapted for Study Plan */
+.main-content {
+    flex: 1;
+}
+
+.timetable {
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.timetable-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: var(--white);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.timetable-header h3 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.timetable table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    height: calc(100% - 2.5rem); /* Adjust for header height */
+}
+
+.timetable thead {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background-color: var(--white);
+}
+
+.timetable tbody {
+    flex: 1;
+}
+
+.timetable th,
+.timetable td {
+    border: 1px solid var(--border-color);
+    padding: 0.4rem;
+    text-align: center;
+    min-height: 60px;
+    vertical-align: top;
+}
+
+.timetable th {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Draggable Course Block - Adapted */
+.course-block {
+    background-color: var(--primary-light);
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin: 0.2rem 0;
+    font-size: 0.8rem;
+    cursor: move;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    min-height: 56px;
+}
+
+.course-block:hover {
+    transform: scale(1.02);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+/* Drop Zone Highlight */
+.timetable td.drag-over {
+    background-color: #e0f0e0;
+}
+
+/* Add Year Button */
+.submit-btn {
+    margin-top: 0;
+    padding: 0.25rem 0.75rem;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.submit-btn:hover {
+    background-color: #225f3d;
+    transform: translateY(-1px);
+}
+
+/* Course Details - Enhanced Graduation Progress */
+.course-details {
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+.course-details h3 {
+    text-align: center;
+    color: var(--primary-color);
+}
+
+.details-content {
+    background: var(--primary-light);
+    padding: 1rem;
+    border-radius: 4px;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    min-height: 150px;
+}
+
+.details-content p {
+    margin: 0.5rem 0;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+}
+
+.progress-bar + .progress-bar {
+    margin-top: 1rem;
+}
+
+#majorProgress,
+#ugCoreProgress,
+#freeProgress,
+#totalProgress {
+    height: 100%;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+/* Day Filter Styles */
+.day-filter-container {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--primary-light);
+    border-radius: 4px;
+}
+
+.filter-header {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.day-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.day-filters label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background-color: var(--white);
+    transition: background-color 0.2s ease;
+}
+
+.day-filters label:hover {
+    background-color: #f0f0f0;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-actions button {
+    padding: 0.25rem 0.5rem;
+    background: var(--secondary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background 0.3s ease;
+    flex: 1;
+}
+
+.filter-actions button:hover {
+    background: #357abd;
+}
+
+/* Responsive Adjustments (from timetable.css) */
+@media (max-height: 768px) {
+    .course-block {
+        padding: 0.3rem;
+        min-height: 48px;
+    }
+    
+    .course-title {
+        font-size: 0.75rem;
+    }
+    
+    .course-type,
+    .course-time,
+    .course-location {
+        font-size: 0.65rem;
+    }
+}
+
+@media (max-height: 600px) {
+    .course-block {
+        padding: 0.2rem;
+        min-height: 36px;
+    }
+    
+    .course-block .course-type,
+    .course-block .course-location {
+        display: none;
+    }
+}
