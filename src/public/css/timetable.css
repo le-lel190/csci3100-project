@@ -555,9 +555,14 @@ body {
 /* Timetable action buttons */
 .timetable-actions {
     display: flex;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
     margin-top: 1rem;
-    justify-content: space-between;
+}
+
+.button-row {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .action-btn {
@@ -567,13 +572,21 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    flex: 1;
     font-size: 0.9rem;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.timetable-actions .action-btn {
+    width: 100%; /* Full width for the Save button */
+}
+
+.button-row .action-btn {
+    width: 50%; /* Half width for Export and Save Image buttons */
+    /*idk why dont work here but courseplanner page work. later change it*/
 }
 
 .export-btn {
@@ -601,4 +614,4 @@ body {
 .action-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-} 
+}
