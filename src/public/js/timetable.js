@@ -225,6 +225,7 @@ function createTimeSlots() {
     // Add time column header
     const timeHeader = document.createElement('th');
     timeHeader.textContent = 'Time';
+    timeHeader.className = 'time-cell';
     headerRow.appendChild(timeHeader);
     
     // Add day headers
@@ -237,10 +238,10 @@ function createTimeSlots() {
     
     thead.appendChild(headerRow);
     
-    // Create time slots
+    // Create time slots - only use 8:30, 9:30, etc. (half-hour intervals)
     const startTime = 8 * 60 + 30; // 8:30 AM
-    const endTime = 19 * 60 + 30; // now shows 6:30 PM
-    const interval = 60; // 60 minutes per slot (1 hour)
+    const endTime = 22 * 60 + 30; // 10:30 PM
+    const interval = 60; // Use 60 minutes (hourly) to only show half-hour slots
 
     for (let time = startTime; time < endTime; time += interval) {
         const row = document.createElement('tr');
@@ -250,6 +251,7 @@ function createTimeSlots() {
         const minutes = time % 60;
         const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
         timeCell.textContent = formattedTime;
+        timeCell.classList.add('time-cell'); // Add class for styling
         
         row.appendChild(timeCell);
 
@@ -467,16 +469,49 @@ function displayCoursesOnTimetable(courses) {
                     try {
                         // Calculate the exact height by using the number of rows that the course spans
                         if (rows.length > 1) {
+                            // Get the last row that should be part of this course
                             const lastRowIndex = Math.min(rows.length - 1, durationHours - 1);
                             const lastRow = rows[lastRowIndex];
                             
-                            // Calculate height from top of first row to bottom of last row
-                            const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 4; // -4px for borders
-                            courseElement.style.height = `${totalHeight}px`;
+                            // If we can't find a sufficient number of rows, use a more aggressive approach
+                            // to find rows that might not have been included due to time boundaries
+                            if (lastRowIndex < durationHours - 1) {
+                                // Find the next rows manually
+                                let lastRowFound = lastRow;
+                                let rowsToFind = durationHours - 1 - lastRowIndex;
+                                let currentRow = lastRow;
+                                
+                                while (rowsToFind > 0 && currentRow.nextElementSibling) {
+                                    currentRow = currentRow.nextElementSibling;
+                                    lastRowFound = currentRow;
+                                    rowsToFind--;
+                                }
+                                
+                                // Use this last row instead if found
+                                if (lastRowFound !== lastRow) {
+                                    // Calculate height using the newly found last row
+                                    const totalHeight = lastRowFound.offsetTop + lastRowFound.offsetHeight - rows[0].offsetTop - 4; // -4px for borders
+                                    courseElement.style.height = `${totalHeight}px`;
+                                    console.log(`Extended height for ${course.id} to ${totalHeight}px (spanning more rows)`);
+                                } else {
+                                    // Calculate height from top of first row to bottom of last row
+                                    const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 4; // -4px for borders
+                                    courseElement.style.height = `${totalHeight}px`;
+                                    console.log(`Set height for ${course.id} to ${totalHeight}px (using available rows)`);
+                                }
+                            } else {
+                                // Standard case - we have enough rows
+                                const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 4; // -4px for borders
+                                courseElement.style.height = `${totalHeight}px`;
+                                console.log(`Standard height for ${course.id} to ${totalHeight}px`);
+                            }
                         } else {
-                            // Fallback to a proportional height based on duration
-                            const baseRowHeight = Math.max(rows[0].offsetHeight, 60); // Minimum height of 60px
-                            courseElement.style.height = `${baseRowHeight * durationHours - 4}px`;
+                            // We have just one row but the course spans multiple hours
+                            // Use a fixed height per hour
+                            const baseRowHeight = 60; // Fixed height of 60px per hour
+                            const totalHeight = baseRowHeight * durationHours - 4; // -4px for borders
+                            courseElement.style.height = `${totalHeight}px`;
+                            console.log(`Fixed height for ${course.id} to ${totalHeight}px for ${durationHours} hours`);
                         }
                     } catch (e) {
                         console.error('Error calculating course block height:', e);
@@ -534,7 +569,14 @@ function displayCoursesOnTimetable(courses) {
             
             // If multiple rows, mark cells below as occupied
             if (durationHours > 1) {
-                for (let i = 1; i < rows.length && i < durationHours; i++) {
+                // Determine how many rows to mark as occupied
+                const rowsToOccupy = durationHours;
+                
+                // Keep track of how many rows we've actually marked
+                let markedRows = 1; // We've already marked the first row
+                
+                // Mark the cells in rows that we already found
+                for (let i = 1; i < rows.length && markedRows < rowsToOccupy; i++) {
                     const cell = rows[i].children[dayIndex + 1];
                     if (cell) {
                         // Mark this cell as having content from a multi-hour course above
@@ -544,6 +586,29 @@ function displayCoursesOnTimetable(courses) {
                         
                         // Add a visual indicator that this cell is part of a multi-hour course
                         cell.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                        markedRows++;
+                    }
+                }
+                
+                // If we haven't marked enough rows, try to find and mark additional rows
+                if (markedRows < rowsToOccupy && rows.length > 0) {
+                    // Start from the last row we found
+                    let currentRow = rows[rows.length - 1];
+                    
+                    while (markedRows < rowsToOccupy && currentRow.nextElementSibling) {
+                        currentRow = currentRow.nextElementSibling;
+                        const cell = currentRow.children[dayIndex + 1];
+                        
+                        if (cell) {
+                            // Mark this cell as having content from a multi-hour course above
+                            cell.dataset.multiHourAbove = 'true';
+                            // Also mark as occupied to prevent other courses from being placed here
+                            cell.dataset.occupied = 'true';
+                            
+                            // Add a visual indicator that this cell is part of a multi-hour course
+                            cell.style.backgroundColor = 'rgba(0,0,0,0.03)';
+                            markedRows++;
+                        }
                     }
                 }
             }
@@ -555,35 +620,38 @@ function displayCoursesOnTimetable(courses) {
         const rows = document.querySelectorAll('.timetable tbody tr');
         const matchingRows = [];
         
-        // Add a small tolerance to handle minute differences
-        const startWithTolerance = startTimeMinutes - 5;
-        const endWithTolerance = endTimeMinutes + 5;
+        // Debug the time values we're searching for
+        console.log(`Finding rows for course from ${Math.floor(startTimeMinutes/60)}:${(startTimeMinutes%60).toString().padStart(2, '0')} to ${Math.floor(endTimeMinutes/60)}:${(endTimeMinutes%60).toString().padStart(2, '0')}`);
         
+        // Check each row to see if it contains the correct time
         for (const row of rows) {
-            const timeCell = row.children[0];
-            const [rowHours, rowMinutes] = timeCell.textContent.split(':').map(Number);
+            const timeCell = row.querySelector('.time-cell');
+            if (!timeCell) continue;
+            
+            const timeText = timeCell.textContent;
+            const [rowHours, rowMinutes] = timeText.split(':').map(Number);
             const rowTimeInMinutes = rowHours * 60 + rowMinutes;
             
-            // Get the next row's time, if available
-            let nextRowTimeInMinutes = Number.MAX_SAFE_INTEGER;
-            if (row.nextElementSibling) {
-                const nextTimeCell = row.nextElementSibling.children[0];
-                const [nextHours, nextMinutes] = nextTimeCell.textContent.split(':').map(Number);
-                nextRowTimeInMinutes = nextHours * 60 + nextMinutes;
-            }
+            // Convert to string for debugging
+            console.log(`Checking row with time: ${timeText} (${rowTimeInMinutes} minutes)`);
             
-            // Check if this row's time range overlaps with the course time range
+            // Get the time of the next slot (which would be 1 hour later with our current setup)
+            let nextRowTimeInMinutes = rowTimeInMinutes + 60;
+            
+            // Check if this row's time range matches where the course should be
+            // For a course starting at 10:30, it should be in the 10:30 row (not 9:30)
             if (
-                // Course starts in this row's time range
+                // This is the starting row for the course
                 (rowTimeInMinutes <= startTimeMinutes && startTimeMinutes < nextRowTimeInMinutes) ||
-                // Course ends in this row's time range
-                (rowTimeInMinutes < endTimeMinutes && endTimeMinutes <= nextRowTimeInMinutes) ||
-                // Course completely spans this row
-                (startTimeMinutes <= rowTimeInMinutes && endTimeMinutes >= nextRowTimeInMinutes)
+                // This row is covered by the course's duration
+                (startTimeMinutes <= rowTimeInMinutes && rowTimeInMinutes < endTimeMinutes)
             ) {
                 matchingRows.push(row);
+                console.log(`✓ Row matched: ${timeText}`);
             }
         }
+        
+        console.log(`Found ${matchingRows.length} matching rows`);
         
         return matchingRows;
     }
