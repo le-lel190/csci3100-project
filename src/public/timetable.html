@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/css/timetable.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -16,9 +17,8 @@
         </div>
         <div class="nav-links">
             <a href="/timetable" class="active">Timetable</a>
-            <a href="/study-plan">Study Plan</a>
+            <a href="./study-planner.html">Study Planner</a>
             <a href="/degree-roadmap">Degree Roadmap</a>
-            <a href="/best-8-calculator">Best-8 Calculator</a>
             <a href="/config">Config</a>
         </div>
         <div class="nav-user">
@@ -91,9 +91,20 @@
             <div class="details-content">
                 Course details will be displayed here once you hover or click on a course
             </div>
+            <div class="timetable-actions">
+                <button id="saveBtn" class="action-btn save-btn">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button id="exportTimetableBtn" class="action-btn export-btn">
+                    <i class="fas fa-file-export"></i> Export Timetable
+                </button>
+                <button id="saveImageBtn" class="action-btn save-btn">
+                    <i class="fas fa-image"></i> Save Image
+                </button>
+            </div>
         </div>
     </div>
 
     <script src="/js/timetable.js"></script>
 </body>
-</html> 
+</html>

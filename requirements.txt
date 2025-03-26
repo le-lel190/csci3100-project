@@ -1,0 +1,68 @@
+• Architecture, Design and Implementation
+1. Software architecture is scalable (4 points)
+2. Design and implementation are scalable (4 points)
+3. The design is consistent with the Requirements Specification (4 points)
+4. Easy to use (2 points)
+
+Technical Requirement: Global Database
+A global database must be employed for storing data, for operations
+like user management, licence management and system
+configuration.
+• SQL database (e.g., MySQL, or Sqlite)
+• NoSQL database (e.g., MongoDB, or Redis)
+• Worth for 4 points
+
+Technical Requirement: User Interface
+An user interface for users to interact with the system.
+• Web-Based System: Accessible via web browsers
+• Game Interface: Accessible through gaming platforms or installation
+• Graphical, beautiful, and user-friendly
+• Worth for 6 points
+
+Technical Requirement: User Management
+• Signup Operation (2 points)
+• Allows users to create new profiles for personalized access
+• Login and Logout Operations (2 points)
+• Access to core functions is restricted to logged-in users
+• Users must log in using valid credentials and can securely log out when finished
+
+Technical Requirement: License Management
+• Authorization by key or key-file (4 points)
+• Authorization: Implemented via key or key-file
+• Restricts system access to users with valid authorization
+• System validates the key or key-file before allowing usage
+• Ensures only licensed users can access the software
+
+Technical Requirement: Code Documentation
+• Worth for 4 points
+• Provide clear explanations of your code for better understanding
+• Critical during development and future maintenance
+• Helps other developers understand and work with your code
+• Enhances code readability and maintainability
+
+Application-specific Requirements
+• Completing the system
+• For a group of 𝒏 members, you must implement at least 𝒏 − 𝟏
+	externally observable features
+• Each of the 𝑛 − 1 application-specific features will contribute 𝟗/(𝒏−𝟏)
+	points to the overall score
+• Example (content-oriented application):
+• Posting text and media content
+• Follow and Unfollow system
+
+
+
+Architecture, Design and Implementation
+Software architecture 4
+Design and implementation 4
+Consistency with Req. Spec. 4
+Easy to use 2
+Technical Requirements Global Database 4
+User Interface 6
+User Management System 2 + 2
+License Management 4
+Code Documentation 4
+Application-specific
+Requirements
+(n – 1) externally observable features 9
+Total 45

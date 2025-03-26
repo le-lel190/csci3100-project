@@ -261,3 +261,48 @@ body {
         opacity: 1;
     }
 } 
+
+/* Study Planner Specific Styles */
+.form-group select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: 'Poppins', sans-serif;
+}
+
+.task-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--white);
+    transition: background-color 0.2s ease;
+}
+
+.task-item:hover {
+    background-color: var(--primary-light);
+}
+
+.task-item.completed {
+    background-color: #e0e0e0;
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.task-item button {
+    background: var(--error-color);
+    color: var(--white);
+    border: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.task-item button:hover {
+    background: #c0392b;
+}
+

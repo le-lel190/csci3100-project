@@ -78,7 +78,7 @@ router.post('/register',
 // Login
 router.post('/login',
   [
-    body('email').isEmail().normalizeEmail(),
+    body('identifier').trim().notEmpty(),
     body('password').exists()
   ],
   async (req, res) => {
@@ -88,10 +88,16 @@ router.post('/login',
         return res.status(400).json({ errors: errors.array() });
       }
 
-      const { email, password } = req.body;
+      const { identifier, password } = req.body;
 
-      // Find user
-      const user = await User.findOne({ email });
+      // Find user by email or username
+      const user = await User.findOne({
+        $or: [
+          { email: identifier },
+          { username: identifier }
+        ]
+      });
+      
       if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
