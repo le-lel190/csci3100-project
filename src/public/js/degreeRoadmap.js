@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     loadUserInfo();
     setupLogout();
     setupDegreeSelection();
@@ -13,54 +13,82 @@ function loadUserInfo() {
     .then(data => {
         if (data.user) {
             document.getElementById('userUsername').textContent = data.user.username;
+        } else if (data.username) {
+            document.getElementById('userUsername').textContent = data.username;
         }
     })
     .catch(error => {
         console.error('Error loading user info:', error);
-        // Redirecting to login page is optional here
-        // window.location.href = '/';
+        window.location.href = '/';
     });
 }
 
 function setupLogout() {
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                const response = await fetch('/api/auth/logout', {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-
-                if (response.ok) {
-                    window.location.href = '/';
-                }
-            } catch (error) {
-                console.error('Logout failed:', error);
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        fetch('/api/auth/logout', {
+            method: 'POST',
+            credentials: 'include'
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/';
             }
+        })
+        .catch(error => {
+            console.error('Error during logout:', error);
         });
-    }
+    });
 }
 
 function setupDegreeSelection() {
-    const degreeItems = document.querySelectorAll('.degree-item');
+    const modal = document.getElementById('roadmapModal');
+    const modalImg = document.getElementById('roadmapImage');
+    const closeBtn = document.querySelector('.close-modal');
     
-    degreeItems.forEach(item => {
-        item.addEventListener('click', (e) => {
+    // Map of degree codes to their respective image paths
+    const degreeImages = {
+        'CENG': '/images/roadmaps/ceng_roadmap.png',
+        'CSCI': '/images/roadmaps/csci_roadmap.png',
+        'MATH': '/images/roadmaps/math_roadmap.png',
+        'IERG': '/images/roadmaps/ierg_roadmap.png',
+        'AIST': '/images/roadmaps/aist_roadmap.png'
+    };
+
+    // Add click event listeners to all degree items
+    document.querySelectorAll('.degree-item').forEach(item => {
+        item.addEventListener('click', function(e) {
             e.preventDefault();
+            const degree = this.getAttribute('data-degree');
+            const imagePath = degreeImages[degree];
             
-            // Remove active class from all items
-            degreeItems.forEach(di => di.classList.remove('active'));
-            
-            // Add active class to clicked item
-            item.classList.add('active');
-            
-            // Get degree name from the clicked item
-            const degreeName = item.textContent.trim();
-            
-            // Load the roadmap for this degree
-            loadRoadmap(degreeName);
+            if (imagePath) {
+                modalImg.src = imagePath;
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
+            }
         });
+    });
+
+    // Close modal when clicking the close button
+    closeBtn.addEventListener('click', function() {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scrolling
+    });
+
+    // Close modal when clicking outside the image
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+    });
+
+    // Close modal with escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.style.display === 'block') {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
     });
 }
 

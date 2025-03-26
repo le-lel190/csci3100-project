@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/css/degreeRoadmap.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -29,49 +28,32 @@
         </div>
     </nav>
 
-    <div class="roadmap-container">
+    <div class="container">
         <div class="sidebar">
             <div class="degree-section">
                 <h2>Degrees</h2>
-                <ul class="degree-list">
-                    <li><a href="#" class="degree-item">BEcon&Fin23-24</a></li>
-                    <li><a href="#" class="degree-item">BEng(Civil Engineering)23-24</a></li>
-                    <li><a href="#" class="degree-item">BEng(CompSc)23-24</a></li>
-                    <li><a href="#" class="degree-item">BEng(Computer Engineering)23-24</a></li>
-                    <li><a href="#" class="degree-item">BEng(Electrical Engineering)23-24</a></li>
-                    <li><a href="#" class="degree-item">BEng(Mechanical Engineering)23-24</a></li>
-                    <li><a href="#" class="degree-item">BEng(IELM)23-24</a></li>
-                    <li><a href="#" class="degree-item">BEng in Engineering Science (Systems Analytics)23-24</a></li>
-                    <li><a href="#" class="degree-item">BEng(DS&E)23-24</a></li>
-                    <li><a href="#" class="degree-item">BASc(FinTech)23-24</a></li>
-                    <li><a href="#" class="degree-item">BSC(QFIN)23-24</a></li>
-                </ul>
-            </div>
-            
-            <div class="degree-section">
-                <h2>Majors</h2>
-                <ul class="degree-list">
-                    <li><a href="#" class="degree-item">Major in Finance</a></li>
-                </ul>
-            </div>
-            
-            <div class="degree-section">
-                <h2>Minors</h2>
-                <ul class="degree-list">
-                    <li><a href="#" class="degree-item">Minor in Statistics23-24</a></li>
-                </ul>
+                <div class="degree-list">
+                    <a href="#" class="degree-item" data-degree="CENG">Computer Engineering (CENG)</a>
+                    <a href="#" class="degree-item" data-degree="CSCI">Computer Science (CSCI)</a>
+                    <a href="#" class="degree-item" data-degree="AIST">Artificial Intelligence (AIST)</a>
+                    <a href="#" class="degree-item" data-degree="AIST">Computational Data Science (CDAS)</a>
+                </div>
             </div>
         </div>
-        
+
         <div class="roadmap-content">
             <div class="empty-state">
-                <p>Click on a syllabus from the left to view its roadmap</p>
+                <i class="fas fa-map-marked-alt"></i>
+                <p>Click on a degree to view its roadmap</p>
             </div>
-            
-            <!-- Roadmap will be dynamically loaded here when a degree is selected -->
-            <div id="roadmap-display" class="hidden">
-                <!-- This will be populated by JavaScript -->
-            </div>
+        </div>
+    </div>
+
+    <!-- Modal for displaying roadmap image -->
+    <div id="roadmapModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <img id="roadmapImage" src="" alt="Degree Roadmap">
         </div>
     </div>
 
