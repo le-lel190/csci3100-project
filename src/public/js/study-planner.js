@@ -130,7 +130,25 @@ function initializeSearch() {
         const courseItems = document.querySelectorAll('.course-item');
         courseItems.forEach(item => {
             const courseText = item.textContent.toLowerCase();
-            item.style.display = courseText.includes(searchTerm) ? 'block' : 'none';
+            
+            // Standard search
+            let isMatch = courseText.includes(searchTerm);
+            
+            // If no match and potential course code (contains letters and numbers)
+            if (!isMatch && /[a-z]+[0-9]+/.test(searchTerm)) {
+                // Try matching with spaces removed
+                const courseTextNoSpaces = courseText.replace(/\s+/g, '');
+                const searchTermNoSpaces = searchTerm.replace(/\s+/g, '');
+                
+                // Try also to match with a space between letters and numbers
+                // e.g., if user types "csci3100", also try "csci 3100"
+                const searchTermWithSpace = searchTerm.replace(/([a-z]+)([0-9]+)/i, '$1 $2');
+                
+                isMatch = courseTextNoSpaces.includes(searchTermNoSpaces) || 
+                          courseText.includes(searchTermWithSpace);
+            }
+            
+            item.style.display = isMatch ? 'block' : 'none';
         });
     });
 }
