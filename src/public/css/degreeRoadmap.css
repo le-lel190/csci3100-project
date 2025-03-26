@@ -68,8 +68,8 @@ body {
 }
 
 .nav-links a.active {
-    background-color: var(--primary-color);
-    color: var(--white);
+    background-color: var(--primary-light);
+    color: var(--text-color);
 }
 
 .nav-user {
@@ -257,7 +257,7 @@ body {
 }
 
 .day-filters label:hover {
-    background-color: #f0f0f0;
+    background-color: var(--primary-light);
 }
 
 .filter-actions {
@@ -273,12 +273,13 @@ body {
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.8rem;
-    transition: background 0.3s ease;
+    transition: all 0.3s ease;
     flex: 1;
 }
 
 .filter-actions button:hover {
-    background: #357abd;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
 }
 
 /* Main Content Styles */
@@ -320,7 +321,8 @@ body {
 }
 
 .add-year-btn:hover {
-    background-color: #357abd;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
 }
 
 .roadmap-table-container {
@@ -497,7 +499,8 @@ body {
 }
 
 .save-btn:hover {
-    background-color: #236a3f;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
@@ -509,7 +512,8 @@ body {
 }
 
 .export-btn:hover {
-    background-color: #357abd;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
@@ -540,14 +544,10 @@ body {
 }
 
 .demo-btn:hover {
-    background-color: #e67e22;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
     transform: translateY(-2px);
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-.demo-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Loading and Error States */
