@@ -283,22 +283,21 @@ router.get('/:semester?', async (req, res) => {
                 
                 console.log(`Processing course ${subject} ${courseCode}: "${courseName}"`);
                 
-                // Check if meeting patterns exist and contain valid data
-                const hasMeetingPatterns = courseInfo.meeting_patterns && 
-                                         Array.isArray(courseInfo.meeting_patterns) && 
-                                         courseInfo.meeting_patterns.length > 0;
+                // Check if terms exist and contain valid data
+                const hasTerms = courseInfo.terms && 
+                               Object.keys(courseInfo.terms).length > 0;
                 
-                console.log(`${subject} ${courseCode} has meeting patterns: ${hasMeetingPatterns}`);
+                console.log(`${subject} ${courseCode} has terms: ${hasTerms}`);
                 
-                if (hasMeetingPatterns) {
-                    // Debug the first meeting pattern
-                    console.log(`First meeting pattern for ${subject} ${courseCode}:`, 
-                               JSON.stringify(courseInfo.meeting_patterns[0], null, 2));
+                if (hasTerms) {
+                    // Debug the first term
+                    const firstTermKey = Object.keys(courseInfo.terms)[0];
+                    console.log(`First term for ${subject} ${courseCode}: ${firstTermKey}`);
                 }
                 
-                // If no meeting patterns, create a placeholder
-                if (!hasMeetingPatterns) {
-                    console.log(`No meeting patterns for ${subject} ${courseCode}, creating placeholder`);
+                // If no terms, create a placeholder
+                if (!hasTerms) {
+                    console.log(`No terms for ${subject} ${courseCode}, creating placeholder`);
                     
                     // Create a more diverse placeholder schedule based on course code
                     // This ensures courses don't all stack in the same time slot
@@ -334,108 +333,91 @@ router.get('/:semester?', async (req, res) => {
                     
                     colorIndex++;
                 } else {
-                    // Create schedules from meeting patterns
+                    // Create schedules from terms
                     const schedules = [];
                     
-                    for (const pattern of courseInfo.meeting_patterns) {
-                        console.log(`Processing pattern for ${subject} ${courseCode}:`, 
-                                   JSON.stringify(pattern).substring(0, 200) + '...');
+                    // Process each term
+                    for (const [termName, termData] of Object.entries(courseInfo.terms)) {
+                        console.log(`Processing term ${termName} for ${subject} ${courseCode}`);
                         
-                        // IMPROVED: More detailed inspection of the pattern structure
-                        console.log(`Pattern details - has days: ${Boolean(pattern.days)}, ` +
-                                   `startTimes: ${Boolean(pattern.startTimes)}, ` +
-                                   `endTimes: ${Boolean(pattern.endTimes)}, ` +
-                                   `locations: ${Boolean(pattern.locations)}`);
-                        
-                        if (pattern.days) {
-                            console.log(`Days array: ${JSON.stringify(pattern.days)}`);
-                        }
-                        
-                        // Skip patterns with no days, start times, or end times
-                        if (!pattern.days || !pattern.startTimes || !pattern.endTimes) {
-                            console.log(`Missing days/times for ${subject} ${courseCode} pattern`);
-                            continue;
-                        }
-                        
-                        // Check if arrays are empty
-                        if (pattern.days.length === 0 || pattern.startTimes.length === 0 || pattern.endTimes.length === 0) {
-                            console.log(`Empty days/times arrays for ${subject} ${courseCode} pattern`);
-                            continue;
-                        }
-                        
-                        // Get the pattern type (Lecture, Tutorial, etc.)
-                        let type = 'Class';
-                        
-                        // Try to extract pattern type from different possible fields
-                        if (pattern.type) {
-                            type = pattern.type;
-                        } else if (pattern.activity_type) {
-                            type = pattern.activity_type;
-                        } else if (pattern.session_type) {
-                            type = pattern.session_type;
-                        } else if (pattern.term_pattern) {
-                            type = pattern.term_pattern;
-                        }
-                        
-                        // Process each day/time combination
-                        for (let i = 0; i < pattern.days.length; i++) {
-                            // Get day index, which could be a number or a string
-                            let dayIndex = pattern.days[i];
+                        // Process each section in the term
+                        for (const [sectionName, sectionData] of Object.entries(termData)) {
+                            console.log(`Processing section ${sectionName} for ${subject} ${courseCode}`);
                             
-                            // If day is a string (like "Monday"), convert to index
-                            if (typeof dayIndex === 'string') {
-                                dayIndex = dayNameToIndex[dayIndex] || -1;
+                            // Extract section type from the section name
+                            let type = 'Class';
+                            if (sectionName.includes('LEC')) {
+                                type = 'Lecture';
+                            } else if (sectionName.includes('LAB')) {
+                                type = 'Laboratory';
+                            } else if (sectionName.includes('TUT')) {
+                                type = 'Tutorial';
                             }
                             
-                            if (dayIndex < 0 || dayIndex > 6) {
-                                console.log(`Invalid day index ${dayIndex} for ${subject} ${courseCode}`);
+                            // Skip sections with no days, start times, or end times
+                            if (!sectionData.days || !sectionData.startTimes || !sectionData.endTimes ||
+                                !Array.isArray(sectionData.days) || !Array.isArray(sectionData.startTimes) || 
+                                !Array.isArray(sectionData.endTimes)) {
+                                console.log(`Missing days/times for ${subject} ${courseCode} section ${sectionName}`);
                                 continue;
                             }
                             
-                            const day = dayIndexToName[dayIndex];
-                            let startTime, endTime;
-                            
-                            // Handle different time formats
-                            if (Array.isArray(pattern.startTimes)) {
-                                startTime = pattern.startTimes[i] || pattern.startTimes[0] || "09:00";
-                            } else if (typeof pattern.startTimes === 'string') {
-                                startTime = pattern.startTimes;
-                            } else {
-                                startTime = "09:00";
+                            // Check if arrays are empty
+                            if (sectionData.days.length === 0 || sectionData.startTimes.length === 0 || sectionData.endTimes.length === 0) {
+                                console.log(`Empty days/times arrays for ${subject} ${courseCode} section ${sectionName}`);
+                                continue;
                             }
                             
-                            if (Array.isArray(pattern.endTimes)) {
-                                endTime = pattern.endTimes[i] || pattern.endTimes[0] || "10:00";
-                            } else if (typeof pattern.endTimes === 'string') {
-                                endTime = pattern.endTimes;
-                            } else {
-                                endTime = "10:00";
+                            // Process each day/time combination
+                            for (let i = 0; i < sectionData.days.length; i++) {
+                                // Get day index, which could be a number or a string
+                                let dayIndex = sectionData.days[i];
+                                
+                                // If day is a string (like "Monday"), convert to index
+                                if (typeof dayIndex === 'string') {
+                                    dayIndex = dayNameToIndex[dayIndex] || -1;
+                                }
+                                
+                                if (dayIndex < 0 || dayIndex > 6) {
+                                    console.log(`Invalid day index ${dayIndex} for ${subject} ${courseCode}`);
+                                    continue;
+                                }
+                                
+                                const day = dayIndexToName[dayIndex];
+                                
+                                // Get start and end times
+                                let startTime = sectionData.startTimes[i] || sectionData.startTimes[0] || "09:00";
+                                let endTime = sectionData.endTimes[i] || sectionData.endTimes[0] || "10:00";
+                                
+                                // Normalize time formats to HH:MM
+                                startTime = normalizeTimeFormat(startTime) || "09:00";
+                                endTime = normalizeTimeFormat(endTime) || "10:00";
+                                
+                                // Get location
+                                let location = "TBA";
+                                if (sectionData.locations && sectionData.locations[i]) {
+                                    location = sectionData.locations[i];
+                                }
+                                
+                                // Add instructor information if available
+                                let instructor = "";
+                                if (sectionData.instructors && sectionData.instructors[i]) {
+                                    instructor = sectionData.instructors[i];
+                                }
+                                
+                                // Create detailed type with section info
+                                const detailedType = `${type} ${sectionName}`.trim();
+                                
+                                schedules.push({
+                                    type: detailedType,
+                                    day,
+                                    start: startTime,
+                                    end: endTime,
+                                    location,
+                                    instructor,
+                                    term: termName
+                                });
                             }
-                            
-                            // Normalize time formats to HH:MM
-                            startTime = normalizeTimeFormat(startTime) || "09:00";
-                            endTime = normalizeTimeFormat(endTime) || "10:00";
-                            
-                            // Get location, which might be in different formats or properties
-                            let location = "TBA";
-                            
-                            if (pattern.locations && pattern.locations[i]) {
-                                location = pattern.locations[i];
-                            } else if (pattern.location) {
-                                location = typeof pattern.location === 'string' ? pattern.location : "TBA";
-                            } else if (pattern.venue) {
-                                location = typeof pattern.venue === 'string' ? pattern.venue : "TBA";
-                            } else if (pattern.room) {
-                                location = typeof pattern.room === 'string' ? pattern.room : "TBA";
-                            }
-                            
-                            schedules.push({
-                                type,
-                                day,
-                                start: startTime,
-                                end: endTime,
-                                location
-                            });
                         }
                     }
                     
