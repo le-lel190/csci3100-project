@@ -351,10 +351,28 @@ function updateTimetableDisplay(courses) {
 function showCourseDetails(course) {
     const detailsContent = document.querySelector('.details-content');
     
-    let schedulesHTML = '';
+    // Group schedules by type for better organization
+    const schedulesByType = {};
     course.schedules.forEach(schedule => {
-        schedulesHTML += `<p>${schedule.type}: ${schedule.day} ${schedule.start} - ${schedule.end}</p>
-        <p class="location">Location: ${schedule.location}</p>`;
+        if (!schedulesByType[schedule.type]) {
+            schedulesByType[schedule.type] = [];
+        }
+        schedulesByType[schedule.type].push(schedule);
+    });
+    
+    // Generate HTML for each schedule group
+    let schedulesHTML = '';
+    Object.entries(schedulesByType).forEach(([type, schedules]) => {
+        schedulesHTML += `<div class="schedule-item">
+            <strong>${type}</strong>`;
+            
+        schedules.forEach(schedule => {
+            schedulesHTML += `
+                <p>${schedule.day} ${schedule.start} - ${schedule.end}</p>
+                <p class="location">${schedule.location || 'Location TBA'}</p>`;
+        });
+        
+        schedulesHTML += `</div>`;
     });
     
     detailsContent.innerHTML = `
@@ -362,7 +380,7 @@ function showCourseDetails(course) {
         <p class="course-name-details">${course.name}</p>
         ${course.isPlaceholder ? '<p class="placeholder-warning">Note: Schedule information is not yet available. Times shown are placeholders.</p>' : ''}
         <div class="course-schedule">
-            <p><strong>Schedule:</strong></p>
+            <h3>Schedule Details:</h3>
             ${schedulesHTML}
         </div>
     `;
@@ -663,9 +681,14 @@ function showCourseScheduleDetails(course, schedule) {
         <h4>${course.id}</h4>
         <p class="course-name-details">${course.name}</p>
         <div class="course-schedule">
-            <p><strong>Schedule Details:</strong></p>
-            <p>${schedule.type}: ${schedule.day} ${schedule.start} - ${schedule.end}</p>
-            <p class="location">Location: ${schedule.location}</p>
+            <h3>Schedule Details:</h3>
+            <div class="schedule-item">
+                <strong>${schedule.type}</strong>
+                <p>${schedule.day} ${schedule.start} - ${schedule.end}</p>
+                <p class="location">${schedule.location || 'Location TBA'}</p>
+                ${schedule.instructor ? `<p><em>Instructor: ${schedule.instructor}</em></p>` : ''}
+                ${schedule.term ? `<p><em>Term: ${schedule.term}</em></p>` : ''}
+            </div>
         </div>
     `;
 }
