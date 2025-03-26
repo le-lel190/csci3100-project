@@ -16,6 +16,131 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCourseData();
 });
 
+function setupTimetableActions() {
+    const saveBtn = document.getElementById('saveBtn');
+    const exportBtn = document.getElementById('exportTimetableBtn');
+    const saveImageBtn = document.getElementById('saveImageBtn');
+
+    // Save button (placeholder for now, will implement later)
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            alert('Saving timetable... (To be implemented with MongoDB)');
+        });
+    }
+
+    // Export timetable button
+    if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+            const selectedCourses = window.coursesData ? window.coursesData.filter(course => course.selected) : [];
+            if (!selectedCourses.length) {
+                alert('No courses selected to export.');
+                return;
+            }
+
+            // Prepare CSV headers
+            const headers = ['Course ID', 'Course Name', 'Type', 'Day', 'Start Time', 'End Time', 'Location'];
+            const csvRows = [headers.join(',')];
+
+            // Add each course schedule as a row
+            selectedCourses.forEach(course => {
+                if (course.schedules && course.schedules.length > 0) {
+                    course.schedules.forEach(schedule => {
+                        const row = [
+                            `"${course.id}"`,
+                            `"${course.name}"`,
+                            `"${schedule.type}"`,
+                            `"${schedule.day}"`,
+                            `"${schedule.start}"`,
+                            `"${schedule.end}"`,
+                            `"${schedule.location}"`
+                        ];
+                        csvRows.push(row.join(','));
+                    });
+                } else {
+                    // If no schedules, add a row with empty schedule fields
+                    const row = [
+                        `"${course.id}"`,
+                        `"${course.name}"`,
+                        '""', // Type
+                        '""', // Day
+                        '""', // Start Time
+                        '""', // End Time
+                        '""'  // Location
+                    ];
+                    csvRows.push(row.join(','));
+                }
+            });
+
+            // Create CSV content
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(blob);
+            const activeSemester = document.querySelector('.semester-btn.active');
+            const semesterName = activeSemester ? activeSemester.textContent.replace(/\s+/g, '_') : 'timetable';
+            downloadLink.download = `${semesterName}_timetable.csv`;
+            downloadLink.click();
+            URL.revokeObjectURL(downloadLink.href);
+        });
+    }
+
+    // Save image button
+    if (saveImageBtn) {
+        saveImageBtn.addEventListener('click', () => {
+            const timetableElement = document.querySelector('.timetable');
+            if (!timetableElement) {
+                alert('Could not find timetable to capture.');
+                return;
+            }
+
+            const loadingMessage = document.createElement('div');
+            loadingMessage.textContent = 'Capturing timetable...';
+            loadingMessage.style.position = 'fixed';
+            loadingMessage.style.top = '50%';
+            loadingMessage.style.left = '50%';
+            loadingMessage.style.transform = 'translate(-50%, -50%)';
+            loadingMessage.style.padding = '1rem';
+            loadingMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            loadingMessage.style.color = 'white';
+            loadingMessage.style.borderRadius = '5px';
+            loadingMessage.style.zIndex = '9999';
+            document.body.appendChild(loadingMessage);
+
+            window.scrollTo(0, 0); // Ensure the element is fully visible
+            html2canvas(timetableElement, {
+                backgroundColor: '#f5f6fa',
+                scale: 2,
+                useCORS: true, // Handle external resources like FontAwesome icons
+                logging: false
+            }).then(canvas => {
+                document.body.removeChild(loadingMessage);
+                canvas.toBlob(blob => {
+                    try {
+                        const clipboardItem = new ClipboardItem({ 'image/png': blob });
+                        navigator.clipboard.write([clipboardItem])
+                            .then(() => console.log('Image copied to clipboard'))
+                            .catch(err => console.error('Error copying to clipboard:', err));
+                    } catch (e) {
+                        console.warn('Clipboard copy not supported:', e);
+                    }
+
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = URL.createObjectURL(blob);
+                    const activeSemester = document.querySelector('.semester-btn.active');
+                    const semesterName = activeSemester ? activeSemester.textContent.replace(/\s+/g, '_') : 'timetable';
+                    downloadLink.download = `${semesterName}.png`; // Changed to PNG
+                    downloadLink.click();
+                    URL.revokeObjectURL(downloadLink.href);
+                }, 'image/png'); // Changed to PNG
+            }).catch(error => {
+                document.body.removeChild(loadingMessage);
+                console.error('Error capturing timetable:', error);
+                alert('Error capturing timetable. Please try again.');
+            });
+        });
+    }
+}
+
 // Setup the demo button click handler
 function setupDemoButton() {
     const demoButton = document.getElementById('loadDemoButton');
@@ -751,103 +876,3 @@ function initializeDayFilters() {
     // Initialize column visibility
     updateColumnVisibility();
 }
-
-// Setup timetable action buttons (export and save image)
-function setupTimetableActions() {
-    const exportBtn = document.getElementById('exportTimetableBtn');
-    const saveImageBtn = document.getElementById('saveImageBtn');
-
-    // Export timetable button (template only, no actual functionality)
-    if (exportBtn) {
-        exportBtn.addEventListener('click', () => {
-            alert('Export functionality will be implemented in a future update.');
-        });
-    }
-
-    // Save image button
-    if (saveImageBtn) {
-        saveImageBtn.addEventListener('click', () => {
-            // Get the timetable element
-            const timetableElement = document.querySelector('.timetable');
-            
-            if (!timetableElement) {
-                alert('Could not find timetable to capture.');
-                return;
-            }
-
-            // Use html2canvas library to capture the timetable as an image
-            // First check if html2canvas is loaded, if not load it
-            if (typeof html2canvas === 'undefined') {
-                // Create script element to load html2canvas
-                const script = document.createElement('script');
-                script.src = 'https://html2canvas.hertzen.com/dist/html2canvas.min.js';
-                script.onload = () => captureAndSaveTimetable(timetableElement);
-                script.onerror = () => alert('Failed to load html2canvas library. Please try again later.');
-                document.head.appendChild(script);
-            } else {
-                captureAndSaveTimetable(timetableElement);
-            }
-        });
-    }
-}
-
-// Function to capture and save timetable as image
-function captureAndSaveTimetable(timetableElement) {
-    // Show loading message
-    const loadingMessage = document.createElement('div');
-    loadingMessage.textContent = 'Capturing timetable...';
-    loadingMessage.style.position = 'fixed';
-    loadingMessage.style.top = '50%';
-    loadingMessage.style.left = '50%';
-    loadingMessage.style.transform = 'translate(-50%, -50%)';
-    loadingMessage.style.padding = '1rem';
-    loadingMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    loadingMessage.style.color = 'white';
-    loadingMessage.style.borderRadius = '5px';
-    loadingMessage.style.zIndex = '9999';
-    document.body.appendChild(loadingMessage);
-    
-    // Use html2canvas to capture the timetable
-    html2canvas(timetableElement, {
-        backgroundColor: '#f5f6fa',
-        scale: 2, // Higher scale for better quality
-        logging: false
-    }).then(canvas => {
-        // Remove loading message
-        document.body.removeChild(loadingMessage);
-        
-        // Convert canvas to blob
-        canvas.toBlob(blob => {
-            // Create a ClipboardItem for copying to clipboard
-            try {
-                // Try to copy to clipboard (may not work in all browsers)
-                const clipboardItem = new ClipboardItem({ 'image/png': blob });
-                navigator.clipboard.write([clipboardItem])
-                    .then(() => console.log('Image copied to clipboard'))
-                    .catch(err => console.error('Error copying to clipboard:', err));
-            } catch (e) {
-                console.warn('Clipboard copy not supported:', e);
-            }
-            
-            // Create download link
-            const downloadLink = document.createElement('a');
-            downloadLink.href = URL.createObjectURL(blob);
-            
-            // Get current semester name for filename
-            const activeSemester = document.querySelector('.semester-btn.active');
-            const semesterName = activeSemester ? activeSemester.textContent.replace(/\s+/g, '_') : 'timetable';
-            downloadLink.download = `${semesterName}.jpg`;
-            
-            // Trigger download
-            downloadLink.click();
-            
-            // Clean up
-            URL.revokeObjectURL(downloadLink.href);
-        }, 'image/jpeg', 0.95); // High quality JPEG
-    }).catch(error => {
-        // Remove loading message and show error
-        document.body.removeChild(loadingMessage);
-        console.error('Error capturing timetable:', error);
-        alert('Error capturing timetable. Please try again.');
-    });
-} 
