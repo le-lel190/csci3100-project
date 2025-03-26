@@ -258,6 +258,30 @@ function loadDemoData() {
     console.log('Loading hardcoded demo data');
     const courses = [
         { 
+            id: 'CSCI 2100',
+            name: 'Data Structures',
+            schedules: [
+                // Lecture section A (meets twice a week)
+                { type: 'Lecture A-LEC', day: 'Tuesday', start: '10:30', end: '12:15', location: 'Y.C. Liang Hall 104' },
+                { type: 'Lecture A-LEC', day: 'Wednesday', start: '10:30', end: '11:15', location: 'Y.C. Liang Hall 104' },
+                
+                // Lecture section B (meets twice a week)
+                { type: 'Lecture B-LEC', day: 'Thursday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg 1004' },
+                { type: 'Lecture B-LEC', day: 'Wednesday', start: '12:30', end: '14:15', location: 'Science Centre L2' },
+                
+                // Tutorial section AT01 (once a week)
+                { type: 'Tutorial AT01-TUT', day: 'Thursday', start: '12:30', end: '13:15', location: 'William M W Mong Eng Bldg 702' },
+                
+                // Tutorial section AT02 (once a week)
+                { type: 'Tutorial AT02-TUT', day: 'Friday', start: '12:30', end: '13:15', location: 'Mong Man Wai Bldg 702' },
+                
+                // Tutorial section BT01 (once a week)
+                { type: 'Tutorial BT01-TUT', day: 'Thursday', start: '16:30', end: '17:15', location: 'William M W Mong Eng Bldg 1004' }
+            ],
+            color: '#fae3d9', // light peach
+            selected: true
+        },
+        { 
             id: 'CSCI 3100',
             name: 'Software Engineering',
             schedules: [
@@ -450,6 +474,14 @@ function populateCourseList(courses) {
             courseItem.classList.add('placeholder-course');
         }
         
+        // Check if the course has multiple lecture or tutorial sections
+        const hasMultipleSections = checkForMultipleSections(course);
+        
+        let sectionSelectors = '';
+        if (hasMultipleSections) {
+            sectionSelectors = generateSectionSelectors(course);
+        }
+        
         courseItem.innerHTML = `
             <input type="checkbox" id="${course.id}" ${course.selected ? 'checked' : ''}>
             <label for="${course.id}">
@@ -457,6 +489,7 @@ function populateCourseList(courses) {
                 <div class="course-name">${course.name}</div>
                 ${course.isPlaceholder ? '<div class="placeholder-indicator">(Schedule TBA)</div>' : ''}
             </label>
+            ${sectionSelectors}
         `;
 
         const checkbox = courseItem.querySelector('input');
@@ -467,6 +500,11 @@ function populateCourseList(courses) {
             // Update the timetable display
             updateTimetableDisplay(courses);
         });
+        
+        // Add event listeners for section selectors if they exist
+        if (hasMultipleSections) {
+            addSectionSelectorEventListeners(courseItem, course);
+        }
         
         // Add hover event to show course details
         courseItem.addEventListener('mouseenter', () => {
@@ -482,6 +520,179 @@ function populateCourseList(courses) {
     });
 }
 
+/**
+ * Check if a course has multiple sections for the same type (lecture, tutorial, etc.)
+ */
+function checkForMultipleSections(course) {
+    // Normalize section types to group lectures and tutorials
+    const sectionTypes = {};
+    
+    for (const schedule of course.schedules) {
+        // Normalize type to basic categories (Lecture, Tutorial)
+        const baseType = normalizeSessionType(schedule.type);
+        
+        if (!sectionTypes[baseType]) {
+            sectionTypes[baseType] = new Set();
+        }
+        
+        // Extract the section identifier (A, B, AT01, BT01, etc.)
+        const sectionId = extractSectionId(schedule.type);
+        if (sectionId) {
+            sectionTypes[baseType].add(sectionId);
+        }
+    }
+    
+    // Return true if any type has more than 1 section
+    return Object.values(sectionTypes).some(sections => sections.size > 1);
+}
+
+/**
+ * Normalize session type to basic categories (Lecture, Tutorial)
+ */
+function normalizeSessionType(type) {
+    if (type.toLowerCase().includes('lec')) {
+        return 'Lecture';
+    } else if (type.toLowerCase().includes('tut')) {
+        return 'Tutorial';
+    }
+    return type; // Return original for other types
+}
+
+/**
+ * Extract section identifier from type string
+ */
+function extractSectionId(type) {
+    // Extract section identifier like A, B, AT01, BT01
+    const lecMatch = type.match(/([A-Z])-?LEC/i);
+    if (lecMatch) return lecMatch[1];
+    
+    const tutMatch = type.match(/([A-Z]T\d+)-?TUT/i);
+    if (tutMatch) return tutMatch[1];
+    
+    return null;
+}
+
+/**
+ * Group schedules by section
+ */
+function groupSchedulesBySection(course) {
+    // First, normalize all schedules by section
+    const sections = {};
+    
+    course.schedules.forEach((schedule, index) => {
+        const baseType = normalizeSessionType(schedule.type);
+        const sectionId = extractSectionId(schedule.type);
+        
+        // Create a key that combines base type and section ID
+        const sectionKey = `${baseType}-${sectionId || 'Default'}`;
+        
+        if (!sections[sectionKey]) {
+            sections[sectionKey] = {
+                type: baseType,
+                sectionId: sectionId || 'Default',
+                schedules: [],
+                baseType
+            };
+        }
+        
+        // Add this schedule to the section with its index
+        sections[sectionKey].schedules.push({...schedule, index});
+    });
+    
+    return sections;
+}
+
+/**
+ * Generate HTML for section selection dropdowns
+ */
+function generateSectionSelectors(course) {
+    // Group schedules by section
+    const sections = groupSchedulesBySection(course);
+    
+    // Group sections by base type (Lecture, Tutorial)
+    const sectionsByType = {};
+    Object.values(sections).forEach(section => {
+        if (!sectionsByType[section.baseType]) {
+            sectionsByType[section.baseType] = [];
+        }
+        sectionsByType[section.baseType].push(section);
+    });
+    
+    // Only create selectors for types with multiple options
+    let selectorHTML = '<div class="section-selectors">';
+    
+    for (const [baseType, typeSections] of Object.entries(sectionsByType)) {
+        if (typeSections.length > 1) {
+            selectorHTML += `
+                <div class="section-selector">
+                    <label class="section-label">${baseType}:</label>
+                    <select class="section-dropdown" data-type="${baseType}">
+            `;
+            
+            // If no section is selected yet, select the first one by default
+            if (!course.selectedSections) {
+                course.selectedSections = {};
+            }
+            
+            // Default selection
+            if (!course.selectedSections[baseType]) {
+                course.selectedSections[baseType] = typeSections[0].sectionId;
+            }
+            
+            typeSections.forEach(section => {
+                const isSelected = course.selectedSections[baseType] === section.sectionId;
+                
+                // Generate a display name for this section
+                const displayTimes = section.schedules.map(s => 
+                    `${s.day} ${s.start}-${s.end}`
+                ).join(', ');
+                
+                const location = section.schedules[0].location;
+                
+                selectorHTML += `
+                    <option value="${section.sectionId}" ${isSelected ? 'selected' : ''}>
+                        Section ${section.sectionId}: ${displayTimes} (${location})
+                    </option>
+                `;
+            });
+            
+            selectorHTML += `
+                    </select>
+                </div>
+            `;
+        }
+    }
+    
+    selectorHTML += '</div>';
+    return selectorHTML;
+}
+
+/**
+ * Add event listeners for section selector dropdowns
+ */
+function addSectionSelectorEventListeners(courseItem, course) {
+    const selectors = courseItem.querySelectorAll('.section-dropdown');
+    
+    selectors.forEach(selector => {
+        selector.addEventListener('change', (e) => {
+            const baseType = e.target.dataset.type;
+            const selectedSectionId = e.target.value;
+            
+            // Update the selected section for this type
+            if (!course.selectedSections) {
+                course.selectedSections = {};
+            }
+            
+            course.selectedSections[baseType] = selectedSectionId;
+            
+            // Update the display if the course is currently selected
+            if (course.selected) {
+                updateTimetableDisplay(window.coursesData);
+            }
+        });
+    });
+}
+
 function updateTimetableDisplay(courses) {
     // Store courses globally for filtering
     window.coursesData = courses;
@@ -494,25 +705,57 @@ function updateTimetableDisplay(courses) {
 function showCourseDetails(course) {
     const detailsContent = document.querySelector('.details-content');
     
-    // Group schedules by type for better organization
-    const schedulesByType = {};
-    course.schedules.forEach(schedule => {
-        if (!schedulesByType[schedule.type]) {
-            schedulesByType[schedule.type] = [];
+    // Group schedules by section
+    const sections = groupSchedulesBySection(course);
+    
+    // Group sections by base type (Lecture, Tutorial)
+    const sectionsByType = {};
+    Object.values(sections).forEach(section => {
+        if (!sectionsByType[section.baseType]) {
+            sectionsByType[section.baseType] = [];
         }
-        schedulesByType[schedule.type].push(schedule);
+        sectionsByType[section.baseType].push(section);
     });
     
     // Generate HTML for each schedule group
     let schedulesHTML = '';
-    Object.entries(schedulesByType).forEach(([type, schedules]) => {
+    Object.entries(sectionsByType).forEach(([baseType, typeSections]) => {
         schedulesHTML += `<div class="schedule-item">
-            <strong>${type}</strong>`;
+            <strong>${baseType}</strong>`;
+        
+        // Check if this type has multiple sections
+        const hasMultipleSections = typeSections.length > 1;
+        
+        typeSections.forEach(section => {
+            // Determine if this section is selected
+            let isSelected = !hasMultipleSections; // If only one section, it's always selected
             
-        schedules.forEach(schedule => {
+            // For multiple sections, check if it's the selected one
+            if (hasMultipleSections && course.selectedSections && 
+                course.selectedSections[baseType] === section.sectionId) {
+                isSelected = true;
+            }
+            
+            // Add a selected indicator for the current selection
+            const selectedClass = isSelected ? 'selected-section' : '';
+            const selectedIndicator = isSelected && hasMultipleSections ? 
+                '<span class="selected-indicator">✓ Selected</span>' : '';
+            
+            // Section header with id
             schedulesHTML += `
-                <p>${schedule.day} ${schedule.start} - ${schedule.end}</p>
-                <p class="location">${schedule.location || 'Location TBA'}</p>`;
+                <div class="schedule-detail ${selectedClass}">
+                    <p class="section-header">Section ${section.sectionId} ${selectedIndicator}</p>`;
+            
+            // Display all the sessions for this section
+            section.schedules.forEach(schedule => {
+                schedulesHTML += `
+                    <p>${schedule.day} ${schedule.start} - ${schedule.end}</p>`;
+            });
+            
+            // Display the location (usually the same for all sessions in a section)
+            schedulesHTML += `
+                    <p class="location">${section.schedules[0].location || 'Location TBA'}</p>
+                </div>`;
         });
         
         schedulesHTML += `</div>`;
@@ -582,8 +825,32 @@ function displayCoursesOnTimetable(courses) {
 
     // Add each course to the timetable
     sortedCourses.forEach(course => {
+        // Get only the schedules that should be displayed
+        // (either selected sections or all if no selection)
+        let schedulesToDisplay = [];
+        
+        if (course.selectedSections) {
+            // Group schedules by section
+            const sections = groupSchedulesBySection(course);
+            
+            // For each type, add only the schedules from the selected section
+            for (const [sectionKey, section] of Object.entries(sections)) {
+                const baseType = section.baseType;
+                const sectionId = section.sectionId;
+                
+                // If this is the selected section for this type, or if there's only one section of this type
+                if (sectionId === course.selectedSections[baseType] || 
+                    !course.selectedSections[baseType]) {
+                    schedulesToDisplay = schedulesToDisplay.concat(section.schedules);
+                }
+            }
+        } else {
+            // No selections, display all schedules
+            schedulesToDisplay = course.schedules.map((schedule, index) => ({...schedule, index}));
+        }
+        
         // Sort schedules to ensure earlier ones render first
-        const sortedSchedules = [...course.schedules].sort((a, b) => {
+        const sortedSchedules = [...schedulesToDisplay].sort((a, b) => {
             return timeToMinutes(a.start) - timeToMinutes(b.start);
         });
         
@@ -651,33 +918,33 @@ function displayCoursesOnTimetable(courses) {
                                 // Use this last row instead if found
                                 if (lastRowFound !== lastRow) {
                                     // Calculate height using the newly found last row
-                                    const totalHeight = lastRowFound.offsetTop + lastRowFound.offsetHeight - rows[0].offsetTop - 4; // -4px for borders
+                                    const totalHeight = lastRowFound.offsetTop + lastRowFound.offsetHeight - rows[0].offsetTop - 2; // -2px for borders
                                     courseElement.style.height = `${totalHeight}px`;
                                     console.log(`Extended height for ${course.id} to ${totalHeight}px (spanning more rows)`);
                                 } else {
                                     // Calculate height from top of first row to bottom of last row
-                                    const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 4; // -4px for borders
+                                    const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 2; // -2px for borders
                                     courseElement.style.height = `${totalHeight}px`;
                                     console.log(`Set height for ${course.id} to ${totalHeight}px (using available rows)`);
                                 }
                             } else {
                                 // Standard case - we have enough rows
-                                const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 4; // -4px for borders
+                                const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 2; // -2px for borders
                                 courseElement.style.height = `${totalHeight}px`;
                                 console.log(`Standard height for ${course.id} to ${totalHeight}px`);
                             }
                         } else {
                             // We have just one row but the course spans multiple hours
-                            // Use a fixed height per hour
-                            const baseRowHeight = 60; // Fixed height of 60px per hour
-                            const totalHeight = baseRowHeight * durationHours - 4; // -4px for borders
+                            // Use a fixed height per hour with a bit more space
+                            const baseRowHeight = 80; // Fixed height of 80px per hour (increased from 60px)
+                            const totalHeight = baseRowHeight * durationHours - 2; // -2px for borders
                             courseElement.style.height = `${totalHeight}px`;
                             console.log(`Fixed height for ${course.id} to ${totalHeight}px for ${durationHours} hours`);
                         }
                     } catch (e) {
                         console.error('Error calculating course block height:', e);
                         // Fallback to minimum height
-                        courseElement.style.height = `${60 * durationHours - 4}px`;
+                        courseElement.style.height = `${80 * durationHours - 2}px`;
                     }
                 }, 0);
                 
@@ -694,9 +961,16 @@ function displayCoursesOnTimetable(courses) {
             }
             
             courseElement.style.backgroundColor = course.color;
+
+            // Create a better structured HTML for course blocks
+            const sectionId = extractSectionId(schedule.type) || '';
+            const baseType = normalizeSessionType(schedule.type);
+
             courseElement.innerHTML = `
                 <div class="course-title">${course.id}</div>
-                <div class="course-type">${schedule.type}</div>
+                <div class="course-type">
+                    ${baseType}${sectionId ? ` (Section ${sectionId})` : ''}
+                </div>
                 <div class="course-time">${schedule.start} - ${schedule.end}</div>
                 <div class="course-location">${schedule.location}</div>
             `;
@@ -820,17 +1094,59 @@ function displayCoursesOnTimetable(courses) {
 
 function showCourseScheduleDetails(course, schedule) {
     const detailsContent = document.querySelector('.details-content');
+    
+    // Extract section identifier and base type
+    const sectionId = extractSectionId(schedule.type) || '';
+    const baseType = normalizeSessionType(schedule.type);
+    
+    // Find all sessions that belong to this section
+    let allSessions = [];
+    const sections = groupSchedulesBySection(course);
+    
+    // Find the matching section
+    for (const [key, section] of Object.entries(sections)) {
+        if (section.baseType === baseType && section.sectionId === sectionId) {
+            allSessions = section.schedules;
+            break;
+        }
+    }
+    
+    // Generate session list HTML
+    let sessionsHTML = '';
+    if (allSessions.length > 1) {
+        sessionsHTML = '<div class="all-sessions">';
+        sessionsHTML += '<p class="sessions-header">All sessions for this section:</p>';
+        
+        allSessions.forEach(s => {
+            sessionsHTML += `
+                <p class="session-item">• ${s.day} ${s.start} - ${s.end}</p>
+            `;
+        });
+        
+        sessionsHTML += '</div>';
+    }
+    
+    // Generate course instructor and term information if available
+    const instructorInfo = schedule.instructor ? 
+        `<p class="instructor"><strong>Instructor:</strong> ${schedule.instructor}</p>` : '';
+    
+    const termInfo = schedule.term ? 
+        `<p class="term"><strong>Term:</strong> ${schedule.term}</p>` : '';
+    
     detailsContent.innerHTML = `
         <h4>${course.id}</h4>
         <p class="course-name-details">${course.name}</p>
         <div class="course-schedule">
             <h3>Schedule Details:</h3>
             <div class="schedule-item">
-                <strong>${schedule.type}</strong>
-                <p>${schedule.day} ${schedule.start} - ${schedule.end}</p>
+                <strong>${baseType}${sectionId ? ` (Section ${sectionId})` : ''}</strong>
+                <p class="selected-session">
+                    <strong>Selected Session:</strong> ${schedule.day} ${schedule.start} - ${schedule.end}
+                </p>
                 <p class="location">${schedule.location || 'Location TBA'}</p>
-                ${schedule.instructor ? `<p><em>Instructor: ${schedule.instructor}</em></p>` : ''}
-                ${schedule.term ? `<p><em>Term: ${schedule.term}</em></p>` : ''}
+                ${instructorInfo}
+                ${termInfo}
+                ${allSessions.length > 1 ? sessionsHTML : ''}
             </div>
         </div>
     `;

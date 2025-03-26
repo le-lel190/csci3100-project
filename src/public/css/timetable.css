@@ -236,7 +236,8 @@ body {
     border: 1px solid var(--border-color);
     padding: 0.25rem;
     text-align: center;
-    height: 60px; /* Taller rows to fit more content */
+    min-height: 80px; /* Increase min-height to fit more content */
+    height: auto; /* Allow cells to grow as needed */
     position: relative;
 }
 
@@ -245,6 +246,7 @@ body {
     color: var(--primary-color);
     font-weight: 600;
     height: 40px; /* Keep header height the same */
+    min-height: unset; /* Reset min-height for headers */
     position: sticky;
     top: 0;
     z-index: 2;
@@ -264,18 +266,19 @@ body {
 .course-block {
     background-color: var(--primary-light);
     border-radius: 4px;
-    padding: 0.25rem;
+    padding: 0.5rem 0.25rem; /* Increased padding top/bottom */
     margin: 0.1rem;
     font-size: 0.8rem;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     height: calc(100% - 2px);
+    min-height: 78px; /* Ensure minimum height to fit content */
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* Align to top instead of center */
     position: relative;
     z-index: 1;
-    overflow: hidden;
+    overflow: visible; /* Changed from hidden to show all content */
 }
 
 .course-block.multi-hour {
@@ -283,10 +286,11 @@ body {
     top: 1px;
     left: 1px;
     right: 1px;
-    overflow: hidden;
+    overflow: visible; /* Show all content */
     z-index: 1;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin: 0;
+    padding: 0.5rem 0.25rem; /* Increased padding for multi-hour blocks */
 }
 
 /* Auto-adjust for smaller screens */
@@ -354,9 +358,13 @@ body {
 }
 
 /* Course block content */
+.course-title, .course-type, .course-time, .course-location {
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
+}
+
 .course-title {
     font-weight: 600;
-    margin-bottom: 0.1rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -742,4 +750,154 @@ body {
 .action-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Section selectors for course items */
+.section-selectors {
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
+}
+
+.section-selector {
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.section-label {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.section-dropdown {
+    width: 100%;
+    padding: 0.25rem;
+    font-size: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: white;
+}
+
+.section-dropdown:hover {
+    border-color: var(--primary-color);
+}
+
+.section-dropdown:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(44, 122, 79, 0.2);
+}
+
+/* Add a distinctive style for courses with multiple sections */
+.course-item:has(.section-selectors) {
+    padding-bottom: 0.75rem;
+}
+
+.course-item:has(.section-selectors) label {
+    font-weight: 500;
+}
+
+/* Additional responsive styles for section selectors */
+@media (max-width: 768px) {
+    .section-selectors {
+        padding-left: 1rem;
+    }
+    
+    .section-selector {
+        margin-bottom: 0.3rem;
+    }
+}
+
+/* Styles for course details panel - section selection */
+.schedule-detail {
+    padding: 0.25rem 0.5rem;
+    margin: 0.25rem 0;
+    border-left: 3px solid transparent;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 0.75rem;
+}
+
+.schedule-detail.selected-section {
+    background-color: rgba(44, 122, 79, 0.1);
+    border-left: 3px solid var(--primary-color);
+    border-radius: 0 4px 4px 0;
+}
+
+.section-header {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.selected-indicator {
+    display: inline-block;
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    background-color: rgba(44, 122, 79, 0.1);
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+}
+
+.course-schedule h3 {
+    font-size: 1rem;
+    margin: 0.75rem 0 0.5rem;
+    color: var(--primary-color);
+}
+
+.schedule-item {
+    margin-bottom: 1rem;
+}
+
+.schedule-item strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    padding: 0.25rem 0;
+    font-size: 1.05rem;
+    color: var(--text-color);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced course details panel */
+.selected-session {
+    font-weight: normal;
+    background-color: rgba(44, 122, 79, 0.08);
+    padding: 0.4rem;
+    border-radius: 4px;
+    margin: 0.5rem 0;
+}
+
+.all-sessions {
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 4px;
+}
+
+.sessions-header {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.session-item {
+    margin: 0.25rem 0;
+    font-size: 0.85rem;
+    padding-left: 0.5rem;
+}
+
+.instructor, .term {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
 }
