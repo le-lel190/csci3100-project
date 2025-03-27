@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Planner - Configuration</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/config.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-graduation-cap"></i>
+            Course Planner
+        </div>
+        <div class="nav-links">
+            <a href="/timetable">Timetable</a>
+            <a href="./studyPlanner.html">Study Plan</a>
+            <a href="./degreeRoadmap.html">Degree Roadmap</a>
+            <a href="./config.html" class="active">Config</a>
+        </div>
+        <div class="nav-user">
+            <span id="userUsername"></span>
+            <button id="logoutBtn" class="btn-logout">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+            <a href="https://github.com/yourrepo" class="github-icon">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div class="config-container">
+        <div class="config-sidebar">
+            <h2>Configuration</h2>
+            <ul class="config-nav">
+                <li class="nav-item active" data-section="general">
+                    <i class="fas fa-cog"></i> General Settings
+                </li>
+                <li class="nav-item" data-section="appearance">
+                    <i class="fas fa-palette"></i> Appearance
+                </li>
+                <li class="nav-item" data-section="data">
+                    <i class="fas fa-database"></i> Data Management
+                </li>
+                <li class="nav-item" data-section="profile">
+                    <i class="fas fa-user-circle"></i> Profile
+                </li>
+                <li class="nav-item" data-section="notifications">
+                    <i class="fas fa-bell"></i> Notifications
+                </li>
+                <li class="nav-item" data-section="academic">
+                    <i class="fas fa-graduation-cap"></i> Academic Info
+                </li>
+            </ul>
+        </div>
+
+        <div class="config-content">
+            <!-- General Settings Section -->
+            <div class="config-section active" id="general">
+                <h2><i class="fas fa-cog"></i> General Settings</h2>
+                
+                <div class="setting-group">
+                    <h3>Default View</h3>
+                    <div class="setting-item">
+                        <label for="default-page">Default start page:</label>
+                        <select id="default-page" class="setting-input">
+                            <option value="timetable">Timetable</option>
+                            <option value="study-planner">Study Planner</option>
+                            <option value="degree-roadmap">Degree Roadmap</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>Time Display</h3>
+                    <div class="setting-item">
+                        <label for="time-format">Time format:</label>
+                        <select id="time-format" class="setting-input">
+                            <option value="24h">24-hour (14:30)</option>
+                            <option value="12h">12-hour (2:30 PM)</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label for="first-day">First day of week:</label>
+                        <select id="first-day" class="setting-input">
+                            <option value="monday">Monday</option>
+                            <option value="sunday">Sunday</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>Alerts</h3>
+                    <div class="setting-item checkbox">
+                        <input type="checkbox" id="clash-alert" checked>
+                        <label for="clash-alert">Alert when adding clashing courses</label>
+                    </div>
+                    <div class="setting-item checkbox">
+                        <input type="checkbox" id="prereq-alert" checked>
+                        <label for="prereq-alert">Alert when adding courses without prerequisites</label>
+                    </div>
+                </div>
+                
+                <button class="save-btn" id="saveGeneralSettings">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+            </div>
+
+            <!-- Appearance Section -->
+            <div class="config-section" id="appearance">
+                <h2><i class="fas fa-palette"></i> Appearance</h2>
+                
+                <div class="setting-group">
+                    <h3>Theme</h3>
+                    <div class="setting-item">
+                        <label for="color-theme">Color theme:</label>
+                        <select id="color-theme" class="setting-input">
+                            <option value="light">Light</option>
+                            <option value="dark">Dark</option>
+                            <option value="system">System default</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>Course Display</h3>
+                    <div class="setting-item">
+                        <label for="course-color-scheme">Course color scheme:</label>
+                        <select id="course-color-scheme" class="setting-input">
+                            <option value="type">By course type</option>
+                            <option value="department">By department</option>
+                            <option value="custom">Custom colors</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-item checkbox">
+                        <input type="checkbox" id="display-location" checked>
+                        <label for="display-location">Show location in timetable</label>
+                    </div>
+                    
+                    <div class="setting-item checkbox">
+                        <input type="checkbox" id="display-course-code" checked>
+                        <label for="display-course-code">Show course code in timetable</label>
+                    </div>
+                </div>
+                
+                <button class="save-btn" id="saveAppearanceSettings">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+            </div>
+
+            <!-- Data Management Section -->
+            <div class="config-section" id="data">
+                <h2><i class="fas fa-database"></i> Data Management</h2>
+                
+                <div class="setting-group">
+                    <h3>Import/Export</h3>
+                    <div class="setting-item">
+                        <button class="action-btn" id="exportDataBtn">
+                            <i class="fas fa-file-export"></i> Export all data
+                        </button>
+                    </div>
+                    <div class="setting-item">
+                        <button class="action-btn" id="importDataBtn">
+                            <i class="fas fa-file-import"></i> Import data
+                        </button>
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>Data Reset</h3>
+                    <div class="setting-item">
+                        <button class="danger-btn" id="resetTimetableBtn">
+                            <i class="fas fa-trash-alt"></i> Reset Timetable
+                        </button>
+                    </div>
+                    <div class="setting-item">
+                        <button class="danger-btn" id="resetStudyPlanBtn">
+                            <i class="fas fa-trash-alt"></i> Reset Study Plan
+                        </button>
+                    </div>
+                    <div class="setting-item">
+                        <button class="danger-btn" id="resetAllDataBtn">
+                            <i class="fas fa-exclamation-triangle"></i> Reset All Data
+                        </button>
+                    </div>
+                </div>
+                
+                <button class="save-btn" id="saveDataSettings">
+                    <i class="fas fa-save"></i> Save Settings
+                </button>
+            </div>
+
+            <!-- Profile Section -->
+            <div class="config-section" id="profile">
+                <h2><i class="fas fa-user-circle"></i> Profile</h2>
+                
+                <div class="setting-group">
+                    <h3>Account Information</h3>
+                    <div class="setting-item">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" class="setting-input" placeholder="Your username">
+                    </div>
+                    <div class="setting-item">
+                        <label for="email">Email:</label>
+                        <input type="email" id="email" class="setting-input" placeholder="Your email">
+                    </div>
+                </div>
+                
+                <div class="setting-group">
+                    <h3>Change Password</h3>
+                    <div class="setting-item">
+                        <label for="current-password">Current password:</label>
+                        <input type="password" id="current-password" class="setting-input" placeholder="Current password">
+                    </div>
+                    <div class="setting-item">
+                        <label for="new-password">New password:</label>
+                        <input type="password" id="new-password" class="setting-input" placeholder="New password">
+                    </div>
+                    <div class="setting-item">
+                        <label for="confirm-password">Confirm new password:</label>
+                        <input type="password" id="confirm-password" class="setting-input" placeholder="Confirm new password">
+                    </div>
+                    <button class="action-btn" id="changePasswordBtn">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                </div>
+                
+                <button class="save-btn" id="saveProfileSettings">
+                    <i class="fas fa-save"></i> Save Profile
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/config.js"></script>
+</body>
+</html>
