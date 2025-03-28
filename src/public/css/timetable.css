@@ -90,7 +90,7 @@ body {
 /* Main Layout */
 .container {
     display: grid;
-    grid-template-columns: minmax(250px, 20%) minmax(0, 1fr) minmax(250px, 20%);
+    grid-template-columns: minmax(250px, 18%) minmax(0, 1fr) minmax(250px, 18%);
     gap: 1rem;
     padding: 1rem;
     max-height: calc(100vh - 4rem);
@@ -289,11 +289,12 @@ body {
     flex-direction: column;
     height: 100%;
     overflow: hidden;
+    min-height: 600px;
 }
 
 .timetable-header {
     display: grid;
-    grid-template-columns: 80px repeat(7, minmax(100px, 1fr));
+    grid-template-columns: 80px repeat(7, 1fr);
     background-color: var(--primary-light);
     position: sticky;
     top: 0;
@@ -317,12 +318,13 @@ body {
     overflow-y: auto;
     position: relative;
     border-top: 1px solid var(--border-color);
+    padding-bottom: 20px; /* Add some padding at the bottom */
 }
 
 /* Ensure timetable grid cells have proper borders and sizing */
 .timetable-grid {
     display: grid;
-    grid-template-columns: 80px repeat(7, minmax(100px, 1fr));
+    grid-template-columns: 80px repeat(7, 1fr);
     position: relative;
     min-width: 800px;
 }
@@ -338,7 +340,7 @@ body {
     z-index: 5;
     border-right: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
-    height: 5rem;
+    height: 8rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -352,7 +354,7 @@ body {
 }
 
 .time-slot {
-    height: 5rem;
+    height: 8rem;
     border-right: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
     position: relative;
@@ -364,9 +366,9 @@ body {
     position: absolute;
     left: 0.25rem;
     right: 0.25rem;
-    border-radius: 6px;
-    padding: 0.5rem;
-    font-size: 0.85rem;
+    border-radius: 8px; /* Slightly increased border radius */
+    padding: 0.75rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
     z-index: 2;
@@ -374,7 +376,8 @@ body {
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.4rem;
+    min-height: 7rem; /* Ensure minimum height for visibility */
 }
 
 .course-event:hover {
@@ -384,19 +387,22 @@ body {
 }
 
 .course-event-title {
-    font-weight: 600;
+    font-weight: 700; /* Make title bolder */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 1rem;
+    margin-bottom: 0.2rem; /* Add small margin below title */
 }
 
 .course-event-type,
 .course-event-time,
 .course-event-location {
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.4;
 }
 
 /* Placeholder styling */
@@ -807,4 +813,9 @@ body {
     .nav-links a {
         padding: 0.4rem 0.75rem;
     }
+}
+
+/* Adjust vertical space between events */
+.course-event + .course-event {
+    margin-top: 0.5rem;
 }

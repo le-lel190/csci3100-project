@@ -980,7 +980,7 @@ function displayCoursesOnTimetable(courses) {
             
             // Calculate the height based on duration
             const durationMinutes = endTimeMinutes - startTimeMinutes;
-            const rows = Math.ceil(durationMinutes / 60); // Number of hour slots
+            const hourHeight = 8; // Height of one hour in rem (matching the CSS)
             const heightPercentage = (durationMinutes / 60) * 100; // Height as percentage of hour slot
             
             // Create course event element
@@ -992,13 +992,20 @@ function displayCoursesOnTimetable(courses) {
             
             // Set style for positioning
             courseEvent.style.backgroundColor = course.color || getRandomColor(course.id);
-            courseEvent.style.top = `${startMinute / 60 * 100}%`;
-            courseEvent.style.height = `${heightPercentage}%`;
+            courseEvent.style.top = `${(startMinute / 60) * 100}%`;
+            
+            // Calculate absolute height if the course spans multiple hours
+            if (durationMinutes > 60) {
+                const totalRems = (durationMinutes / 60) * hourHeight;
+                courseEvent.style.height = `${totalRems}rem`;
+            } else {
+                courseEvent.style.height = `${heightPercentage}%`;
+            }
             
             // Extract section ID and base type
             const sectionId = extractSectionId(schedule.type) || '';
             const baseType = normalizeSessionType(schedule.type);
-
+            
             // Add content
             courseEvent.innerHTML = `
                 <div class="course-event-title">${course.id}</div>
@@ -1006,7 +1013,7 @@ function displayCoursesOnTimetable(courses) {
                     ${baseType}${sectionId ? ` (Section ${sectionId})` : ''}
                 </div>
                 <div class="course-event-time">${schedule.start} - ${schedule.end}</div>
-                <div class="course-event-location">${schedule.location}</div>
+                <div class="course-event-location">${schedule.location || 'TBA'}</div>
             `;
             
             // Add hover effect for details
