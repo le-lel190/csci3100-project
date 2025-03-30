@@ -1,12 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize day filters (all days visible by default)
-    window.visibleDays = [0, 1, 2, 3, 4, 5, 6]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
-    
     // Initialize timetable
     createTimetableGrid();
     initializeSemesterButtons();
     initializeSearch();
-    initializeDayFilters();
     loadUserInfo();
     setupLogout();
     setupDemoButton();
@@ -110,78 +106,6 @@ function initializeSearch() {
 }
 
 /**
- * Initialize day filter functionality
- */
-function initializeDayFilters() {
-    // Add event listeners to checkboxes
-    const dayCheckboxes = document.querySelectorAll('.day-filters input[type="checkbox"]');
-    dayCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            updateVisibleDays();
-        });
-    });
-    
-    // Add event listeners to buttons
-    const selectAllBtn = document.getElementById('selectAllDays');
-    const clearAllBtn = document.getElementById('clearAllDays');
-    
-    selectAllBtn.addEventListener('click', () => {
-        dayCheckboxes.forEach(checkbox => {
-            checkbox.checked = true;
-        });
-        updateVisibleDays();
-    });
-    
-    clearAllBtn.addEventListener('click', () => {
-        dayCheckboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        updateVisibleDays();
-    });
-}
-
-/**
- * Update visible days based on checkbox selection
- */
-function updateVisibleDays() {
-    const dayCheckboxes = document.querySelectorAll('.day-filters input[type="checkbox"]');
-    window.visibleDays = [];
-    
-    dayCheckboxes.forEach(checkbox => {
-        if (checkbox.checked) {
-            window.visibleDays.push(parseInt(checkbox.dataset.day));
-        }
-    });
-    
-    // Update column visibility
-    updateColumnVisibility();
-    
-    // Redisplay courses with the new day filter
-    if (window.coursesData) {
-        updateTimetableDisplay(window.coursesData);
-    }
-}
-
-/**
- * Show/hide columns based on visible days
- */
-function updateColumnVisibility() {
-    // Update header cells
-    const headerCells = document.querySelectorAll('.timetable-header .header-cell');
-    for (let i = 1; i < headerCells.length; i++) { // Skip first (empty) cell
-        const dayIndex = i - 1;
-        headerCells[i].style.display = window.visibleDays.includes(dayIndex) ? '' : 'none';
-    }
-    
-    // Update time slots
-    const timeSlots = document.querySelectorAll('.time-slot');
-    timeSlots.forEach(slot => {
-        const dayIndex = parseInt(slot.dataset.day);
-        slot.style.display = window.visibleDays.includes(dayIndex) ? '' : 'none';
-    });
-}
-
-/**
  * Setup timetable action buttons (export, save, etc)
  */
 function setupTimetableActions() {
@@ -209,6 +133,23 @@ function setupTimetableActions() {
             captureAndSaveTimetable();
         });
     }
+}
+
+/**
+ * Show/hide columns based on visible days
+ */
+function updateColumnVisibility() {
+    // All days are visible by default
+    const headerCells = document.querySelectorAll('.timetable-header .header-cell');
+    for (let i = 1; i < headerCells.length; i++) { // Skip first (empty) cell
+        headerCells[i].style.display = '';
+    }
+    
+    // All time slots are visible
+    const timeSlots = document.querySelectorAll('.time-slot');
+    timeSlots.forEach(slot => {
+        slot.style.display = '';
+    });
 }
 
 /**
@@ -920,10 +861,9 @@ function displayCoursesOnTimetable(courses) {
         return aStartTime - bStartTime;
     });
 
-    // Process each course
     sortedCourses.forEach(course => {
         // Skip if no schedules
-        if (!course.schedules || !course.schedules.length) return;
+        if (!course.schedules || course.schedules.length === 0) return;
         
         // Get only the schedules that should be displayed
         // (either selected sections or all if no selection)
@@ -957,9 +897,6 @@ function displayCoursesOnTimetable(courses) {
         // Process each schedule
         sortedSchedules.forEach(schedule => {
             const dayIndex = dayMap[schedule.day];
-            
-            // Skip if this day is filtered out
-            if (!window.visibleDays.includes(dayIndex)) return;
             
             // Calculate start and end times in minutes
             const startTimeMinutes = timeToMinutes(schedule.start);
