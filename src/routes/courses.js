@@ -376,6 +376,10 @@ router.get('/:semester?', async (req, res) => {
                                 // If day is a string (like "Monday"), convert to index
                                 if (typeof dayIndex === 'string') {
                                     dayIndex = dayNameToIndex[dayIndex] || -1;
+                                } else if (typeof dayIndex === 'number') {
+                                    // Handle 1-indexed days (convert to 0-indexed)
+                                    // This fixes the bug where day 1 was mapped to Tuesday instead of Monday
+                                    dayIndex = dayIndex - 1;
                                 }
                                 
                                 if (dayIndex < 0 || dayIndex > 6) {

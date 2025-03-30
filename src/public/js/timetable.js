@@ -1,27 +1,119 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize day filters (all days visible by default)
-    window.visibleDays = [0, 1, 2, 3, 4, 5, 6]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
-    
     // Initialize timetable
-    createTimeSlots();
+    createTimetableGrid();
     initializeSemesterButtons();
     initializeSearch();
-    initializeDayFilters(); // Add day filters
     loadUserInfo();
     setupLogout();
-    setupDemoButton(); // Add demo button functionality
-    setupTimetableActions(); // Setup export and save functionality
+    setupDemoButton();
+    setupTimetableActions();
 
     // Load course data from external file instead of hardcoding
     loadCourseData();
 });
 
+/**
+ * Creates the timetable grid structure
+ */
+function createTimetableGrid() {
+    const timetableGrid = document.getElementById('timetable-grid');
+    timetableGrid.innerHTML = ''; // Clear any existing content
+    
+    // Create time slots (from 8:30 AM to 10:30 PM)
+    const startHour = 8;
+    const startMinute = 30;
+    const endHour = 22;
+    const endMinute = 30;
+    const interval = 60; // 1-hour intervals
+    
+    // Calculate total minutes for start and end
+    const startTimeMinutes = startHour * 60 + startMinute;
+    const endTimeMinutes = endHour * 60 + endMinute;
+    
+    // Create a row for each time slot
+    for (let time = startTimeMinutes; time < endTimeMinutes; time += interval) {
+        // Calculate hours and minutes for current time
+        const hours = Math.floor(time / 60);
+        const minutes = time % 60;
+        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        
+        // Create time label cell
+        const timeLabel = document.createElement('div');
+        timeLabel.className = 'time-label';
+        timeLabel.textContent = formattedTime;
+        timetableGrid.appendChild(timeLabel);
+        
+        // Create time slots for each day of the week
+        for (let day = 0; day < 7; day++) {
+            const timeSlot = document.createElement('div');
+            timeSlot.className = 'time-slot';
+            timeSlot.dataset.time = formattedTime;
+            timeSlot.dataset.day = day;
+            timetableGrid.appendChild(timeSlot);
+        }
+    }
+}
+
+/**
+ * Setup semester button functionality
+ */
+function initializeSemesterButtons() {
+    const buttons = document.querySelectorAll('.semester-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            buttons.forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Load semester-specific courses
+            const semester = button.dataset.semester || 'current';
+            loadCourseData(semester);
+        });
+    });
+}
+
+/**
+ * Initialize search functionality
+ */
+function initializeSearch() {
+    const searchInput = document.getElementById('courseSearch');
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const courseItems = document.querySelectorAll('.course-item');
+        
+        courseItems.forEach(item => {
+            const courseText = item.textContent.toLowerCase();
+            
+            // Standard search
+            let isMatch = courseText.includes(searchTerm);
+            
+            // If no match and potential course code (contains letters and numbers)
+            if (!isMatch && /[a-z]+[0-9]+/.test(searchTerm)) {
+                // Try matching with spaces removed
+                const courseTextNoSpaces = courseText.replace(/\s+/g, '');
+                const searchTermNoSpaces = searchTerm.replace(/\s+/g, '');
+                
+                // Try also to match with a space between letters and numbers
+                // e.g., if user types "csci3100", also try "csci 3100"
+                const searchTermWithSpace = searchTerm.replace(/([a-z]+)([0-9]+)/i, '$1 $2');
+                
+                isMatch = courseTextNoSpaces.includes(searchTermNoSpaces) || 
+                          courseText.includes(searchTermWithSpace);
+            }
+            
+            item.style.display = isMatch ? 'block' : 'none';
+        });
+    });
+}
+
+/**
+ * Setup timetable action buttons (export, save, etc)
+ */
 function setupTimetableActions() {
     const saveBtn = document.getElementById('saveBtn');
     const exportBtn = document.getElementById('exportTimetableBtn');
     const saveImageBtn = document.getElementById('saveImageBtn');
 
-    // Save button (placeholder for now, will implement later)
+    // Save button functionality
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
             alert('Saving timetable... (To be implemented with MongoDB)');
@@ -31,6 +123,39 @@ function setupTimetableActions() {
     // Export timetable button
     if (exportBtn) {
         exportBtn.addEventListener('click', () => {
+            exportTimetableToCsv();
+        });
+    }
+
+    // Save image button
+    if (saveImageBtn) {
+        saveImageBtn.addEventListener('click', () => {
+            captureAndSaveTimetable();
+        });
+    }
+}
+
+/**
+ * Show/hide columns based on visible days
+ */
+function updateColumnVisibility() {
+    // All days are visible by default
+    const headerCells = document.querySelectorAll('.timetable-header .header-cell');
+    for (let i = 1; i < headerCells.length; i++) { // Skip first (empty) cell
+        headerCells[i].style.display = '';
+    }
+    
+    // All time slots are visible
+    const timeSlots = document.querySelectorAll('.time-slot');
+    timeSlots.forEach(slot => {
+        slot.style.display = '';
+    });
+}
+
+/**
+ * Export timetable to CSV
+ */
+function exportTimetableToCsv() {
             const selectedCourses = window.coursesData ? window.coursesData.filter(course => course.selected) : [];
             if (!selectedCourses.length) {
                 alert('No courses selected to export.');
@@ -81,12 +206,12 @@ function setupTimetableActions() {
             downloadLink.download = `${semesterName}_timetable.csv`;
             downloadLink.click();
             URL.revokeObjectURL(downloadLink.href);
-        });
-    }
+}
 
-    // Save image button
-    if (saveImageBtn) {
-        saveImageBtn.addEventListener('click', () => {
+/**
+ * Capture and save timetable as image
+ */
+function captureAndSaveTimetable() {
             const timetableElement = document.querySelector('.timetable');
             if (!timetableElement) {
                 alert('Could not find timetable to capture.');
@@ -128,20 +253,20 @@ function setupTimetableActions() {
                     downloadLink.href = URL.createObjectURL(blob);
                     const activeSemester = document.querySelector('.semester-btn.active');
                     const semesterName = activeSemester ? activeSemester.textContent.replace(/\s+/g, '_') : 'timetable';
-                    downloadLink.download = `${semesterName}.png`; // Changed to PNG
+            downloadLink.download = `${semesterName}.png`;
                     downloadLink.click();
                     URL.revokeObjectURL(downloadLink.href);
-                }, 'image/png'); // Changed to PNG
+        }, 'image/png');
             }).catch(error => {
                 document.body.removeChild(loadingMessage);
                 console.error('Error capturing timetable:', error);
                 alert('Error capturing timetable. Please try again.');
-            });
         });
-    }
 }
 
-// Setup the demo button click handler
+/**
+ * Setup demo button functionality
+ */
 function setupDemoButton() {
     const demoButton = document.getElementById('loadDemoButton');
     if (demoButton) {
@@ -153,6 +278,7 @@ function setupDemoButton() {
             // Reset semester buttons
             const semesterButtons = document.querySelectorAll('.semester-btn');
             semesterButtons.forEach(btn => btn.classList.remove('active'));
+            semesterButtons[0].classList.add('active');
             
             // Load demo data
             loadDemoDataFromAPI()
@@ -165,7 +291,50 @@ function setupDemoButton() {
     }
 }
 
-// Function to load course data from external file
+/**
+ * Load user information
+ */
+function loadUserInfo() {
+    fetch('/api/auth/login', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.user) {
+            document.getElementById('userUsername').textContent = data.user.username;
+        }
+    })
+    .catch(error => {
+        console.error('Error loading user info:', error);
+        window.location.href = '/';
+    });
+}
+
+/**
+ * Setup logout button
+ */
+function setupLogout() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    logoutBtn.addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                window.location.href = '/';
+            }
+        } catch (error) {
+            console.error('Logout failed:', error);
+        }
+    });
+}
+
+/**
+ * Load course data for a specific semester
+ */
 function loadCourseData(semester = 'current') {
     // Show loading indicator
     const courseItems = document.querySelector('.course-items');
@@ -191,7 +360,9 @@ function loadCourseData(semester = 'current') {
         });
 }
 
-// Function to load semester-specific data
+/**
+ * Load semester-specific course data
+ */
 function loadSemesterData(semester) {
     // Fetch course data from the server
     return fetch(`/api/courses/${semester}`)
@@ -226,7 +397,9 @@ function loadSemesterData(semester) {
         });
 }
 
-// Function to load demo data directly from API
+/**
+ * Load demo data from the API
+ */
 function loadDemoDataFromAPI() {
     console.log('Loading demo data from API');
     return fetch('/api/courses/demo')
@@ -253,7 +426,9 @@ function loadDemoDataFromAPI() {
         });
 }
 
-// Ultimate fallback function with hardcoded demo data
+/**
+ * Fallback function with hardcoded demo data
+ */
 function loadDemoData() {
     console.log('Loading hardcoded demo data');
     const courses = [
@@ -362,105 +537,9 @@ function loadDemoData() {
     updateTimetableDisplay(courses);
 }
 
-function createTimeSlots() {
-    const tbody = document.querySelector('.timetable tbody');
-    tbody.innerHTML = ''; // Clear existing rows
-    
-    // Create table header
-    const thead = document.querySelector('.timetable thead');
-    thead.innerHTML = '';
-    const headerRow = document.createElement('tr');
-    
-    // Add time column header
-    const timeHeader = document.createElement('th');
-    timeHeader.textContent = 'Time';
-    timeHeader.className = 'time-cell';
-    headerRow.appendChild(timeHeader);
-    
-    // Add day headers
-    const days = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-    days.forEach(day => {
-        const dayHeader = document.createElement('th');
-        dayHeader.textContent = day;
-        headerRow.appendChild(dayHeader);
-    });
-    
-    thead.appendChild(headerRow);
-    
-    // Create time slots - only use 8:30, 9:30, etc. (half-hour intervals)
-    const startTime = 8 * 60 + 30; // 8:30 AM
-    const endTime = 22 * 60 + 30; // 10:30 PM
-    const interval = 60; // Use 60 minutes (hourly) to only show half-hour slots
-
-    for (let time = startTime; time < endTime; time += interval) {
-        const row = document.createElement('tr');
-        const timeCell = document.createElement('td');
-        
-        const hours = Math.floor(time / 60);
-        const minutes = time % 60;
-        const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-        timeCell.textContent = formattedTime;
-        timeCell.classList.add('time-cell'); // Add class for styling
-        
-        row.appendChild(timeCell);
-
-        // Add cells for each day
-        for (let i = 0; i < 7; i++) {
-            const cell = document.createElement('td');
-            cell.dataset.time = formattedTime;
-            cell.dataset.day = i;
-            row.appendChild(cell);
-        }
-
-        tbody.appendChild(row);
-    }
-}
-
-function initializeSemesterButtons() {
-    const buttons = document.querySelectorAll('.semester-btn');
-    buttons.forEach(button => {
-        button.addEventListener('click', () => {
-            buttons.forEach(b => b.classList.remove('active'));
-            button.classList.add('active');
-            
-            // Load semester-specific courses
-            const semester = button.dataset.semester || 'current';
-            loadCourseData(semester);
-        });
-    });
-}
-
-function initializeSearch() {
-    const searchInput = document.getElementById('courseSearch');
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        const courseItems = document.querySelectorAll('.course-item');
-        
-        courseItems.forEach(item => {
-            const courseText = item.textContent.toLowerCase();
-            
-            // Standard search
-            let isMatch = courseText.includes(searchTerm);
-            
-            // If no match and potential course code (contains letters and numbers)
-            if (!isMatch && /[a-z]+[0-9]+/.test(searchTerm)) {
-                // Try matching with spaces removed
-                const courseTextNoSpaces = courseText.replace(/\s+/g, '');
-                const searchTermNoSpaces = searchTerm.replace(/\s+/g, '');
-                
-                // Try also to match with a space between letters and numbers
-                // e.g., if user types "csci3100", also try "csci 3100"
-                const searchTermWithSpace = searchTerm.replace(/([a-z]+)([0-9]+)/i, '$1 $2');
-                
-                isMatch = courseTextNoSpaces.includes(searchTermNoSpaces) || 
-                          courseText.includes(searchTermWithSpace);
-            }
-            
-            item.style.display = isMatch ? 'block' : 'none';
-        });
-    });
-}
-
+/**
+ * Populate the course list sidebar with course items
+ */
 function populateCourseList(courses) {
     const courseItems = document.querySelector('.course-items');
     courseItems.innerHTML = '';
@@ -477,29 +556,50 @@ function populateCourseList(courses) {
         // Check if the course has multiple lecture or tutorial sections
         const hasMultipleSections = checkForMultipleSections(course);
         
+        // Create checkbox inside a label
+        const checkboxLabel = document.createElement('label');
+        checkboxLabel.className = 'course-checkbox-label';
+        checkboxLabel.htmlFor = course.id;
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = course.id;
+        checkbox.checked = course.selected || false;
+        
+        const courseInfo = document.createElement('div');
+        courseInfo.className = 'course-info';
+        
+        // Ensure course ID is displayed without extra spacing
+        const courseId = document.createElement('div');
+        courseId.className = 'course-id';
+        courseId.textContent = course.id;
+        
+        const courseName = document.createElement('div');
+        courseName.className = 'course-name';
+        courseName.textContent = course.name;
+        
+        courseInfo.appendChild(courseId);
+        courseInfo.appendChild(courseName);
+        
+        if (course.isPlaceholder) {
+            const placeholderIndicator = document.createElement('div');
+            placeholderIndicator.className = 'placeholder-indicator';
+            placeholderIndicator.textContent = '(Schedule TBA)';
+            courseInfo.appendChild(placeholderIndicator);
+        }
+        
+        checkboxLabel.appendChild(checkbox);
+        checkboxLabel.appendChild(courseInfo);
+        courseItem.appendChild(checkboxLabel);
+        
         let sectionSelectors = '';
         if (hasMultipleSections) {
             sectionSelectors = generateSectionSelectors(course);
+            const sectionSelectorsDiv = document.createElement('div');
+            sectionSelectorsDiv.className = 'section-selectors';
+            sectionSelectorsDiv.innerHTML = sectionSelectors;
+            courseItem.appendChild(sectionSelectorsDiv);
         }
-        
-        courseItem.innerHTML = `
-            <input type="checkbox" id="${course.id}" ${course.selected ? 'checked' : ''}>
-            <label for="${course.id}">
-                ${course.id}
-                <div class="course-name">${course.name}</div>
-                ${course.isPlaceholder ? '<div class="placeholder-indicator">(Schedule TBA)</div>' : ''}
-            </label>
-            ${sectionSelectors}
-        `;
-
-        const checkbox = courseItem.querySelector('input');
-        
-        // Separate the checkbox click handling from the label hover
-        checkbox.addEventListener('change', (e) => {
-            course.selected = e.target.checked;
-            // Update the timetable display
-            updateTimetableDisplay(courses);
-        });
         
         // Add event listeners for section selectors if they exist
         if (hasMultipleSections) {
@@ -509,14 +609,27 @@ function populateCourseList(courses) {
         // Add hover event to show course details
         courseItem.addEventListener('mouseenter', () => {
             showCourseDetails(course);
+            
+            // Preview this course on the timetable if not already selected
+            if (!course.selected) {
+                previewCourseOnTimetable(course);
+            }
         });
         
+        // Remove preview when mouse leaves
         courseItem.addEventListener('mouseleave', () => {
-            // Don't hide the details when moving away from the course item
-            // This way details remain visible until hovering over another course
+            // If the course is not selected, remove it from preview
+            if (!course.selected) {
+                removePreviewFromTimetable();
+                // Restore the timetable with only selected courses
+                updateTimetableDisplay(courses);
+            }
         });
 
         courseItems.appendChild(courseItem);
+        
+        // Add course selection handler - this handles conflict checking
+        handleCourseSelection(checkbox, course);
     });
 }
 
@@ -526,6 +639,10 @@ function populateCourseList(courses) {
 function checkForMultipleSections(course) {
     // Normalize section types to group lectures and tutorials
     const sectionTypes = {};
+    
+    if (!course.schedules || course.schedules.length === 0) {
+        return false;
+    }
     
     for (const schedule of course.schedules) {
         // Normalize type to basic categories (Lecture, Tutorial)
@@ -569,6 +686,10 @@ function extractSectionId(type) {
     const tutMatch = type.match(/([A-Z]T\d+)-?TUT/i);
     if (tutMatch) return tutMatch[1];
     
+    // Try to match other common tutorial patterns like T01, T02
+    const simpleTutMatch = type.match(/T(\d+)/i);
+    if (simpleTutMatch) return simpleTutMatch[0];
+    
     return null;
 }
 
@@ -581,7 +702,12 @@ function groupSchedulesBySection(course) {
     
     course.schedules.forEach((schedule, index) => {
         const baseType = normalizeSessionType(schedule.type);
-        const sectionId = extractSectionId(schedule.type);
+        let sectionId = extractSectionId(schedule.type);
+        
+        // If no section ID found but it's a tutorial, use day+time+location as a section identifier
+        if (!sectionId && baseType === 'Tutorial') {
+            sectionId = `${schedule.day}-${schedule.start}-${schedule.location.substring(0, 10)}`;
+        }
         
         // Create a key that combines base type and section ID
         const sectionKey = `${baseType}-${sectionId || 'Default'}`;
@@ -619,13 +745,13 @@ function generateSectionSelectors(course) {
     });
     
     // Only create selectors for types with multiple options
-    let selectorHTML = '<div class="section-selectors">';
+    let selectorHTML = '';
     
     for (const [baseType, typeSections] of Object.entries(sectionsByType)) {
         if (typeSections.length > 1) {
             selectorHTML += `
                 <div class="section-selector">
-                    <label class="section-label">${baseType}:</label>
+                    <div class="section-label">${baseType}:</div>
                     <select class="section-dropdown" data-type="${baseType}">
             `;
             
@@ -663,7 +789,6 @@ function generateSectionSelectors(course) {
         }
     }
     
-    selectorHTML += '</div>';
     return selectorHTML;
 }
 
@@ -693,15 +818,221 @@ function addSectionSelectorEventListeners(courseItem, course) {
     });
 }
 
+/**
+ * Update timetable display with selected courses
+ */
 function updateTimetableDisplay(courses) {
     // Store courses globally for filtering
     window.coursesData = courses;
+    
+    // Clear existing course events
+    clearTimetable();
     
     // Only display selected courses
     const selectedCourses = courses.filter(course => course.selected);
     displayCoursesOnTimetable(selectedCourses);
 }
 
+/**
+ * Clear all course events from the timetable
+ */
+function clearTimetable() {
+    const courseEvents = document.querySelectorAll('.course-event');
+    courseEvents.forEach(event => event.remove());
+}
+
+/**
+ * Display courses on the timetable
+ */
+function displayCoursesOnTimetable(courses) {
+    const timetableGrid = document.getElementById('timetable-grid');
+    const startHour = 8;
+    const startMinute = 30;
+    
+    // Create a mapping for days to indices
+    const dayMap = {
+        'Monday': 0, 'Mon': 0, 
+        'Tuesday': 1, 'Tue': 1, 
+        'Wednesday': 2, 'Wed': 2, 
+        'Thursday': 3, 'Thu': 3, 
+        'Friday': 4, 'Fri': 4, 
+        'Saturday': 5, 'Sat': 5, 
+        'Sunday': 6, 'Sun': 6
+    };
+    
+    // Sort courses by start time to display earlier classes first
+    const sortedCourses = [...courses].sort((a, b) => {
+        if (!a.schedules || !a.schedules.length) return 1;
+        if (!b.schedules || !b.schedules.length) return -1;
+        
+        const aStartTime = Math.min(...a.schedules.map(s => timeToMinutes(s.start)));
+        const bStartTime = Math.min(...b.schedules.map(s => timeToMinutes(s.start)));
+        return aStartTime - bStartTime;
+    });
+
+    sortedCourses.forEach(course => {
+        // Skip if no schedules or not selected (unless it's a preview)
+        if (!course.schedules || course.schedules.length === 0) return;
+        if (!course.selected && !course.isPreview) return;
+        
+        // Determine which schedules to display
+        let schedulesToDisplay = [];
+        
+        // If we have section selections, use those
+        if (course.selectedSections) {
+            const sections = groupSchedulesBySection(course);
+            
+            // For each type, add only the schedules from the selected section
+            for (const [sectionKey, section] of Object.entries(sections)) {
+                const baseType = section.baseType;
+                const sectionId = section.sectionId;
+                
+                // If this is the selected section for this type, or if there's only one section of this type
+                if (sectionId === course.selectedSections[baseType] || 
+                    !course.selectedSections[baseType]) {
+                    schedulesToDisplay = schedulesToDisplay.concat(section.schedules);
+                }
+            }
+        } else {
+            // No selections, display all schedules
+            schedulesToDisplay = course.schedules.map((schedule, index) => ({...schedule, index}));
+        }
+        
+        // Sort schedules to ensure earlier ones render first
+        const sortedSchedules = [...schedulesToDisplay].sort((a, b) => {
+            return timeToMinutes(a.start) - timeToMinutes(b.start);
+        });
+        
+        // Process each schedule
+        sortedSchedules.forEach(schedule => {
+            const dayIndex = dayMap[schedule.day];
+            
+            // Calculate start and end times in minutes
+            const startTimeMinutes = timeToMinutes(schedule.start);
+            const endTimeMinutes = timeToMinutes(schedule.end);
+            
+            // Find the appropriate time slot
+            const startMinute = startTimeMinutes % 60;
+            
+            // Calculate position and height for the course event
+            const timeSlots = document.querySelectorAll(`.time-slot[data-day="${dayIndex}"]`);
+            
+            // Find the starting time slot
+            let startSlot;
+            for (const slot of timeSlots) {
+                const slotTime = slot.dataset.time;
+                const [slotHour, slotMinute] = slotTime.split(':').map(Number);
+                const slotTimeMinutes = slotHour * 60 + slotMinute;
+                
+                // Find the closest time slot
+                if (slotTimeMinutes <= startTimeMinutes && (!startSlot || slotTimeMinutes > timeToMinutes(startSlot.dataset.time))) {
+                    startSlot = slot;
+                }
+            }
+            
+            if (!startSlot) return; // Skip if no suitable slot found
+            
+            // Calculate the height based on duration
+            const durationMinutes = endTimeMinutes - startTimeMinutes;
+            const hourHeight = 8; // Height of one hour in rem (matching the CSS)
+            const heightPercentage = (durationMinutes / 60) * 100; // Height as percentage of hour slot
+            
+            // Create course event element
+            const courseEvent = document.createElement('div');
+            courseEvent.className = 'course-event';
+            courseEvent.dataset.courseId = course.id;
+            
+            if (course.isPlaceholder || schedule.type?.includes('Placeholder')) {
+                courseEvent.classList.add('placeholder-event');
+            }
+            
+            // Add preview class if this is a preview course
+            if (course.isPreview) {
+                courseEvent.classList.add('preview-event');
+            }
+            
+            // Add conflict class if this schedule has a conflict
+            if (course.hasConflicts && schedule.hasConflict) {
+                courseEvent.classList.add('conflict-event');
+            }
+            
+            // Set style for positioning
+            courseEvent.style.backgroundColor = course.color || getRandomColor(course.id);
+            courseEvent.style.top = `${(startMinute / 60) * 100}%`;
+            
+            // Calculate absolute height if the course spans multiple hours
+            if (durationMinutes > 60) {
+                const totalRems = (durationMinutes / 60) * hourHeight;
+                courseEvent.style.height = `${totalRems}rem`;
+            } else {
+                courseEvent.style.height = `${heightPercentage}%`;
+            }
+            
+            // Extract section ID and base type
+            const sectionId = extractSectionId(schedule.type) || '';
+            const baseType = normalizeSessionType(schedule.type);
+            
+            // Add content
+            courseEvent.innerHTML = `
+                <div class="course-event-title">${course.id}</div>
+                <div class="course-event-type">
+                    ${baseType}${sectionId ? ` (Section ${sectionId})` : ''}
+                </div>
+                <div class="course-event-time">${schedule.start} - ${schedule.end}</div>
+                <div class="course-event-location">${schedule.location || 'TBA'}</div>
+            `;
+            
+            // Add hover effect for details
+            courseEvent.addEventListener('mouseenter', () => {
+                // Highlight this course in the course list
+                highlightCourseInList(course.id);
+                
+                // Show detailed info
+                showCourseScheduleDetails(course, schedule);
+            });
+            
+            // Add to the time slot
+            startSlot.appendChild(courseEvent);
+        });
+    });
+}
+
+/**
+ * Generate a random color based on course ID for consistent coloring
+ */
+function getRandomColor(courseId) {
+    // Simple hash function to generate a consistent color for a course ID
+    let hash = 0;
+    for (let i = 0; i < courseId.length; i++) {
+        hash = courseId.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    // Generate HSL color with good saturation and lightness
+    const h = hash % 360;
+    const s = 70 + (hash % 20); // 70-90%
+    const l = 80 + (hash % 15); // 80-95%
+    
+    return `hsl(${h}, ${s}%, ${l}%)`;
+}
+
+/**
+ * Highlight a course in the course list
+ */
+function highlightCourseInList(courseId) {
+                const courseItems = document.querySelectorAll('.course-item');
+                courseItems.forEach(item => {
+        const itemCheckbox = item.querySelector('input[type="checkbox"]');
+        if (itemCheckbox && itemCheckbox.id === courseId) {
+                        item.classList.add('highlighted');
+                    } else {
+                        item.classList.remove('highlighted');
+                    }
+                });
+}
+
+/**
+ * Show course details in the details panel
+ */
 function showCourseDetails(course) {
     const detailsContent = document.querySelector('.details-content');
     
@@ -739,12 +1070,12 @@ function showCourseDetails(course) {
             // Add a selected indicator for the current selection
             const selectedClass = isSelected ? 'selected-section' : '';
             const selectedIndicator = isSelected && hasMultipleSections ? 
-                '<span class="selected-indicator">✓ Selected</span>' : '';
+                '<span class="selected-indicator">Selected</span>' : '';
             
             // Section header with id
             schedulesHTML += `
                 <div class="schedule-detail ${selectedClass}">
-                    <p class="section-header">Section ${section.sectionId} ${selectedIndicator}</p>`;
+                    <div class="section-header">Section ${section.sectionId} ${selectedIndicator}</div>`;
             
             // Display all the sessions for this section
             section.schedules.forEach(schedule => {
@@ -754,344 +1085,31 @@ function showCourseDetails(course) {
             
             // Display the location (usually the same for all sessions in a section)
             schedulesHTML += `
-                    <p class="location">${section.schedules[0].location || 'Location TBA'}</p>
+                    <div class="location">${section.schedules[0].location || 'Location TBA'}</div>
                 </div>`;
         });
         
         schedulesHTML += `</div>`;
     });
     
+    // Display placeholder warning if applicable
+    const placeholderWarning = course.isPlaceholder ? 
+        '<p class="placeholder-warning">Note: Schedule information is not yet available. Times shown are placeholders.</p>' : '';
+    
     detailsContent.innerHTML = `
         <h4>${course.id}</h4>
         <p class="course-name-details">${course.name}</p>
-        ${course.isPlaceholder ? '<p class="placeholder-warning">Note: Schedule information is not yet available. Times shown are placeholders.</p>' : ''}
+        ${placeholderWarning}
         <div class="course-schedule">
-            <h3>Schedule Details:</h3>
+            <h3>Schedule Details</h3>
             ${schedulesHTML}
         </div>
     `;
-    
-    // Highlight this course in the list
-    const courseItems = document.querySelectorAll('.course-item');
-    courseItems.forEach(item => {
-        const itemId = item.querySelector('input').id;
-        if (itemId === course.id) {
-            item.classList.add('highlighted');
-        } else {
-            item.classList.remove('highlighted');
-        }
-    });
 }
 
-function hideCourseDetails() {
-    const detailsContent = document.querySelector('.details-content');
-    detailsContent.innerHTML = 'Course details will be displayed here once you hover or click on a course';
-}
-
-function displayCoursesOnTimetable(courses) {
-    // Map days to their indices
-    const dayMap = {
-        'Monday': 0,
-        'Tuesday': 1,
-        'Wednesday': 2,
-        'Thursday': 3,
-        'Friday': 4,
-        'Saturday': 5,
-        'Sunday': 6
-    };
-
-    // Clear existing courses from timetable
-    const cells = document.querySelectorAll('.timetable td:not(:first-child)');
-    cells.forEach(cell => {
-        cell.innerHTML = '';
-        cell.className = '';
-        // Also clear the multi-hour data attribute
-        delete cell.dataset.multiHourAbove;
-        delete cell.dataset.occupied;
-    });
-
-    // Helper function to convert time to minutes
-    function timeToMinutes(timeStr) {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        return hours * 60 + minutes;
-    }
-
-    // Sort courses by start time to display earlier classes first
-    const sortedCourses = [...courses].sort((a, b) => {
-        const aStartTime = Math.min(...a.schedules.map(s => timeToMinutes(s.start)));
-        const bStartTime = Math.min(...b.schedules.map(s => timeToMinutes(s.start)));
-        return aStartTime - bStartTime;
-    });
-
-    // Add each course to the timetable
-    sortedCourses.forEach(course => {
-        // Get only the schedules that should be displayed
-        // (either selected sections or all if no selection)
-        let schedulesToDisplay = [];
-        
-        if (course.selectedSections) {
-            // Group schedules by section
-            const sections = groupSchedulesBySection(course);
-            
-            // For each type, add only the schedules from the selected section
-            for (const [sectionKey, section] of Object.entries(sections)) {
-                const baseType = section.baseType;
-                const sectionId = section.sectionId;
-                
-                // If this is the selected section for this type, or if there's only one section of this type
-                if (sectionId === course.selectedSections[baseType] || 
-                    !course.selectedSections[baseType]) {
-                    schedulesToDisplay = schedulesToDisplay.concat(section.schedules);
-                }
-            }
-        } else {
-            // No selections, display all schedules
-            schedulesToDisplay = course.schedules.map((schedule, index) => ({...schedule, index}));
-        }
-        
-        // Sort schedules to ensure earlier ones render first
-        const sortedSchedules = [...schedulesToDisplay].sort((a, b) => {
-            return timeToMinutes(a.start) - timeToMinutes(b.start);
-        });
-        
-        sortedSchedules.forEach(schedule => {
-            const dayIndex = dayMap[schedule.day];
-            
-            // Skip if this day is filtered out
-            if (!window.visibleDays.includes(dayIndex)) return;
-            
-            const startTimeMinutes = timeToMinutes(schedule.start);
-            const endTimeMinutes = timeToMinutes(schedule.end);
-            
-            // Calculate duration in hours (round up for partial hours)
-            const durationHours = Math.ceil((endTimeMinutes - startTimeMinutes) / 60);
-            
-            // Find all rows that this course spans
-            const rows = findRowsForTimeSpan(startTimeMinutes, endTimeMinutes);
-            if (rows.length === 0) return;
-            
-            // Get the cell in the first row for this day
-            const firstCell = rows[0].children[dayIndex + 1]; // +1 because first column is time
-            if (!firstCell) return;
-            
-            // Skip if the cell is marked as occupied by another course
-            if (firstCell.dataset.occupied === 'true') return;
-            
-            // Create course element
-            const courseElement = document.createElement('div');
-            courseElement.className = 'course-block';
-            
-            // Add placeholder class if this is a placeholder schedule
-            if (course.isPlaceholder || schedule.type.includes('Placeholder')) {
-                courseElement.classList.add('placeholder-block');
-            }
-            
-            // Set height based on duration
-            if (durationHours > 1) {
-                // Calculate the actual time span in minutes
-                const timeSpanMinutes = endTimeMinutes - startTimeMinutes;
-                
-                // Only attempt to calculate dynamic heights once the DOM is fully rendered
-                // and elements have their computed heights
-                setTimeout(() => {
-                    try {
-                        // Calculate the exact height by using the number of rows that the course spans
-                        if (rows.length > 1) {
-                            // Get the last row that should be part of this course
-                            const lastRowIndex = Math.min(rows.length - 1, durationHours - 1);
-                            const lastRow = rows[lastRowIndex];
-                            
-                            // If we can't find a sufficient number of rows, use a more aggressive approach
-                            // to find rows that might not have been included due to time boundaries
-                            if (lastRowIndex < durationHours - 1) {
-                                // Find the next rows manually
-                                let lastRowFound = lastRow;
-                                let rowsToFind = durationHours - 1 - lastRowIndex;
-                                let currentRow = lastRow;
-                                
-                                while (rowsToFind > 0 && currentRow.nextElementSibling) {
-                                    currentRow = currentRow.nextElementSibling;
-                                    lastRowFound = currentRow;
-                                    rowsToFind--;
-                                }
-                                
-                                // Use this last row instead if found
-                                if (lastRowFound !== lastRow) {
-                                    // Calculate height using the newly found last row
-                                    const totalHeight = lastRowFound.offsetTop + lastRowFound.offsetHeight - rows[0].offsetTop - 2; // -2px for borders
-                                    courseElement.style.height = `${totalHeight}px`;
-                                    console.log(`Extended height for ${course.id} to ${totalHeight}px (spanning more rows)`);
-                                } else {
-                                    // Calculate height from top of first row to bottom of last row
-                                    const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 2; // -2px for borders
-                                    courseElement.style.height = `${totalHeight}px`;
-                                    console.log(`Set height for ${course.id} to ${totalHeight}px (using available rows)`);
-                                }
-                            } else {
-                                // Standard case - we have enough rows
-                                const totalHeight = lastRow.offsetTop + lastRow.offsetHeight - rows[0].offsetTop - 2; // -2px for borders
-                                courseElement.style.height = `${totalHeight}px`;
-                                console.log(`Standard height for ${course.id} to ${totalHeight}px`);
-                            }
-                        } else {
-                            // We have just one row but the course spans multiple hours
-                            // Use a fixed height per hour with a bit more space
-                            const baseRowHeight = 80; // Fixed height of 80px per hour (increased from 60px)
-                            const totalHeight = baseRowHeight * durationHours - 2; // -2px for borders
-                            courseElement.style.height = `${totalHeight}px`;
-                            console.log(`Fixed height for ${course.id} to ${totalHeight}px for ${durationHours} hours`);
-                        }
-                    } catch (e) {
-                        console.error('Error calculating course block height:', e);
-                        // Fallback to minimum height
-                        courseElement.style.height = `${80 * durationHours - 2}px`;
-                    }
-                }, 0);
-                
-                // Position absolutely
-                courseElement.style.position = 'absolute';
-                courseElement.style.top = '0';
-                courseElement.style.left = '0';
-                courseElement.style.right = '0';
-                courseElement.style.zIndex = '10';
-                courseElement.classList.add('multi-hour');
-                
-                // Also set position relative on the container cell
-                firstCell.style.position = 'relative';
-            }
-            
-            courseElement.style.backgroundColor = course.color;
-
-            // Create a better structured HTML for course blocks
-            const sectionId = extractSectionId(schedule.type) || '';
-            const baseType = normalizeSessionType(schedule.type);
-
-            courseElement.innerHTML = `
-                <div class="course-title">${course.id}</div>
-                <div class="course-type">
-                    ${baseType}${sectionId ? ` (Section ${sectionId})` : ''}
-                </div>
-                <div class="course-time">${schedule.start} - ${schedule.end}</div>
-                <div class="course-location">${schedule.location}</div>
-            `;
-            
-            // Add hover effect to show more details
-            courseElement.addEventListener('mouseenter', () => {
-                showCourseScheduleDetails(course, schedule);
-                
-                // Also highlight this course in the list
-                const courseItems = document.querySelectorAll('.course-item');
-                courseItems.forEach(item => {
-                    const itemId = item.querySelector('input').id;
-                    if (itemId === course.id) {
-                        item.classList.add('highlighted');
-                    } else {
-                        item.classList.remove('highlighted');
-                    }
-                });
-            });
-            
-            courseElement.addEventListener('mouseleave', () => {
-                // We no longer hide course details on mouse leave
-                // This allows details to persist until another course is hovered
-            });
-            
-            // Mark this cell as occupied
-            firstCell.dataset.occupied = 'true';
-            
-            // Append to first cell
-            firstCell.appendChild(courseElement);
-            
-            // If multiple rows, mark cells below as occupied
-            if (durationHours > 1) {
-                // Determine how many rows to mark as occupied
-                const rowsToOccupy = durationHours;
-                
-                // Keep track of how many rows we've actually marked
-                let markedRows = 1; // We've already marked the first row
-                
-                // Mark the cells in rows that we already found
-                for (let i = 1; i < rows.length && markedRows < rowsToOccupy; i++) {
-                    const cell = rows[i].children[dayIndex + 1];
-                    if (cell) {
-                        // Mark this cell as having content from a multi-hour course above
-                        cell.dataset.multiHourAbove = 'true';
-                        // Also mark as occupied to prevent other courses from being placed here
-                        cell.dataset.occupied = 'true';
-                        
-                        // Add a visual indicator that this cell is part of a multi-hour course
-                        cell.style.backgroundColor = 'rgba(0,0,0,0.03)';
-                        markedRows++;
-                    }
-                }
-                
-                // If we haven't marked enough rows, try to find and mark additional rows
-                if (markedRows < rowsToOccupy && rows.length > 0) {
-                    // Start from the last row we found
-                    let currentRow = rows[rows.length - 1];
-                    
-                    while (markedRows < rowsToOccupy && currentRow.nextElementSibling) {
-                        currentRow = currentRow.nextElementSibling;
-                        const cell = currentRow.children[dayIndex + 1];
-                        
-                        if (cell) {
-                            // Mark this cell as having content from a multi-hour course above
-                            cell.dataset.multiHourAbove = 'true';
-                            // Also mark as occupied to prevent other courses from being placed here
-                            cell.dataset.occupied = 'true';
-                            
-                            // Add a visual indicator that this cell is part of a multi-hour course
-                            cell.style.backgroundColor = 'rgba(0,0,0,0.03)';
-                            markedRows++;
-                        }
-                    }
-                }
-            }
-        });
-    });
-    
-    // Function to find rows for a time span
-    function findRowsForTimeSpan(startTimeMinutes, endTimeMinutes) {
-        const rows = document.querySelectorAll('.timetable tbody tr');
-        const matchingRows = [];
-        
-        // Debug the time values we're searching for
-        console.log(`Finding rows for course from ${Math.floor(startTimeMinutes/60)}:${(startTimeMinutes%60).toString().padStart(2, '0')} to ${Math.floor(endTimeMinutes/60)}:${(endTimeMinutes%60).toString().padStart(2, '0')}`);
-        
-        // Check each row to see if it contains the correct time
-        for (const row of rows) {
-            const timeCell = row.querySelector('.time-cell');
-            if (!timeCell) continue;
-            
-            const timeText = timeCell.textContent;
-            const [rowHours, rowMinutes] = timeText.split(':').map(Number);
-            const rowTimeInMinutes = rowHours * 60 + rowMinutes;
-            
-            // Convert to string for debugging
-            console.log(`Checking row with time: ${timeText} (${rowTimeInMinutes} minutes)`);
-            
-            // Get the time of the next slot (which would be 1 hour later with our current setup)
-            let nextRowTimeInMinutes = rowTimeInMinutes + 60;
-            
-            // Check if this row's time range matches where the course should be
-            // For a course starting at 10:30, it should be in the 10:30 row (not 9:30)
-            if (
-                // This is the starting row for the course
-                (rowTimeInMinutes <= startTimeMinutes && startTimeMinutes < nextRowTimeInMinutes) ||
-                // This row is covered by the course's duration
-                (startTimeMinutes <= rowTimeInMinutes && rowTimeInMinutes < endTimeMinutes)
-            ) {
-                matchingRows.push(row);
-                console.log(`✓ Row matched: ${timeText}`);
-            }
-        }
-        
-        console.log(`Found ${matchingRows.length} matching rows`);
-        
-        return matchingRows;
-    }
-}
-
+/**
+ * Show specific schedule details in the details panel
+ */
 function showCourseScheduleDetails(course, schedule) {
     const detailsContent = document.querySelector('.details-content');
     
@@ -1133,171 +1151,208 @@ function showCourseScheduleDetails(course, schedule) {
     const termInfo = schedule.term ? 
         `<p class="term"><strong>Term:</strong> ${schedule.term}</p>` : '';
     
+    // Display placeholder warning if applicable
+    const placeholderWarning = course.isPlaceholder || schedule.type.includes('Placeholder') ? 
+        '<p class="placeholder-warning">Note: Schedule information is not yet finalized. Times shown are tentative.</p>' : '';
+    
     detailsContent.innerHTML = `
         <h4>${course.id}</h4>
         <p class="course-name-details">${course.name}</p>
+        ${placeholderWarning}
         <div class="course-schedule">
-            <h3>Schedule Details:</h3>
+            <h3>Schedule Details</h3>
             <div class="schedule-item">
                 <strong>${baseType}${sectionId ? ` (Section ${sectionId})` : ''}</strong>
-                <p class="selected-session">
-                    <strong>Selected Session:</strong> ${schedule.day} ${schedule.start} - ${schedule.end}
-                </p>
-                <p class="location">${schedule.location || 'Location TBA'}</p>
+                <div class="schedule-detail selected-section">
+                    <div class="section-header">Selected Session</div>
+                    <p>${schedule.day} ${schedule.start} - ${schedule.end}</p>
+                    <div class="location">${schedule.location || 'Location TBA'}</div>
                 ${instructorInfo}
                 ${termInfo}
                 ${allSessions.length > 1 ? sessionsHTML : ''}
             </div>
         </div>
-    `;
-}
-
-function loadUserInfo() {
-    fetch('/api/auth/login', {
-        method: 'GET',
-        credentials: 'include'
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.user) {
-            document.getElementById('userUsername').textContent = data.user.username;
-        }
-    })
-    .catch(error => {
-        console.error('Error loading user info:', error);
-        window.location.href = '/';
-    });
-}
-
-function setupLogout() {
-    const logoutBtn = document.getElementById('logoutBtn');
-    logoutBtn.addEventListener('click', async () => {
-        try {
-            const response = await fetch('/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                window.location.href = '/';
-            }
-        } catch (error) {
-            console.error('Logout failed:', error);
-        }
-    });
-}
-
-function initializeDayFilters() {
-    // Create the day filter container if it doesn't exist
-    let dayFilterContainer = document.querySelector('.day-filter-container');
-    if (!dayFilterContainer) {
-        dayFilterContainer = document.createElement('div');
-        dayFilterContainer.className = 'day-filter-container';
-        
-        // Insert it after the search box
-        const searchBox = document.querySelector('.search-box');
-        if (searchBox) {
-            searchBox.parentNode.insertBefore(dayFilterContainer, searchBox.nextSibling);
-        } else {
-            // Fallback - add to the sidebar
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar) {
-                sidebar.appendChild(dayFilterContainer);
-            }
-        }
-    }
-    
-    // Create the filter UI
-    dayFilterContainer.innerHTML = `
-        <div class="filter-header">Day Filters</div>
-        <div class="day-filters">
-            <label><input type="checkbox" data-day="0" checked> Mon</label>
-            <label><input type="checkbox" data-day="1" checked> Tue</label>
-            <label><input type="checkbox" data-day="2" checked> Wed</label>
-            <label><input type="checkbox" data-day="3" checked> Thu</label>
-            <label><input type="checkbox" data-day="4" checked> Fri</label>
-            <label><input type="checkbox" data-day="5" checked> Sat</label>
-            <label><input type="checkbox" data-day="6" checked> Sun</label>
-        </div>
-        <div class="filter-actions">
-            <button id="selectAllDays">Select All</button>
-            <button id="clearAllDays">Clear All</button>
         </div>
     `;
-    
-    // Add event listeners to checkboxes
-    const dayCheckboxes = dayFilterContainer.querySelectorAll('input[type="checkbox"]');
-    dayCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            updateVisibleDays();
-        });
-    });
-    
-    // Add event listeners to buttons
-    const selectAllBtn = document.getElementById('selectAllDays');
-    const clearAllBtn = document.getElementById('clearAllDays');
-    
-    selectAllBtn.addEventListener('click', () => {
-        dayCheckboxes.forEach(checkbox => {
-            checkbox.checked = true;
-        });
-        updateVisibleDays();
-    });
-    
-    clearAllBtn.addEventListener('click', () => {
-        dayCheckboxes.forEach(checkbox => {
-            checkbox.checked = false;
-        });
-        updateVisibleDays();
-    });
-    
-    // Function to update visible days based on checkboxes
-    function updateVisibleDays() {
-        window.visibleDays = [];
-        dayCheckboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                window.visibleDays.push(parseInt(checkbox.dataset.day));
-            }
-        });
-        
-        // Update the table display
-        updateColumnVisibility();
-        
-        // Redisplay courses with the new day filter
-        const courses = window.coursesData || [];
-        updateTimetableDisplay(courses);
+}
+
+/**
+ * Check if two schedules conflict with each other
+ * @param {Object} schedule1 - First schedule to check
+ * @param {Object} schedule2 - Second schedule to check
+ * @returns {Boolean} - True if there's a conflict
+ */
+function schedulesConflict(schedule1, schedule2) {
+    // Check if schedules are on the same day
+    if (schedule1.day !== schedule2.day) {
+        return false;
     }
     
-    // Function to show/hide columns based on visible days
-    function updateColumnVisibility() {
-        const table = document.querySelector('.timetable table');
-        if (!table) return;
+    // Convert times to minutes for easier comparison
+    const start1 = timeToMinutes(schedule1.start);
+    const end1 = timeToMinutes(schedule1.end);
+    const start2 = timeToMinutes(schedule2.start);
+    const end2 = timeToMinutes(schedule2.end);
+    
+    // Check if times overlap
+    return (start1 < end2 && start2 < end1);
+}
+
+/**
+ * Find all schedule conflicts between a course and existing selected courses
+ * @param {Object} courseToCheck - The course to check for conflicts
+ * @param {Array} existingCourses - Array of existing courses to check against
+ * @returns {Array} - Array of conflict objects with details
+ */
+function findScheduleConflicts(courseToCheck, existingCourses) {
+    const conflicts = [];
+    
+    // Get the schedules for the course to check
+    const schedulesToCheck = courseToCheck.schedules || [];
+    
+    // Loop through existing courses
+    for (const existingCourse of existingCourses) {
+        // Skip if it's the same course or not selected
+        if (existingCourse.id === courseToCheck.id || !existingCourse.selected) {
+            continue;
+        }
         
-        // Get all rows
-        const rows = table.querySelectorAll('tr');
+        const existingSchedules = existingCourse.schedules || [];
         
-        rows.forEach(row => {
-            // Skip if it's the header row (handle separately)
-            if (row.parentElement.tagName === 'THEAD') {
-                const headers = row.querySelectorAll('th');
-                // Skip the first column (time column)
-                for (let i = 1; i < headers.length; i++) {
-                    const dayIndex = i - 1;
-                    headers[i].style.display = window.visibleDays.includes(dayIndex) ? '' : 'none';
+        // Check each schedule combination for conflicts
+        for (const schedule1 of schedulesToCheck) {
+            for (const schedule2 of existingSchedules) {
+                if (schedulesConflict(schedule1, schedule2)) {
+                    conflicts.push({
+                        course1: courseToCheck,
+                        course2: existingCourse,
+                        schedule1: schedule1,
+                        schedule2: schedule2
+                    });
                 }
+            }
+        }
+    }
+    
+    return conflicts;
+}
+
+/**
+ * Show a conflict popup message that fades out after a few seconds
+ * @param {Array} conflicts - Array of conflicts to display
+ */
+function showConflictPopup(conflicts) {
+    // Create popup element if it doesn't exist
+    let popup = document.getElementById('conflict-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'conflict-popup';
+        document.body.appendChild(popup);
+    }
+    
+    // Generate message for all conflicts
+    let message = '<strong>Course Conflicts Detected:</strong><br>';
+    const uniqueConflicts = new Set();
+    
+    conflicts.forEach(conflict => {
+        const conflictText = `${conflict.course1.id} conflicts with ${conflict.course2.id}`;
+        if (!uniqueConflicts.has(conflictText)) {
+            uniqueConflicts.add(conflictText);
+            message += `• ${conflictText}<br>`;
+        }
+    });
+    
+    // Set popup content and show it
+    popup.innerHTML = message;
+    popup.classList.add('active');
+    
+    // Automatically hide after 3 seconds
+    setTimeout(() => {
+        popup.classList.remove('active');
+    }, 3000);
+}
+
+/**
+ * Preview a course on the timetable without selecting it
+ */
+function previewCourseOnTimetable(course) {
+    // Save current timetable state
+    const previewedCourse = { ...course };
+    
+    // Mark as preview for styling
+    previewedCourse.isPreview = true;
+    
+    // Clear existing preview if any
+    removePreviewFromTimetable();
+    
+    // Check for conflicts with existing courses
+    const conflicts = findScheduleConflicts(previewedCourse, window.coursesData.filter(c => c.selected));
+    
+    // Mark preview course schedules that have conflicts
+    if (conflicts.length > 0) {
+        previewedCourse.hasConflicts = true;
+        
+        // Mark specific schedules with conflicts
+        if (previewedCourse.schedules) {
+            previewedCourse.schedules = previewedCourse.schedules.map(schedule => {
+                // Check if this schedule has a conflict
+                const hasConflict = conflicts.some(conflict => 
+                    conflict.schedule1.day === schedule.day && 
+                    conflict.schedule1.start === schedule.start && 
+                    conflict.schedule1.end === schedule.end
+                );
+                
+                return { ...schedule, hasConflict };
+            });
+        }
+    }
+    
+    // Display the course with preview styling
+    displayCoursesOnTimetable([...window.coursesData.filter(c => c.selected), previewedCourse]);
+}
+
+/**
+ * Remove any preview courses from the timetable
+ */
+function removePreviewFromTimetable() {
+    const previewEvents = document.querySelectorAll('.course-event.preview-event');
+    previewEvents.forEach(event => event.remove());
+}
+
+/**
+ * Handle course selection
+ */
+function handleCourseSelection(checkbox, course) {
+    checkbox.addEventListener('change', (e) => {
+        // If trying to select the course
+        if (e.target.checked) {
+            // Check for conflicts with existing selected courses
+            const conflicts = findScheduleConflicts(course, window.coursesData.filter(c => c.selected));
+            
+            // If conflicts exist, show popup and prevent selection
+            if (conflicts.length > 0) {
+                e.preventDefault();
+                e.target.checked = false;
+                course.selected = false;
+                showConflictPopup(conflicts);
                 return;
             }
-            
-            // Handle body rows
-            const cells = row.querySelectorAll('td');
-            // Skip the first column (time column)
-            for (let i = 1; i < cells.length; i++) {
-                const dayIndex = i - 1;
-                cells[i].style.display = window.visibleDays.includes(dayIndex) ? '' : 'none';
-            }
-        });
-    }
-    
-    // Initialize column visibility
-    updateColumnVisibility();
+        }
+        
+        // If not prevented, proceed with selection
+        course.selected = e.target.checked;
+        
+        // Update the timetable display
+        updateTimetableDisplay(window.coursesData);
+    });
+}
+
+/**
+ * Convert time string to minutes
+ * @param {String} timeStr - Time string in format "HH:MM"
+ * @returns {Number} - Total minutes
+ */
+function timeToMinutes(timeStr) {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
 }

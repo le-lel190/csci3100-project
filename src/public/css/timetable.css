@@ -2,12 +2,15 @@
     --primary-color: #2c7a4f;
     --primary-light: #e8f5e9;
     --secondary-color: #4a90e2;
+    --accent-color: #f39c12;
     --text-color: #2c3e50;
     --text-light: #7f8c8d;
     --border-color: #dcdde1;
     --background-color: #f5f6fa;
     --white: #ffffff;
-    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --transition-speed: 0.3s;
 }
 
 * {
@@ -31,6 +34,9 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .nav-brand {
@@ -44,7 +50,7 @@ body {
 
 .nav-links {
     display: flex;
-    gap: 2rem;
+    gap: 1.5rem;
 }
 
 .nav-links a {
@@ -53,7 +59,7 @@ body {
     font-weight: 500;
     padding: 0.5rem 1rem;
     border-radius: 4px;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) ease;
 }
 
 .nav-links a:hover,
@@ -74,46 +80,46 @@ body {
     color: var(--text-light);
     cursor: pointer;
     font-size: 1.2rem;
-    transition: color 0.3s ease;
+    transition: color var(--transition-speed) ease;
 }
 
 .btn-logout:hover {
     color: var(--primary-color);
 }
 
-/* Container Layout */
+/* Main Layout */
 .container {
     display: grid;
-    grid-template-columns: 300px minmax(0, 1fr) 300px;
+    grid-template-columns: minmax(250px, 18%) minmax(0, 1fr) minmax(250px, 18%);
     gap: 1rem;
     padding: 1rem;
-    height: calc(100vh - 4rem);
     max-height: calc(100vh - 4rem);
+    height: calc(100vh - 4rem);
     overflow: hidden;
 }
 
 /* Sidebar Styles */
 .sidebar {
     background: var(--white);
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: var(--shadow);
-    padding: 1rem;
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
     overflow-y: auto;
-    max-height: 100%;
+    height: 100%;
 }
 
 .semester-selector {
     border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1rem;
+    padding-bottom: 1.25rem;
 }
 
 .semester-buttons {
     display: flex;
     gap: 0.5rem;
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
 }
 
 .semester-btn {
@@ -121,9 +127,10 @@ body {
     padding: 0.5rem;
     border: 1px solid var(--border-color);
     background: var(--white);
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all var(--transition-speed) ease;
+    font-weight: 500;
 }
 
 .semester-btn.active {
@@ -132,12 +139,40 @@ body {
     border-color: var(--primary-color);
 }
 
+.semester-btn:hover:not(.active) {
+    background: var(--background-color);
+    border-color: var(--primary-color);
+}
+
+.search-box {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
 .search-box input {
     width: 100%;
-    padding: 0.5rem;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    margin-bottom: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all var(--transition-speed) ease;
+}
+
+.search-box::before {
+    content: '\f002';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(44, 122, 79, 0.15);
 }
 
 .course-list {
@@ -146,17 +181,32 @@ body {
 }
 
 .course-items {
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Fix for course items to prevent indentation */
+.course-info {
+    width: 100%;
+    padding-left: 0.5rem;
 }
 
 .course-item {
-    padding: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-    transition: background-color 0.2s ease;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-speed) ease;
+    margin-bottom: 0.5rem;
 }
 
 .course-item:hover, .course-item.highlighted {
     background-color: var(--primary-light);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 .course-item label {
@@ -164,14 +214,66 @@ body {
     flex-direction: column;
     gap: 0.25rem;
     cursor: pointer;
+    width: 100%;
+}
+
+.course-id {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-color);
+    margin-bottom: 2px;
 }
 
 .course-name {
     font-size: 0.9rem;
     color: var(--text-light);
+    margin-bottom: 3px;
 }
 
-/* Timetable Styles */
+/* Checkbox styling */
+.course-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    position: relative;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: all var(--transition-speed) ease;
+}
+
+.course-item input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+}
+
+.course-item input[type="checkbox"]:checked::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: white;
+    position: absolute;
+    font-size: 0.75rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.course-item input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(44, 122, 79, 0.15);
+}
+
+/* Fix checkbox alignment in course items */
+.course-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+/* Timetable Grid */
 .main-content {
     display: flex;
     flex-direction: column;
@@ -181,269 +283,201 @@ body {
 
 .timetable {
     background: var(--white);
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
     height: 100%;
     overflow: hidden;
-    position: relative;
-    flex: 1;
+    min-height: 600px;
 }
 
-.timetable-wrapper {
-    flex: 1;
-    overflow-y: scroll;
-    overflow-x: auto;
-    max-height: calc(100vh - 7rem);
-    scrollbar-width: thin;
-}
-
-.timetable-wrapper::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.timetable-wrapper::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.timetable-wrapper::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
-}
-
-.timetable-wrapper::-webkit-scrollbar-thumb:hover {
-    background: #a1a1a1;
-}
-
-.timetable table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-
-.timetable thead {
-    position: sticky;
-    top: 0;
-    z-index: 5;
-    background-color: var(--white);
-}
-
-.timetable th,
-.timetable td {
-    border: 1px solid var(--border-color);
-    padding: 0.25rem;
-    text-align: center;
-    min-height: 80px; /* Increase min-height to fit more content */
-    height: auto; /* Allow cells to grow as needed */
-    position: relative;
-}
-
-.timetable th {
+.timetable-header {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
     background-color: var(--primary-light);
-    color: var(--primary-color);
-    font-weight: 600;
-    height: 40px; /* Keep header height the same */
-    min-height: unset; /* Reset min-height for headers */
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: 10;
+    min-width: 800px;
 }
 
-.time-cell {
+/* Ensure header cells are properly sized and aligned */
+.header-cell {
+    padding: 1rem 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    color: var(--primary-color);
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    min-width: 100px; /* Ensure minimum width for header cells */
+}
+
+.timetable-grid-container {
+    flex: 1;
+    overflow-x: auto;  /* Enable horizontal scrolling */
+    overflow-y: auto;
+    position: relative;
+    border-top: 1px solid var(--border-color);
+    padding-bottom: 20px; /* Add some padding at the bottom */
+}
+
+/* Ensure timetable grid cells have proper borders and sizing */
+.timetable-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    position: relative;
+    min-width: 800px;
+}
+
+.time-label {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    background-color: var(--white);
     position: sticky;
     left: 0;
-    background-color: var(--white);
-    z-index: 1;
-    font-size: 0.85rem;
-    width: 60px;
-    min-width: 60px;
+    z-index: 5;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    height: 8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    width: 80px;
 }
 
-/* Course block styles */
-.course-block {
-    background-color: var(--primary-light);
-    border-radius: 4px;
-    padding: 0.5rem 0.25rem; /* Increased padding top/bottom */
-    margin: 0.1rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    height: calc(100% - 2px);
-    min-height: 78px; /* Ensure minimum height to fit content */
+.day-column {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* Align to top instead of center */
-    position: relative;
-    z-index: 1;
-    overflow: visible; /* Changed from hidden to show all content */
 }
 
-.course-block.multi-hour {
+.time-slot {
+    height: 8rem;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    min-width: 100px; /* Ensure minimum width for time slots */
+}
+
+/* Course Event Styling */
+.course-event {
     position: absolute;
-    top: 1px;
-    left: 1px;
-    right: 1px;
-    overflow: visible; /* Show all content */
-    z-index: 1;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    margin: 0;
-    padding: 0.5rem 0.25rem; /* Increased padding for multi-hour blocks */
-}
-
-/* Auto-adjust for smaller screens */
-@media (max-height: 768px) {
-    .course-block {
-        padding: 0.3rem;
-        min-height: 48px;
-    }
-    
-    .course-title {
-        font-size: 0.75rem;
-    }
-    
-    .course-type, .course-time, .course-location {
-        font-size: 0.65rem;
-    }
-}
-
-/* Auto-adjust for even smaller screens */
-@media (max-height: 600px) {
-    .course-block {
-        padding: 0.2rem;
-        min-height: 36px;
-    }
-    
-    .course-block .course-type, 
-    .course-block .course-location {
-        display: none; /* Hide less important info on very small screens */
-    }
-}
-
-/* Ensure courses that start on their own row display properly */
-.timetable td[data-multi-hour-above="true"] {
-    background-color: rgba(0, 0, 0, 0.03);
-    pointer-events: none; /* Prevent interaction with cells below multi-hour courses */
-}
-
-.timetable td[data-multi-hour-above="true"] .course-block {
-    position: relative;
+    left: 0.25rem;
+    right: 0.25rem;
+    border-radius: 8px; /* Slightly increased border radius */
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
     z-index: 2;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-height: 7rem; /* Ensure minimum height for visibility */
 }
 
-.course-block:hover {
+.course-event:hover {
     transform: scale(1.02);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 10;
+    box-shadow: var(--shadow-hover);
+    z-index: 20;
 }
 
-.timetable td {
-    position: relative;
-    height: auto;
-    min-width: 120px;
-    vertical-align: top;
-    padding: 2px;
+.course-event-title {
+    font-weight: 700; /* Make title bolder */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1rem;
+    margin-bottom: 0.2rem; /* Add small margin below title */
 }
 
-/* To ensure all time slots have consistent height */
-.timetable tr {
-    height: auto;
+.course-event-type,
+.course-event-time,
+.course-event-location {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
 }
 
-/* Occupied cell styling */
-.timetable td[data-occupied="true"] {
-    background-color: transparent;
+/* Placeholder styling */
+.placeholder-course {
+    opacity: 0.85;
 }
 
-/* Course block content */
-.course-title, .course-type, .course-time, .course-location {
-    margin-bottom: 0.25rem;
-    line-height: 1.2;
+.placeholder-indicator {
+    font-size: 0.8em;
+    color: #d32f2f;
+    font-style: italic;
+    margin-top: 2px;
 }
 
-.course-title {
+.placeholder-event {
+    border: 2px dashed rgba(0, 0, 0, 0.3) !important;
+    opacity: 0.75;
+}
+
+.placeholder-event::after {
+    content: "Tentative";
+    position: absolute;
+    bottom: 2px;
+    right: 5px;
+    font-size: 9px;
+    color: rgba(0, 0, 0, 0.6);
+    font-style: italic;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+
+/* Preview event styling */
+.preview-event {
+    border: 2px dashed var(--secondary-color) !important;
+    opacity: 0.85;
+}
+
+.preview-event::after {
+    content: "Preview";
+    position: absolute;
+    bottom: 2px;
+    right: 5px;
+    font-size: 9px;
+    color: var(--secondary-color);
     font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 1px 4px;
+    border-radius: 3px;
 }
 
-.course-type {
-    font-size: 0.75rem;
-    opacity: 0.8;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.course-time {
-    font-size: 0.75rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.course-location {
-    font-size: 0.75rem;
-    opacity: 0.8;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Ensure the table fills the available space */
-.timetable tbody {
-    height: 100%;
-}
-
-/* Add some padding to the bottom of the scrollable area */
-.timetable tbody::after {
-    content: '';
-    display: block;
-    height: 2rem;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1200px) {
-    .container {
-        grid-template-columns: 250px minmax(0, 1fr) 250px;
-    }
-}
-
-@media (max-width: 992px) {
-    .container {
-        grid-template-columns: 200px minmax(0, 1fr) 200px;
-    }
-}
-
-/* Course Details Styles */
+/* Course Details Panel */
 .course-details {
     background: var(--white);
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: var(--shadow);
-    padding: 1rem;
+    padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.25rem;
     overflow-y: auto;
-    max-height: 100%;
     height: 100%;
 }
 
 .details-content {
     background: var(--primary-light);
-    padding: 1rem;
-    border-radius: 4px;
+    padding: 1.25rem;
+    border-radius: 8px;
     color: var(--text-color);
     font-size: 0.9rem;
     overflow-y: auto;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    max-height: calc(100vh - 18rem); /* Dynamic height that accounts for header and buttons */
+    gap: 0.75rem;
 }
 
 .details-content h4 {
@@ -464,276 +498,88 @@ body {
 .course-schedule {
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    overflow-y: auto;
-    padding-right: 0.5rem;
+    gap: 1rem;
 }
 
 .course-schedule h3 {
     font-size: 1.1rem;
-    margin-bottom: 0.5rem;
     color: var(--primary-color);
 }
 
 .schedule-item {
     border-left: 3px solid var(--primary-color);
-    padding-left: 0.8rem;
-    margin-bottom: 0.8rem;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
 }
 
-.course-schedule p {
+.schedule-detail {
+    padding: 0.75rem;
     margin: 0.5rem 0;
-    line-height: 1.5;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 6px;
+    transition: all var(--transition-speed) ease;
 }
 
-.course-schedule strong {
+.schedule-detail.selected-section {
+    background-color: rgba(44, 122, 79, 0.1);
+    border-left: 3px solid var(--primary-color);
+}
+
+.section-header {
+    font-weight: 600;
     color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.course-schedule .location {
+.selected-indicator {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background-color: rgba(44, 122, 79, 0.2);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.location {
+    display: flex;
+    align-items: center;
     color: var(--text-light);
-    font-size: 0.85rem;
-    margin-top: 0.25rem;
-    margin-bottom: 0.8rem;
-    margin-left: 0.5rem;
-    display: flex;
-    align-items: center;
+    margin-top: 0.5rem;
 }
 
-.course-schedule .location::before {
-    content: "📍";
-    margin-right: 0.3rem;
-    font-size: 0.8rem;
+.location::before {
+    content: '\f3c5';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    margin-right: 0.5rem;
 }
 
-/* Day Filter Styles */
-.day-filter-container {
-    margin-top: 1rem;
-    padding: 1rem;
-    background-color: var(--primary-light);
-    border-radius: 4px;
-}
-
-.filter-header {
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
-}
-
-.day-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.day-filters label {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    background-color: var(--white);
-    transition: background-color 0.2s ease;
-}
-
-.day-filters label:hover {
-    background-color: #f0f0f0;
-}
-
-.filter-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.filter-actions button {
-    padding: 0.25rem 0.5rem;
-    background: var(--secondary-color);
-    color: var(--white);
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: background 0.3s ease;
-    flex: 1;
-}
-
-.filter-actions button:hover {
-    background: #357abd;
-}
-
-/* Loading and Error States */
-.loading-indicator {
-    text-align: center;
-    padding: 20px;
-    color: #666;
-}
-
-.loading-indicator:after {
-    content: '';
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    margin-left: 10px;
-    border: 2px solid #ccc;
-    border-top-color: #3498db;
-    border-radius: 50%;
-    animation: spin 1s infinite linear;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.error-message {
-    background-color: #ffebee;
-    color: #c62828;
-    padding: 15px;
-    margin: 10px 0;
-    border-radius: 4px;
-    border-left: 3px solid #c62828;
-}
-
-.error-message button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    margin-top: 10px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background-color 0.3s;
-}
-
-.error-message button:hover {
-    background-color: #2980b9;
-}
-
-/* Add styles for placeholder courses */
-.placeholder-course {
-    position: relative;
-    opacity: 0.85;
-}
-
-.placeholder-indicator {
-    font-size: 0.8em;
-    color: #d32f2f;
-    font-style: italic;
-    margin-top: 2px;
-}
-
-.placeholder-warning {
-    color: #d32f2f;
-    font-style: italic;
-    background-color: #ffebee;
-    padding: 5px;
-    border-radius: 4px;
-    margin: 10px 0;
-    font-size: 0.9em;
-}
-
-.placeholder-block {
-    border: 2px dashed rgba(0, 0, 0, 0.3) !important;
-    opacity: 0.75;
-}
-
-.placeholder-block::after {
-    content: "Tentative";
-    position: absolute;
-    bottom: 2px;
-    right: 5px;
-    font-size: 9px;
-    color: rgba(0, 0, 0, 0.6);
-    font-style: italic;
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 1px 3px;
-    border-radius: 2px;
-}
-
-/* Demo button styles */
-.demo-button-container {
-    margin-top: 1rem;
-    text-align: center;
-}
-
-.demo-btn {
-    padding: 0.75rem 1.5rem;
-    background-color: #f39c12; /* Orange color to make it stand out */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: 100%;
-    font-size: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.demo-btn:hover {
-    background-color: #e67e22;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-.demo-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Timetable action buttons */
+/* Action buttons */
 .timetable-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1rem;
-}
-
-.button-row {
-    display: flex;
-    gap: 0.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
 }
 
 .action-btn {
     padding: 0.75rem 1rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
+    transition: all var(--transition-speed) ease;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
 }
 
-.timetable-actions .action-btn {
-    width: 100%; /* Full width for the Save button */
-}
-
-.button-row .action-btn {
-    width: 50%; /* Half width for Export and Save Image buttons */
-    /*idk why dont work here but courseplanner page work. later change it*/
-}
-
-.export-btn {
-    background-color: var(--secondary-color);
-    color: white;
-}
-
-.export-btn:hover {
-    background-color: #3a7bc8;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+.action-btn:first-child {
+    grid-column: span 2;
 }
 
 .save-btn {
@@ -744,160 +590,260 @@ body {
 .save-btn:hover {
     background-color: #236a3f;
     transform: translateY(-2px);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow);
 }
 
-.action-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.export-btn {
+    background-color: var(--secondary-color);
+    color: white;
 }
 
-/* Section selectors for course items */
+.export-btn:hover {
+    background-color: #3a7bc8;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+/* Section selectors */
 .section-selectors {
-    margin-top: 0.5rem;
-    padding-left: 1.5rem;
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 6px;
 }
 
 .section-selector {
     margin-bottom: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
 }
 
 .section-label {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--primary-color);
     font-weight: 500;
+    margin-bottom: 0.25rem;
 }
 
 .section-dropdown {
     width: 100%;
-    padding: 0.25rem;
-    font-size: 0.8rem;
+    padding: 0.5rem;
     border: 1px solid var(--border-color);
-    border-radius: 4px;
-    background-color: white;
-}
-
-.section-dropdown:hover {
-    border-color: var(--primary-color);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: all var(--transition-speed) ease;
 }
 
 .section-dropdown:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(44, 122, 79, 0.2);
+    box-shadow: 0 0 0 3px rgba(44, 122, 79, 0.15);
 }
 
-/* Add a distinctive style for courses with multiple sections */
-.course-item:has(.section-selectors) {
-    padding-bottom: 0.75rem;
+/* Demo button */
+.demo-button-container {
+    margin-top: 1rem;
 }
 
-.course-item:has(.section-selectors) label {
-    font-weight: 500;
-}
-
-/* Additional responsive styles for section selectors */
-@media (max-width: 768px) {
-    .section-selectors {
-        padding-left: 1rem;
-    }
-    
-    .section-selector {
-        margin-bottom: 0.3rem;
-    }
-}
-
-/* Styles for course details panel - section selection */
-.schedule-detail {
-    padding: 0.25rem 0.5rem;
-    margin: 0.25rem 0;
-    border-left: 3px solid transparent;
-    background-color: rgba(0, 0, 0, 0.02);
-    border-radius: 0 4px 4px 0;
-    margin-bottom: 0.75rem;
-}
-
-.schedule-detail.selected-section {
-    background-color: rgba(44, 122, 79, 0.1);
-    border-left: 3px solid var(--primary-color);
-    border-radius: 0 4px 4px 0;
-}
-
-.section-header {
+.demo-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 0.9rem;
-    color: var(--primary-color);
-    margin-bottom: 0.5rem;
-    padding-bottom: 0.25rem;
-    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
-.selected-indicator {
-    display: inline-block;
-    margin-left: 0.5rem;
-    font-size: 0.75rem;
-    color: var(--primary-color);
-    font-weight: 600;
-    background-color: rgba(44, 122, 79, 0.1);
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
+.demo-btn::before {
+    content: '\f15c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
 }
 
-.course-schedule h3 {
-    font-size: 1rem;
-    margin: 0.75rem 0 0.5rem;
-    color: var(--primary-color);
+.demo-btn:hover {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
-.schedule-item {
-    margin-bottom: 1rem;
+/* Loading and error states */
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--text-light);
+    gap: 1rem;
 }
 
-.schedule-item strong {
+.loading-indicator::after {
+    content: '';
     display: block;
-    margin-bottom: 0.25rem;
-    padding: 0.25rem 0;
-    font-size: 1.05rem;
-    color: var(--text-color);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
 }
 
-/* Enhanced course details panel */
-.selected-session {
-    font-weight: normal;
-    background-color: rgba(44, 122, 79, 0.08);
-    padding: 0.4rem;
-    border-radius: 4px;
-    margin: 0.5rem 0;
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-.all-sessions {
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 6px;
+    border-left: 3px solid #c62828;
+}
+
+.error-message button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
     margin-top: 0.75rem;
-    padding: 0.5rem;
-    background-color: rgba(0, 0, 0, 0.03);
-    border-radius: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
 }
 
-.sessions-header {
-    font-weight: 600;
-    font-size: 0.85rem;
-    margin-bottom: 0.5rem;
-    color: var(--primary-color);
+.error-message button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
 }
 
-.session-item {
-    margin: 0.25rem 0;
-    font-size: 0.85rem;
-    padding-left: 0.5rem;
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .container {
+        grid-template-columns: 250px minmax(0, 1fr) 250px;
+        padding: 1rem;
+        gap: 1rem;
+    }
+    
+    .course-event {
+        padding: 0.4rem;
+    }
 }
 
-.instructor, .term {
-    margin: 0.5rem 0;
-    font-size: 0.9rem;
+@media (max-width: 992px) {
+    .container {
+        grid-template-columns: 220px minmax(0, 1fr) 220px;
+    }
+    
+    .sidebar, .course-details {
+        padding: 1rem;
+    }
+    
+    .details-content {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        height: auto;
+        max-height: none;
+    }
+    
+    .sidebar, .course-details {
+        max-height: 300px;
+    }
+    
+    .navbar {
+        padding: 0.75rem 1rem;
+    }
+    
+    .nav-links {
+        gap: 0.5rem;
+    }
+    
+    .nav-links a {
+        padding: 0.4rem 0.75rem;
+    }
+}
+
+/* Adjust vertical space between events */
+.course-event + .course-event {
+    margin-top: 0.5rem;
+}
+
+/* Conflict styling for preview events */
+.conflict-event {
+    background-image: repeating-linear-gradient(
+        135deg,
+        rgba(255, 0, 0, 0.2) 0px,
+        rgba(255, 0, 0, 0.2) 10px,
+        rgba(255, 0, 0, 0.4) 10px,
+        rgba(255, 0, 0, 0.4) 20px
+    ) !important;
+    border: 2px solid #ff0000 !important;
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5) !important;
+    color: #000 !important;
+}
+
+.conflict-event::after {
+    content: '\f071'; /* Font Awesome warning icon */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: #ff0000;
+    font-size: 1.2rem;
+}
+
+/* Conflict popup message */
+#conflict-popup {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100%);
+    background-color: #ffffff;
+    border-top: 5px solid #ff0000;
+    padding: 19px 25px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    width: 440px;
+    border-radius: 6px;
+    font-size: 1.13rem;
+    line-height: 1.5;
+    transition: all 0.3s ease-in-out;
+    opacity: 0;
+    pointer-events: none;
+    text-align: center;
+}
+
+#conflict-popup.active {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+#conflict-popup strong {
+    color: #ff0000;
+    display: block;
+    margin-bottom: 12px;
+    font-size: 1.25rem;
+}
+
+/* Animation for popup */
+@keyframes fadeOut {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    90% { opacity: 0; transform: translateX(-50%) translateY(-100%); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-100%); }
+}
+
+#conflict-popup.fade-out {
+    animation: fadeOut 0.5s forwards;
 }
