@@ -616,6 +616,21 @@ function populateCourseList(courses) {
         // Add hover event to show course details
         courseItem.addEventListener('mouseenter', () => {
             showCourseDetails(course);
+            
+            // Preview this course on the timetable if not already selected
+            if (!course.selected) {
+                previewCourseOnTimetable(course);
+            }
+        });
+        
+        // Remove preview when mouse leaves
+        courseItem.addEventListener('mouseleave', () => {
+            // If the course is not selected, remove it from preview
+            if (!course.selected) {
+                removePreviewFromTimetable();
+                // Restore the timetable with only selected courses
+                updateTimetableDisplay(courses);
+            }
         });
 
         courseItems.appendChild(courseItem);
@@ -936,6 +951,11 @@ function displayCoursesOnTimetable(courses) {
                 courseEvent.classList.add('placeholder-event');
             }
             
+            // Add preview class if this is a preview course
+            if (course.isPreview) {
+                courseEvent.classList.add('preview-event');
+            }
+            
             // Set style for positioning
             courseEvent.style.backgroundColor = course.color || getRandomColor(course.id);
             courseEvent.style.top = `${(startMinute / 60) * 100}%`;
@@ -1154,4 +1174,29 @@ function showCourseScheduleDetails(course, schedule) {
         </div>
         </div>
     `;
+}
+
+/**
+ * Preview a course on the timetable without selecting it
+ */
+function previewCourseOnTimetable(course) {
+    // Save current timetable state
+    const previewedCourse = { ...course };
+    
+    // Mark as preview for styling
+    previewedCourse.isPreview = true;
+    
+    // Clear existing preview if any
+    removePreviewFromTimetable();
+    
+    // Display the course with preview styling
+    displayCoursesOnTimetable([...window.coursesData.filter(c => c.selected), previewedCourse]);
+}
+
+/**
+ * Remove any preview courses from the timetable
+ */
+function removePreviewFromTimetable() {
+    const previewEvents = document.querySelectorAll('.course-event.preview-event');
+    previewEvents.forEach(event => event.remove());
 }

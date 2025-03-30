@@ -435,6 +435,25 @@ body {
     border-radius: 2px;
 }
 
+/* Preview event styling */
+.preview-event {
+    border: 2px dashed var(--secondary-color) !important;
+    opacity: 0.85;
+}
+
+.preview-event::after {
+    content: "Preview";
+    position: absolute;
+    bottom: 2px;
+    right: 5px;
+    font-size: 9px;
+    color: var(--secondary-color);
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
 /* Course Details Panel */
 .course-details {
     background: var(--white);
