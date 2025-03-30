@@ -601,13 +601,6 @@ function populateCourseList(courses) {
             courseItem.appendChild(sectionSelectorsDiv);
         }
         
-        // Separate the checkbox click handling from the label hover
-        checkbox.addEventListener('change', (e) => {
-            course.selected = e.target.checked;
-            // Update the timetable display
-            updateTimetableDisplay(courses);
-        });
-        
         // Add event listeners for section selectors if they exist
         if (hasMultipleSections) {
             addSectionSelectorEventListeners(courseItem, course);
@@ -634,6 +627,9 @@ function populateCourseList(courses) {
         });
 
         courseItems.appendChild(courseItem);
+        
+        // Add course selection handler - this handles conflict checking
+        handleCourseSelection(checkbox, course);
     });
 }
 
@@ -849,23 +845,21 @@ function clearTimetable() {
  * Display courses on the timetable
  */
 function displayCoursesOnTimetable(courses) {
-    // Map days to their indices
+    const timetableGrid = document.getElementById('timetable-grid');
+    const startHour = 8;
+    const startMinute = 30;
+    
+    // Create a mapping for days to indices
     const dayMap = {
-        'Monday': 0,
-        'Tuesday': 1,
-        'Wednesday': 2,
-        'Thursday': 3,
-        'Friday': 4,
-        'Saturday': 5,
-        'Sunday': 6
+        'Monday': 0, 'Mon': 0, 
+        'Tuesday': 1, 'Tue': 1, 
+        'Wednesday': 2, 'Wed': 2, 
+        'Thursday': 3, 'Thu': 3, 
+        'Friday': 4, 'Fri': 4, 
+        'Saturday': 5, 'Sat': 5, 
+        'Sunday': 6, 'Sun': 6
     };
-
-    // Helper function to convert time to minutes
-    function timeToMinutes(timeStr) {
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        return hours * 60 + minutes;
-    }
-
+    
     // Sort courses by start time to display earlier classes first
     const sortedCourses = [...courses].sort((a, b) => {
         if (!a.schedules || !a.schedules.length) return 1;
@@ -877,15 +871,15 @@ function displayCoursesOnTimetable(courses) {
     });
 
     sortedCourses.forEach(course => {
-        // Skip if no schedules
+        // Skip if no schedules or not selected (unless it's a preview)
         if (!course.schedules || course.schedules.length === 0) return;
+        if (!course.selected && !course.isPreview) return;
         
-        // Get only the schedules that should be displayed
-        // (either selected sections or all if no selection)
+        // Determine which schedules to display
         let schedulesToDisplay = [];
         
+        // If we have section selections, use those
         if (course.selectedSections) {
-            // Group schedules by section
             const sections = groupSchedulesBySection(course);
             
             // For each type, add only the schedules from the selected section
@@ -918,7 +912,6 @@ function displayCoursesOnTimetable(courses) {
             const endTimeMinutes = timeToMinutes(schedule.end);
             
             // Find the appropriate time slot
-            const startHour = Math.floor(startTimeMinutes / 60);
             const startMinute = startTimeMinutes % 60;
             
             // Calculate position and height for the course event
@@ -947,13 +940,20 @@ function displayCoursesOnTimetable(courses) {
             // Create course event element
             const courseEvent = document.createElement('div');
             courseEvent.className = 'course-event';
-            if (course.isPlaceholder || schedule.type.includes('Placeholder')) {
+            courseEvent.dataset.courseId = course.id;
+            
+            if (course.isPlaceholder || schedule.type?.includes('Placeholder')) {
                 courseEvent.classList.add('placeholder-event');
             }
             
             // Add preview class if this is a preview course
             if (course.isPreview) {
                 courseEvent.classList.add('preview-event');
+            }
+            
+            // Add conflict class if this schedule has a conflict
+            if (course.hasConflicts && schedule.hasConflict) {
+                courseEvent.classList.add('conflict-event');
             }
             
             // Set style for positioning
@@ -1177,6 +1177,102 @@ function showCourseScheduleDetails(course, schedule) {
 }
 
 /**
+ * Check if two schedules conflict with each other
+ * @param {Object} schedule1 - First schedule to check
+ * @param {Object} schedule2 - Second schedule to check
+ * @returns {Boolean} - True if there's a conflict
+ */
+function schedulesConflict(schedule1, schedule2) {
+    // Check if schedules are on the same day
+    if (schedule1.day !== schedule2.day) {
+        return false;
+    }
+    
+    // Convert times to minutes for easier comparison
+    const start1 = timeToMinutes(schedule1.start);
+    const end1 = timeToMinutes(schedule1.end);
+    const start2 = timeToMinutes(schedule2.start);
+    const end2 = timeToMinutes(schedule2.end);
+    
+    // Check if times overlap
+    return (start1 < end2 && start2 < end1);
+}
+
+/**
+ * Find all schedule conflicts between a course and existing selected courses
+ * @param {Object} courseToCheck - The course to check for conflicts
+ * @param {Array} existingCourses - Array of existing courses to check against
+ * @returns {Array} - Array of conflict objects with details
+ */
+function findScheduleConflicts(courseToCheck, existingCourses) {
+    const conflicts = [];
+    
+    // Get the schedules for the course to check
+    const schedulesToCheck = courseToCheck.schedules || [];
+    
+    // Loop through existing courses
+    for (const existingCourse of existingCourses) {
+        // Skip if it's the same course or not selected
+        if (existingCourse.id === courseToCheck.id || !existingCourse.selected) {
+            continue;
+        }
+        
+        const existingSchedules = existingCourse.schedules || [];
+        
+        // Check each schedule combination for conflicts
+        for (const schedule1 of schedulesToCheck) {
+            for (const schedule2 of existingSchedules) {
+                if (schedulesConflict(schedule1, schedule2)) {
+                    conflicts.push({
+                        course1: courseToCheck,
+                        course2: existingCourse,
+                        schedule1: schedule1,
+                        schedule2: schedule2
+                    });
+                }
+            }
+        }
+    }
+    
+    return conflicts;
+}
+
+/**
+ * Show a conflict popup message that fades out after a few seconds
+ * @param {Array} conflicts - Array of conflicts to display
+ */
+function showConflictPopup(conflicts) {
+    // Create popup element if it doesn't exist
+    let popup = document.getElementById('conflict-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'conflict-popup';
+        document.body.appendChild(popup);
+    }
+    
+    // Generate message for all conflicts
+    let message = '<strong>Course Conflicts Detected:</strong><br>';
+    const uniqueConflicts = new Set();
+    
+    conflicts.forEach(conflict => {
+        const conflictText = `${conflict.course1.id} conflicts with ${conflict.course2.id}`;
+        if (!uniqueConflicts.has(conflictText)) {
+            uniqueConflicts.add(conflictText);
+            message += `• ${conflictText}<br>`;
+        }
+    });
+    
+    // Set popup content and show it
+    popup.innerHTML = message;
+    popup.classList.add('active');
+    
+    // Automatically hide after 3 seconds
+    setTimeout(() => {
+        popup.classList.remove('active');
+    }, 3000);
+}
+
+/**
  * Preview a course on the timetable without selecting it
  */
 function previewCourseOnTimetable(course) {
@@ -1189,6 +1285,28 @@ function previewCourseOnTimetable(course) {
     // Clear existing preview if any
     removePreviewFromTimetable();
     
+    // Check for conflicts with existing courses
+    const conflicts = findScheduleConflicts(previewedCourse, window.coursesData.filter(c => c.selected));
+    
+    // Mark preview course schedules that have conflicts
+    if (conflicts.length > 0) {
+        previewedCourse.hasConflicts = true;
+        
+        // Mark specific schedules with conflicts
+        if (previewedCourse.schedules) {
+            previewedCourse.schedules = previewedCourse.schedules.map(schedule => {
+                // Check if this schedule has a conflict
+                const hasConflict = conflicts.some(conflict => 
+                    conflict.schedule1.day === schedule.day && 
+                    conflict.schedule1.start === schedule.start && 
+                    conflict.schedule1.end === schedule.end
+                );
+                
+                return { ...schedule, hasConflict };
+            });
+        }
+    }
+    
     // Display the course with preview styling
     displayCoursesOnTimetable([...window.coursesData.filter(c => c.selected), previewedCourse]);
 }
@@ -1199,4 +1317,42 @@ function previewCourseOnTimetable(course) {
 function removePreviewFromTimetable() {
     const previewEvents = document.querySelectorAll('.course-event.preview-event');
     previewEvents.forEach(event => event.remove());
+}
+
+/**
+ * Handle course selection
+ */
+function handleCourseSelection(checkbox, course) {
+    checkbox.addEventListener('change', (e) => {
+        // If trying to select the course
+        if (e.target.checked) {
+            // Check for conflicts with existing selected courses
+            const conflicts = findScheduleConflicts(course, window.coursesData.filter(c => c.selected));
+            
+            // If conflicts exist, show popup and prevent selection
+            if (conflicts.length > 0) {
+                e.preventDefault();
+                e.target.checked = false;
+                course.selected = false;
+                showConflictPopup(conflicts);
+                return;
+            }
+        }
+        
+        // If not prevented, proceed with selection
+        course.selected = e.target.checked;
+        
+        // Update the timetable display
+        updateTimetableDisplay(window.coursesData);
+    });
+}
+
+/**
+ * Convert time string to minutes
+ * @param {String} timeStr - Time string in format "HH:MM"
+ * @returns {Number} - Total minutes
+ */
+function timeToMinutes(timeStr) {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
 }
