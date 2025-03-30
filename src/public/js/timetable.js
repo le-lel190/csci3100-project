@@ -734,6 +734,10 @@ function extractSectionId(type) {
     const tutMatch = type.match(/([A-Z]T\d+)-?TUT/i);
     if (tutMatch) return tutMatch[1];
     
+    // Try to match other common tutorial patterns like T01, T02
+    const simpleTutMatch = type.match(/T(\d+)/i);
+    if (simpleTutMatch) return simpleTutMatch[0];
+    
     return null;
 }
 
@@ -746,7 +750,12 @@ function groupSchedulesBySection(course) {
     
     course.schedules.forEach((schedule, index) => {
         const baseType = normalizeSessionType(schedule.type);
-        const sectionId = extractSectionId(schedule.type);
+        let sectionId = extractSectionId(schedule.type);
+        
+        // If no section ID found but it's a tutorial, use day+time+location as a section identifier
+        if (!sectionId && baseType === 'Tutorial') {
+            sectionId = `${schedule.day}-${schedule.start}-${schedule.location.substring(0, 10)}`;
+        }
         
         // Create a key that combines base type and section ID
         const sectionKey = `${baseType}-${sectionId || 'Default'}`;
