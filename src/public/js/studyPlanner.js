@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupLogout();
     initializeSemesterButtons();
     initializeSearch();
-    initializeDayFilters();
     setupDemoButton();
     loadCourseData();
     setupDragAndDrop();
@@ -130,56 +129,27 @@ function initializeSearch() {
         const courseItems = document.querySelectorAll('.course-item');
         courseItems.forEach(item => {
             const courseText = item.textContent.toLowerCase();
-            item.style.display = courseText.includes(searchTerm) ? 'block' : 'none';
+            
+            // Standard search
+            let isMatch = courseText.includes(searchTerm);
+            
+            // If no match and potential course code (contains letters and numbers)
+            if (!isMatch && /[a-z]+[0-9]+/.test(searchTerm)) {
+                // Try matching with spaces removed
+                const courseTextNoSpaces = courseText.replace(/\s+/g, '');
+                const searchTermNoSpaces = searchTerm.replace(/\s+/g, '');
+                
+                // Try also to match with a space between letters and numbers
+                // e.g., if user types "csci3100", also try "csci 3100"
+                const searchTermWithSpace = searchTerm.replace(/([a-z]+)([0-9]+)/i, '$1 $2');
+                
+                isMatch = courseTextNoSpaces.includes(searchTermNoSpaces) || 
+                          courseText.includes(searchTermWithSpace);
+            }
+            
+            item.style.display = isMatch ? 'block' : 'none';
         });
     });
-}
-
-function initializeDayFilters() {
-    let dayFilterContainer = document.querySelector('.day-filter-container');
-    if (!dayFilterContainer) {
-        dayFilterContainer = document.createElement('div');
-        dayFilterContainer.className = 'day-filter-container';
-        const searchBox = document.querySelector('.search-box');
-        if (searchBox) searchBox.parentNode.insertBefore(dayFilterContainer, searchBox.nextSibling);
-    }
-
-    dayFilterContainer.innerHTML = `
-        <div class="filter-header">Day Filters</div>
-        <div class="day-filters">
-            <label><input type="checkbox" data-day="0" checked> Mon</label>
-            <label><input type="checkbox" data-day="1" checked> Tue</label>
-            <label><input type="checkbox" data-day="2" checked> Wed</label>
-            <label><input type="checkbox" data-day="3" checked> Thu</label>
-            <label><input type="checkbox" data-day="4" checked> Fri</label>
-            <label><input type="checkbox" data-day="5" checked> Sat</label>
-            <label><input type="checkbox" data-day="6" checked> Sun</label>
-        </div>
-        <div class="filter-actions">
-            <button id="selectAllDays">Select All</button>
-            <button id="clearAllDays">Clear All</button>
-        </div>
-    `;
-
-    const dayCheckboxes = dayFilterContainer.querySelectorAll('input[type="checkbox"]');
-    dayCheckboxes.forEach(checkbox => checkbox.addEventListener('change', updateVisibleDays));
-
-    document.getElementById('selectAllDays').addEventListener('click', () => {
-        dayCheckboxes.forEach(cb => cb.checked = true);
-        updateVisibleDays();
-    });
-
-    document.getElementById('clearAllDays').addEventListener('click', () => {
-        dayCheckboxes.forEach(cb => cb.checked = false);
-        updateVisibleDays();
-    });
-
-    function updateVisibleDays() {
-        window.visibleDays = Array.from(dayCheckboxes)
-            .filter(cb => cb.checked)
-            .map(cb => parseInt(cb.dataset.day));
-        console.log('Visible days:', window.visibleDays); // Placeholder
-    }
 }
 
 function setupDragAndDrop() {
