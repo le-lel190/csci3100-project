@@ -8,8 +8,26 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDemoButton();
     setupTimetableActions();
 
-    // Load course data from external file instead of hardcoding
-    loadCourseData();
+    // Get the active semester
+    const activeSemester = document.querySelector('.semester-btn.active');
+    const semester = activeSemester ? activeSemester.dataset.semester : 'current';
+    
+    // Check if we have a saved timetable
+    const savedTimetable = localStorage.getItem(`timetable_${semester}`);
+    
+    if (savedTimetable) {
+        try {
+            console.log(`Found saved timetable for ${semester}`);
+            // Load course data first to get all available courses
+            loadCourseData(semester);
+        } catch (e) {
+            console.error('Error loading saved timetable:', e);
+            loadCourseData(semester);
+        }
+    } else {
+        // Load course data from external file instead of hardcoding
+        loadCourseData(semester);
+    }
 });
 
 /**
@@ -66,7 +84,42 @@ function initializeSemesterButtons() {
             
             // Load semester-specific courses
             const semester = button.dataset.semester || 'current';
-            loadCourseData(semester);
+            
+            // First check if we have a saved timetable in localStorage
+            const savedTimetable = localStorage.getItem(`timetable_${semester}`);
+            
+            if (savedTimetable) {
+                try {
+                    // Parse the saved timetable
+                    const savedCourses = JSON.parse(savedTimetable);
+                    console.log(`Loading saved timetable for ${semester} with ${savedCourses.length} courses`);
+                    
+                    // Replace window.coursesData with the saved data
+                    if (window.coursesData) {
+                        // Mark courses as selected/unselected based on saved data
+                        const savedCourseIds = savedCourses.map(c => c.id);
+                        window.coursesData.forEach(course => {
+                            course.selected = savedCourseIds.includes(course.id);
+                        });
+                        
+                        // Load any saved tentative schedules
+                        loadTentativeSchedules(semester);
+                        
+                        // Update the UI
+                        populateCourseList(window.coursesData);
+                        updateTimetableDisplay(window.coursesData);
+                    } else {
+                        // If we don't have course data yet, load it from the server
+                        loadCourseData(semester);
+                    }
+                } catch (e) {
+                    console.error('Error loading saved timetable:', e);
+                    loadCourseData(semester);
+                }
+            } else {
+                // No saved timetable, load from server
+                loadCourseData(semester);
+            }
         });
     });
 }
@@ -116,7 +169,8 @@ function setupTimetableActions() {
     // Save button functionality
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
-            alert('Saving timetable... (To be implemented with MongoDB)');
+            saveTimetableToLocalStorage();
+            alert('Timetable saved successfully!');
         });
     }
 
@@ -132,6 +186,74 @@ function setupTimetableActions() {
         saveImageBtn.addEventListener('click', () => {
             captureAndSaveTimetable();
         });
+    }
+}
+
+/**
+ * Save timetable data to localStorage
+ */
+function saveTimetableToLocalStorage() {
+    // Get the current semester
+    const activeSemester = document.querySelector('.semester-btn.active');
+    const semesterName = activeSemester ? activeSemester.dataset.semester : 'current';
+    
+    // Get selected courses only
+    const selectedCourses = window.coursesData ? 
+        window.coursesData.filter(course => course.selected) : [];
+    
+    // Store in localStorage
+    localStorage.setItem(`timetable_${semesterName}`, JSON.stringify(selectedCourses));
+    
+    // Also save any tentative schedule modifications
+    saveTentativeSchedules();
+}
+
+/**
+ * Save tentative schedule modifications to localStorage
+ */
+function saveTentativeSchedules() {
+    if (!window.coursesData) return;
+    
+    // Get current semester
+    const activeSemester = document.querySelector('.semester-btn.active');
+    const semesterName = activeSemester ? activeSemester.dataset.semester : 'current';
+    
+    // Filter courses with isPlaceholder flag
+    const tentativeCourses = window.coursesData
+        .filter(course => course.isPlaceholder || course.schedules?.some(s => s.type?.includes('Placeholder')))
+        .map(course => ({
+            id: course.id,
+            schedules: course.schedules
+        }));
+    
+    if (tentativeCourses.length > 0) {
+        localStorage.setItem(`tentative_schedules_${semesterName}`, JSON.stringify(tentativeCourses));
+    }
+}
+
+/**
+ * Load saved tentative schedules from localStorage
+ */
+function loadTentativeSchedules(semester) {
+    const semesterName = semester || 'current';
+    const savedTentative = localStorage.getItem(`tentative_schedules_${semesterName}`);
+    
+    if (savedTentative && window.coursesData) {
+        try {
+            const tentativeCourses = JSON.parse(savedTentative);
+            
+            // Update course data with saved tentative schedules
+            tentativeCourses.forEach(savedCourse => {
+                const courseIndex = window.coursesData.findIndex(c => c.id === savedCourse.id);
+                if (courseIndex >= 0) {
+                    window.coursesData[courseIndex].schedules = savedCourse.schedules;
+                }
+            });
+            
+            console.log(`Loaded ${tentativeCourses.length} tentative course schedules from localStorage`);
+        } catch (e) {
+            console.error('Error loading tentative schedules:', e);
+        }
     }
 }
 
@@ -375,6 +497,9 @@ function loadSemesterData(semester) {
         .then(courses => {
             // Store courses globally for filtering
             window.coursesData = courses;
+            
+            // Load any saved tentative schedules from localStorage
+            loadTentativeSchedules(semester);
             
             // Populate course list
             populateCourseList(courses);
@@ -944,6 +1069,10 @@ function displayCoursesOnTimetable(courses) {
             
             if (course.isPlaceholder || schedule.type?.includes('Placeholder')) {
                 courseEvent.classList.add('placeholder-event');
+                
+                // Add a data attribute to track if this is a tentative course
+                courseEvent.dataset.tentative = 'true';
+                courseEvent.dataset.scheduleIndex = schedule.index;
             }
             
             // Add preview class if this is a preview course
@@ -980,6 +1109,9 @@ function displayCoursesOnTimetable(courses) {
                 </div>
                 <div class="course-event-time">${schedule.start} - ${schedule.end}</div>
                 <div class="course-event-location">${schedule.location || 'TBA'}</div>
+                ${(course.isPlaceholder || schedule.type?.includes('Placeholder')) ? 
+                    '<button class="edit-tentative-btn"><i class="fas fa-edit"></i></button>' : 
+                    ''}
             `;
             
             // Add hover effect for details
@@ -990,6 +1122,15 @@ function displayCoursesOnTimetable(courses) {
                 // Show detailed info
                 showCourseScheduleDetails(course, schedule);
             });
+            
+            // Add edit functionality for tentative courses
+            if (course.isPlaceholder || schedule.type?.includes('Placeholder')) {
+                const editBtn = courseEvent.querySelector('.edit-tentative-btn');
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showTentativeEditPopup(course, schedule, courseEvent);
+                });
+            }
             
             // Add to the time slot
             startSlot.appendChild(courseEvent);
@@ -1355,4 +1496,248 @@ function handleCourseSelection(checkbox, course) {
 function timeToMinutes(timeStr) {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
+}
+
+/**
+ * Shows a popup to edit tentative course schedule
+ */
+function showTentativeEditPopup(course, schedule, courseEvent) {
+    // Remove any existing popups
+    const existingPopup = document.getElementById('tentative-edit-popup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    // Create popup container
+    const popup = document.createElement('div');
+    popup.id = 'tentative-edit-popup';
+    popup.className = 'tentative-edit-popup';
+    
+    // Generate valid time options
+    const validStartTimes = [];
+    const validEndTimes = [];
+    
+    for (let hour = 8; hour <= 19; hour++) {
+        const formattedHour = hour.toString().padStart(2, '0');
+        validStartTimes.push(`${formattedHour}:30`);
+        validEndTimes.push(`${formattedHour}:15`);
+    }
+    
+    // Create popup content
+    popup.innerHTML = `
+        <div class="popup-header">
+            <h3>Edit Tentative Schedule</h3>
+            <button class="close-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="popup-content">
+            <div class="course-info">
+                <div class="popup-course-id">${course.id}</div>
+                <div class="popup-course-name">${course.name}</div>
+                <div class="popup-course-type">${schedule.type || 'Class'}</div>
+            </div>
+            
+            <div class="schedule-edit-form">
+                <div class="form-group">
+                    <label for="day-select">Day:</label>
+                    <select id="day-select">
+                        <option value="Monday" ${schedule.day === 'Monday' ? 'selected' : ''}>Monday</option>
+                        <option value="Tuesday" ${schedule.day === 'Tuesday' ? 'selected' : ''}>Tuesday</option>
+                        <option value="Wednesday" ${schedule.day === 'Wednesday' ? 'selected' : ''}>Wednesday</option>
+                        <option value="Thursday" ${schedule.day === 'Thursday' ? 'selected' : ''}>Thursday</option>
+                        <option value="Friday" ${schedule.day === 'Friday' ? 'selected' : ''}>Friday</option>
+                        <option value="Saturday" ${schedule.day === 'Saturday' ? 'selected' : ''}>Saturday</option>
+                        <option value="Sunday" ${schedule.day === 'Sunday' ? 'selected' : ''}>Sunday</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="start-time-select">Start Time (XX:30):</label>
+                    <select id="start-time-select" class="time-select">
+                        ${validStartTimes.map(time => 
+                            `<option value="${time}" ${time === schedule.start ? 'selected' : ''}>${time}</option>`
+                        ).join('')}
+                    </select>
+                    <div class="time-format-hint">Must be in format XX:30 (8:30 AM to 7:30 PM)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="end-time-select">End Time (XX:15):</label>
+                    <select id="end-time-select" class="time-select">
+                        ${validEndTimes.map(time => 
+                            `<option value="${time}" ${time === schedule.end ? 'selected' : ''}>${time}</option>`
+                        ).join('')}
+                    </select>
+                    <div class="time-format-hint">Must be in format XX:15 (8:15 AM to 7:15 PM)</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location-input">Location:</label>
+                    <input type="text" id="location-input" value="${schedule.location || 'TBA'}">
+                </div>
+                
+                <div id="validation-error" class="validation-error"></div>
+            </div>
+            
+            <div class="popup-actions">
+                <button class="cancel-btn">Cancel</button>
+                <button class="save-btn">Save Changes</button>
+            </div>
+        </div>
+    `;
+    
+    // Add the popup to the document
+    document.body.appendChild(popup);
+    
+    // Position the popup near the course event
+    positionPopup(popup, courseEvent);
+    
+    // Add event listeners
+    const closeBtn = popup.querySelector('.close-btn');
+    const cancelBtn = popup.querySelector('.cancel-btn');
+    const saveBtn = popup.querySelector('.save-btn');
+    const startTimeSelect = document.getElementById('start-time-select');
+    const endTimeSelect = document.getElementById('end-time-select');
+    const validationError = document.getElementById('validation-error');
+    
+    // Select the closest valid options to the current schedule
+    if (!validStartTimes.includes(schedule.start)) {
+        // Find the closest time in the valid options
+        const closestStartTime = findClosestTime(schedule.start, validStartTimes);
+        if (closestStartTime) {
+            startTimeSelect.value = closestStartTime;
+        }
+    }
+    
+    if (!validEndTimes.includes(schedule.end)) {
+        // Find the closest time in the valid options
+        const closestEndTime = findClosestTime(schedule.end, validEndTimes);
+        if (closestEndTime) {
+            endTimeSelect.value = closestEndTime;
+        }
+    }
+    
+    // Validate times when selection changes
+    startTimeSelect.addEventListener('change', validateTimes);
+    endTimeSelect.addEventListener('change', validateTimes);
+    
+    // Initial validation
+    validateTimes();
+    
+    function validateTimes() {
+        const startTime = startTimeSelect.value;
+        const endTime = endTimeSelect.value;
+        const startMinutes = timeToMinutes(startTime);
+        const endMinutes = timeToMinutes(endTime);
+        
+        if (endMinutes <= startMinutes) {
+            validationError.textContent = 'End time must be after start time';
+            saveBtn.disabled = true;
+            return false;
+        } else {
+            validationError.textContent = '';
+            saveBtn.disabled = false;
+            return true;
+        }
+    }
+    
+    closeBtn.addEventListener('click', () => popup.remove());
+    cancelBtn.addEventListener('click', () => popup.remove());
+    
+    saveBtn.addEventListener('click', () => {
+        // Check if the times are valid
+        if (!validateTimes()) {
+            return;
+        }
+        
+        // Get values from form
+        const day = document.getElementById('day-select').value;
+        const startTime = startTimeSelect.value;
+        const endTime = endTimeSelect.value;
+        const location = document.getElementById('location-input').value || 'TBA';
+        
+        // Update the schedule in the courseData
+        const courseIndex = window.coursesData.findIndex(c => c.id === course.id);
+        const scheduleIndex = parseInt(courseEvent.dataset.scheduleIndex, 10);
+        
+        if (courseIndex >= 0 && !isNaN(scheduleIndex)) {
+            window.coursesData[courseIndex].schedules[scheduleIndex] = {
+                ...window.coursesData[courseIndex].schedules[scheduleIndex],
+                day,
+                start: startTime,
+                end: endTime,
+                location
+            };
+            
+            // Save the updated tentative schedule to localStorage
+            saveTentativeSchedules();
+            
+            // Update the display
+            clearTimetable();
+            displayCoursesOnTimetable(window.coursesData.filter(c => c.selected));
+            
+            // Optional: Highlight the moved event
+            setTimeout(() => {
+                const updatedEvent = document.querySelector(`.course-event[data-course-id="${course.id}"][data-schedule-index="${scheduleIndex}"]`);
+                if (updatedEvent) {
+                    updatedEvent.classList.add('highlight-updated');
+                    setTimeout(() => updatedEvent.classList.remove('highlight-updated'), 2000);
+                }
+            }, 100);
+        }
+        
+        // Close the popup
+        popup.remove();
+    });
+}
+
+/**
+ * Find the closest time in a list of valid times
+ */
+function findClosestTime(targetTime, validTimes) {
+    if (!targetTime || !validTimes || validTimes.length === 0) return null;
+    
+    const targetMinutes = timeToMinutes(targetTime);
+    let closestTime = validTimes[0];
+    let smallestDiff = Math.abs(timeToMinutes(closestTime) - targetMinutes);
+    
+    for (let i = 1; i < validTimes.length; i++) {
+        const currentTime = validTimes[i];
+        const currentDiff = Math.abs(timeToMinutes(currentTime) - targetMinutes);
+        
+        if (currentDiff < smallestDiff) {
+            smallestDiff = currentDiff;
+            closestTime = currentTime;
+        }
+    }
+    
+    return closestTime;
+}
+
+/**
+ * Position the popup near the course event
+ */
+function positionPopup(popup, courseEvent) {
+    const rect = courseEvent.getBoundingClientRect();
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    
+    popup.style.position = 'absolute';
+    
+    // Position to the right if there's enough space, otherwise to the left
+    const rightSpace = window.innerWidth - rect.right;
+    if (rightSpace >= 320) {
+        popup.style.left = `${rect.right + 20}px`;
+    } else {
+        popup.style.left = `${Math.max(20, rect.left - 320)}px`;
+    }
+    
+    // Position vertically centered with the event
+    popup.style.top = `${rect.top + scrollTop - popup.offsetHeight/2 + rect.height/2}px`;
+    
+    // Make sure popup is fully visible vertically
+    const popupRect = popup.getBoundingClientRect();
+    if (popupRect.top < 60) {
+        popup.style.top = `${scrollTop + 60}px`;
+    } else if (popupRect.bottom > window.innerHeight - 20) {
+        popup.style.top = `${scrollTop + window.innerHeight - popupRect.height - 20}px`;
+    }
 }
