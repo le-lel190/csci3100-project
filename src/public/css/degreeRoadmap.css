@@ -1,7 +1,8 @@
 :root {
-    --primary-color: #2c7a4f;
-    --primary-light: #e8f5e9;
-    --secondary-color: #4a90e2;
+    --primary-color: #663399;
+    --primary-light: #f0e6ff;
+    --secondary-color: #9370DB;
+    --accent-color: #DAA520;
     --error-color: #e74c3c;
     --text-color: #2c3e50;
     --text-light: #7f8c8d;
@@ -282,8 +283,8 @@ body {
 }
 
 .filter-actions button:hover {
-    background-color: var(--primary-light);
-    color: var(--primary-color);
+    background: #7A58B5;
+    color: white;
 }
 
 /* Main Content Styles */
@@ -511,8 +512,8 @@ body {
 }
 
 .save-btn:hover {
-    background-color: var(--primary-light);
-    color: var(--primary-color);
+    background-color: #542980;
+    color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
@@ -524,8 +525,8 @@ body {
 }
 
 .export-btn:hover {
-    background-color: var(--primary-light);
-    color: var(--primary-color);
+    background-color: #7A58B5;
+    color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
@@ -543,7 +544,7 @@ body {
 
 .demo-btn {
     padding: 0.75rem 1.5rem;
-    background-color: #f39c12; /* Orange color to make it stand out */
+    background-color: var(--accent-color);
     color: white;
     border: none;
     border-radius: 5px;
@@ -556,8 +557,8 @@ body {
 }
 
 .demo-btn:hover {
-    background-color: var(--primary-light);
-    color: var(--primary-color);
+    background-color: #B8860B;
+    color: white;
     transform: translateY(-2px);
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
@@ -676,7 +677,7 @@ body {
 .brand {
     text-align: center;
     padding: 20px;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    background: linear-gradient(135deg, var(--primary-color), #4A2970);
     color: var(--white);
 }
 
@@ -983,6 +984,12 @@ body {
     width: 100%;
     height: auto;
     display: block;
+}
+
+/* Update selected section */
+.schedule-detail.selected-section {
+    background-color: rgba(102, 51, 153, 0.1);
+    border-left: 3px solid var(--primary-color);
 }
 
 
