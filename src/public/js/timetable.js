@@ -82,11 +82,30 @@ function initializeSearch() {
         
         courseItems.forEach(item => {
             const courseText = item.textContent.toLowerCase();
+            const courseId = item.querySelector('input[type="checkbox"]')?.id;
             
-            // Standard search
+            // Find the corresponding course data to check schedules for class codes
+            const courseData = window.coursesData?.find(c => c.id === courseId);
+            
+            // Standard search - check if text content contains the search term
             let isMatch = courseText.includes(searchTerm);
             
-            // If no match and potential course code (contains letters and numbers)
+            // Check if the search term is purely numeric (likely a class code)
+            if (!isMatch && /^\d+$/.test(searchTerm)) {
+                // Search through schedules for class code matches
+                isMatch = courseData?.schedules?.some(schedule => {
+                    if (schedule.type) {
+                        // Extract class code from type (format: "Type (CODE)")
+                        const codeMatch = schedule.type.match(/\((\d+)\)/);
+                        if (codeMatch && codeMatch[1]) {
+                            return codeMatch[1].includes(searchTerm);
+                        }
+                    }
+                    return false;
+                }) || false;
+            }
+            
+            // If still no match and potential course code (contains letters and numbers)
             if (!isMatch && /[a-z]+[0-9]+/.test(searchTerm)) {
                 // Try matching with spaces removed
                 const courseTextNoSpaces = courseText.replace(/\s+/g, '');
