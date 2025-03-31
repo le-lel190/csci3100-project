@@ -45,13 +45,12 @@ function setupDegreeSelection() {
     const modalImg = document.getElementById('roadmapImage');
     const closeBtn = document.querySelector('.close-modal');
     
-    // Map of degree codes to their respective image paths
+    // Map of degree codes to their respective paths (local or online)
     const degreeImages = {
-        'CENG': '/images/roadmaps/ceng_roadmap.png',
-        'CSCI': '/images/roadmaps/csci_roadmap.png',
-        'MATH': '/images/roadmaps/math_roadmap.png',
-        'IERG': '/images/roadmaps/ierg_roadmap.png',
-        'AIST': '/images/roadmaps/aist_roadmap.png'
+        'CENG': 'https://www.cse.cuhk.edu.hk/wp-content/uploads/academics/ug/CENGN-2023.pdf',
+        'CSCI': 'https://www.cse.cuhk.edu.hk/wp-content/uploads/academics/ug/CSCIN-2023.pdf',
+        'AIST': 'https://www.cse.cuhk.edu.hk/wp-content/uploads/academics/ug/AISTN-2024.pdf',
+        'CDAS': 'https://www.cdas.cuhk.edu.hk/en/curriculum'
     };
 
     // Add click event listeners to all degree items
@@ -59,35 +58,32 @@ function setupDegreeSelection() {
         item.addEventListener('click', function(e) {
             e.preventDefault();
             const degree = this.getAttribute('data-degree');
-            const imagePath = degreeImages[degree];
+            const path = degreeImages[degree];
             
-            if (imagePath) {
-                modalImg.src = imagePath;
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
+            if (path) {
+                // For all degrees now, we'll open in a new tab since they're all external links
+                window.open(path, '_blank');
             }
         });
     });
 
-    // Close modal when clicking the close button
+    // Keep modal code for future use with local images
     closeBtn.addEventListener('click', function() {
         modal.style.display = 'none';
-        document.body.style.overflow = 'auto'; // Restore scrolling
+        document.body.style.overflow = 'auto';
     });
 
-    // Close modal when clicking outside the image
     modal.addEventListener('click', function(e) {
         if (e.target === modal) {
             modal.style.display = 'none';
-            document.body.style.overflow = 'auto'; // Restore scrolling
+            document.body.style.overflow = 'auto';
         }
     });
 
-    // Close modal with escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.style.display === 'block') {
             modal.style.display = 'none';
-            document.body.style.overflow = 'auto'; // Restore scrolling
+            document.body.style.overflow = 'auto';
         }
     });
 }
