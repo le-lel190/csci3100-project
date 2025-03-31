@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Planner - Study Planner</title>
+    <title>Course Planner - Degree Roadmap</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/css/degreeRoadmap.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -18,8 +17,8 @@
         <div class="nav-links">
             <a href="/timetable">Timetable</a>
             <a href="./studyPlanner.html">Study Planner</a>
-            <a href="./degreeRoadmap.html"  class="active">Degree Roadmap</a>
-            <a href="./config.html" >Config</a>
+            <a href="./degreeRoadmap.html" class="active">Degree Roadmap</a>
+            <a href="./config.html">Config</a>
         </div>
         <div class="nav-user">
             <span id="userUsername"></span>
@@ -28,6 +27,36 @@
             </button>
         </div>
     </nav>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="degree-section">
+                <h2>Degrees</h2>
+                <div class="degree-list">
+                    <a href="#" class="degree-item" data-degree="CENG">Computer Engineering (CENG)</a>
+                    <a href="#" class="degree-item" data-degree="CSCI">Computer Science (CSCI)</a>
+                    <a href="#" class="degree-item" data-degree="AIST">Artificial Intelligence (AIST)</a>
+                    <a href="#" class="degree-item" data-degree="CDAS">Computational Data Science (CDAS)</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="roadmap-content">
+            <div class="empty-state">
+                <i class="fas fa-map-marked-alt"></i>
+                <p>Click on a degree to view its roadmap</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for displaying roadmap image -->
+    <div id="roadmapModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <img id="roadmapImage" src="" alt="Degree Roadmap">
+        </div>
+    </div>
+
     <script src="/js/degreeRoadmap.js"></script>
 </body>
 </html>
