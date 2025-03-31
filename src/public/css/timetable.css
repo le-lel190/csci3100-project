@@ -230,6 +230,13 @@ body {
     margin-bottom: 3px;
 }
 
+.course-class-code {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
 /* Checkbox styling */
 .course-item input[type="checkbox"] {
     appearance: none;
@@ -500,6 +507,15 @@ body {
     line-height: 1.4;
 }
 
+.class-codes {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
 .course-schedule {
     display: flex;
     flex-direction: column;
@@ -577,7 +593,7 @@ body {
     cursor: pointer;
     transition: all var(--transition-speed) ease;
     display: flex;
-    align-items: center;
+    align-items: center;    
     justify-content: center;
     gap: 0.5rem;
     font-size: 0.9rem;

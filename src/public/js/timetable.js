@@ -635,6 +635,26 @@ function populateCourseList(courses) {
         courseInfo.appendChild(courseId);
         courseInfo.appendChild(courseName);
         
+        // Extract and display class codes
+        if (course.schedules && course.schedules.length > 0) {
+            const classCodes = new Set();
+            course.schedules.forEach(schedule => {
+                if (schedule.type) {
+                    const codeMatch = schedule.type.match(/\((\d+)\)/);
+                    if (codeMatch && codeMatch[1]) {
+                        classCodes.add(codeMatch[1]);
+                    }
+                }
+            });
+            
+            // if (classCodes.size > 0) {
+            //     const classCodeElement = document.createElement('div');
+            //     // classCodeElement.className = 'course-class-code';
+            //     // classCodeElement.textContent = `Class Code: ${Array.from(classCodes).join(', ')}`;
+            //     courseInfo.appendChild(classCodeElement);
+            // }
+        }
+        
         if (course.isPlaceholder) {
             const placeholderIndicator = document.createElement('div');
             placeholderIndicator.className = 'placeholder-indicator';
@@ -1028,7 +1048,7 @@ function displayCoursesOnTimetable(courses) {
             // Add content
             courseEvent.innerHTML = `
                 <div class="course-event-title">${course.id}</div>
-                <div class="course-event-type">${formattedType}</div>
+                <div class="course-event-type section-type-code">${formattedType}</div>
                 <div class="course-event-time">${schedule.start} - ${schedule.end}</div>
                 <div class="course-event-location">${schedule.location || 'TBA'}</div>
             `;
@@ -1102,8 +1122,7 @@ function showCourseDetails(course) {
     // Generate HTML for each schedule group
     let schedulesHTML = '';
     Object.entries(sectionsByType).forEach(([baseType, typeSections]) => {
-        schedulesHTML += `<div class="schedule-item">
-            <strong>${baseType}</strong>`;
+        schedulesHTML += `<div class="schedule-item">`;
         
         // Check if this type has multiple sections
         const hasMultipleSections = typeSections.length > 1;
@@ -1123,7 +1142,19 @@ function showCourseDetails(course) {
             const selectedIndicator = isSelected && hasMultipleSections ? 
                 '<span class="selected-indicator">Selected</span>' : '';
             
-            // Section header with id
+            // Extract class code for this section
+            let classCode = '';
+            if (section.schedules[0] && section.schedules[0].type) {
+                const codeMatch = section.schedules[0].type.match(/\((\d+)\)/);
+                if (codeMatch) {
+                    classCode = section.schedules[0].type;
+                }
+            }
+            
+            // Show type with class code in the heading
+            schedulesHTML += `<strong class="section-type-code">${classCode || baseType}</strong>`;
+            
+            // Section header with id and class code
             schedulesHTML += `
                 <div class="schedule-detail ${selectedClass}">
                     <div class="section-header">Section ${section.sectionId} ${selectedIndicator}</div>`;
@@ -1167,15 +1198,6 @@ function showCourseScheduleDetails(course, schedule) {
     // Get the original class type and format
     const classType = schedule.type || '';
     
-    // Extract class code for display in the dedicated section
-    let classCode = '';
-    if (schedule.type) {
-        const codeMatch = schedule.type.match(/\((\d+)\)/);
-        if (codeMatch && codeMatch[1]) {
-            classCode = codeMatch[1];
-        }
-    }
-    
     // Find all sessions that belong to this section
     const baseType = normalizeSessionType(schedule.type);
     const sectionId = extractSectionId(schedule.type) || '';
@@ -1212,10 +1234,6 @@ function showCourseScheduleDetails(course, schedule) {
     const termInfo = schedule.term ? 
         `<p class="term"><strong>Term:</strong> ${schedule.term}</p>` : '';
     
-    // Display class code if available
-    const classCodeInfo = classCode ? 
-        `<p class="class-code"><strong>Class Code:</strong> ${classCode}</p>` : '';
-    
     // Display placeholder warning if applicable
     const placeholderWarning = course.isPlaceholder || schedule.type?.includes('Placeholder') ? 
         '<p class="placeholder-warning">Note: Schedule information is not yet finalized. Times shown are tentative.</p>' : '';
@@ -1227,17 +1245,16 @@ function showCourseScheduleDetails(course, schedule) {
         <div class="course-schedule">
             <h3>Schedule Details</h3>
             <div class="schedule-item">
-                <strong>${classType}</strong>
+                <strong class="section-type-code">${classType}</strong>
                 <div class="schedule-detail selected-section">
                     <div class="section-header">Selected Session</div>
                     <p>${schedule.day} ${schedule.start} - ${schedule.end}</p>
                     <div class="location">${schedule.location || 'Location TBA'}</div>
-                ${classCodeInfo}
-                ${instructorInfo}
-                ${termInfo}
-                ${allSessions.length > 1 ? sessionsHTML : ''}
-        </div>
-        </div>
+                    ${instructorInfo}
+                    ${termInfo}
+                    ${allSessions.length > 1 ? sessionsHTML : ''}
+                </div>
+            </div>
         </div>
     `;
 }
