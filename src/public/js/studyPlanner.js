@@ -191,9 +191,17 @@ function setupDragAndDrop() {
 
 function setupAddYearButton() {
     const addYearBtn = document.getElementById('addYearBtn');
-    let yearCount = 4;
-
+    let yearCount = 4; // Starting with 4 years
+    const MAX_YEARS = 8; // Maximum number of years allowed
+    
+    // Update button state on initialization
+    updateAddYearButtonState();
+    
     addYearBtn.addEventListener('click', () => {
+        if (yearCount >= MAX_YEARS) {
+            return; // Don't add more years if maximum is reached
+        }
+        
         yearCount++;
         const thead = document.querySelector('.timetable thead tr');
         const th = document.createElement('th');
@@ -227,7 +235,7 @@ function setupAddYearButton() {
                     const courseBlock = document.createElement('div');
                     courseBlock.className = 'course-block';
                     courseBlock.dataset.courseId = course.id;
-                    courseBlock.style.backgroundColor = course.color || '#e8f5e9';
+                    courseBlock.style.backgroundColor = course.color || '#f0e6ff'; // Update to use purple theme
                     courseBlock.innerHTML = `
                         <div class="course-title">${course.id}</div>
                         <div class="course-name">${course.name}</div>
@@ -237,7 +245,23 @@ function setupAddYearButton() {
                 }
             });
         });
+        
+        // Update button state after adding a year
+        updateAddYearButtonState();
     });
+    
+    // Function to update the button state based on current year count
+    function updateAddYearButtonState() {
+        if (yearCount >= MAX_YEARS) {
+            addYearBtn.disabled = true;
+            addYearBtn.classList.add('disabled');
+            addYearBtn.title = 'Maximum of 8 years reached';
+        } else {
+            addYearBtn.disabled = false;
+            addYearBtn.classList.remove('disabled');
+            addYearBtn.title = 'Add another year to your study plan';
+        }
+    }
 }
 
 function updateProgressBars() {

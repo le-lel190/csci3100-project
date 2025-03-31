@@ -327,6 +327,21 @@ body {
     transform: translateY(-1px);
 }
 
+/* Add Year Button - Disabled State */
+.submit-btn.disabled {
+    background-color: #9e9e9e;
+    color: #e0e0e0;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+}
+
+.submit-btn.disabled:hover {
+    background-color: #9e9e9e;
+    transform: none;
+    box-shadow: none;
+}
+
 /* Course Details - Enhanced Graduation Progress */
 .course-details {
     background: var(--white);

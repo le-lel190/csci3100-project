@@ -1253,7 +1253,7 @@ function showCourseScheduleDetails(course, schedule) {
                     ${instructorInfo}
                     ${termInfo}
                     ${allSessions.length > 1 ? sessionsHTML : ''}
-                </div>
+        </div>
             </div>
         </div>
     `;
