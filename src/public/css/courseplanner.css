@@ -112,7 +112,7 @@ body {
 }
 
 .semester-selector h3 {
-    color: var(--text-color);
+    color: var(--primary-color);
     margin-bottom: 0.5rem;
 }
 
@@ -182,10 +182,8 @@ body {
 }
 
 .course-list h3 {
-    color: var(--text-color);
+    color: var(--primary-color);
     margin-bottom: 0.5rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
 }
 
 .course-items {
