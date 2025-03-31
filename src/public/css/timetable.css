@@ -405,6 +405,11 @@ body {
     line-height: 1.4;
 }
 
+.course-event-type {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.75);
+}
+
 /* Placeholder styling */
 .placeholder-course {
     opacity: 0.85;

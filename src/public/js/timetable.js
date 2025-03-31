@@ -373,6 +373,19 @@ function loadSemesterData(semester) {
             return response.json();
         })
         .then(courses => {
+            // Process courses to extract class codes from section key
+            courses.forEach(course => {
+                if (course.schedules) {
+                    course.schedules.forEach(schedule => {
+                        // Check if the schedules were parsed from JSON with class codes in the type
+                        // Usually in format like "--LEC (8137)"
+                        if (!schedule.type && schedule.originalKey) {
+                            schedule.type = schedule.originalKey;
+                        }
+                    });
+                }
+            });
+            
             // Store courses globally for filtering
             window.coursesData = courses;
             
@@ -410,6 +423,18 @@ function loadDemoDataFromAPI() {
             return response.json();
         })
         .then(courses => {
+            // Process courses to ensure class codes are preserved
+            courses.forEach(course => {
+                if (course.schedules) {
+                    course.schedules.forEach(schedule => {
+                        // Check if the schedules were parsed from JSON with class codes in the type
+                        if (!schedule.type && schedule.originalKey) {
+                            schedule.type = schedule.originalKey;
+                        }
+                    });
+                }
+            });
+            
             // Store courses globally for filtering
             window.coursesData = courses;
             
@@ -437,21 +462,21 @@ function loadDemoData() {
             name: 'Data Structures',
             schedules: [
                 // Lecture section A (meets twice a week)
-                { type: 'Lecture A-LEC', day: 'Tuesday', start: '10:30', end: '12:15', location: 'Y.C. Liang Hall 104' },
-                { type: 'Lecture A-LEC', day: 'Wednesday', start: '10:30', end: '11:15', location: 'Y.C. Liang Hall 104' },
+                { type: 'Lecture A-LEC (8001)', day: 'Tuesday', start: '10:30', end: '12:15', location: 'Y.C. Liang Hall 104' },
+                { type: 'Lecture A-LEC (8001)', day: 'Wednesday', start: '10:30', end: '11:15', location: 'Y.C. Liang Hall 104' },
                 
                 // Lecture section B (meets twice a week)
-                { type: 'Lecture B-LEC', day: 'Thursday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg 1004' },
-                { type: 'Lecture B-LEC', day: 'Wednesday', start: '12:30', end: '14:15', location: 'Science Centre L2' },
+                { type: 'Lecture B-LEC (8002)', day: 'Thursday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg 1004' },
+                { type: 'Lecture B-LEC (8002)', day: 'Wednesday', start: '12:30', end: '14:15', location: 'Science Centre L2' },
                 
                 // Tutorial section AT01 (once a week)
-                { type: 'Tutorial AT01-TUT', day: 'Thursday', start: '12:30', end: '13:15', location: 'William M W Mong Eng Bldg 702' },
+                { type: 'Tutorial AT01-TUT (8101)', day: 'Thursday', start: '12:30', end: '13:15', location: 'William M W Mong Eng Bldg 702' },
                 
                 // Tutorial section AT02 (once a week)
-                { type: 'Tutorial AT02-TUT', day: 'Friday', start: '12:30', end: '13:15', location: 'Mong Man Wai Bldg 702' },
+                { type: 'Tutorial AT02-TUT (8102)', day: 'Friday', start: '12:30', end: '13:15', location: 'Mong Man Wai Bldg 702' },
                 
                 // Tutorial section BT01 (once a week)
-                { type: 'Tutorial BT01-TUT', day: 'Thursday', start: '16:30', end: '17:15', location: 'William M W Mong Eng Bldg 1004' }
+                { type: 'Tutorial BT01-TUT (8103)', day: 'Thursday', start: '16:30', end: '17:15', location: 'William M W Mong Eng Bldg 1004' }
             ],
             color: '#fae3d9', // light peach
             selected: true
@@ -460,8 +485,8 @@ function loadDemoData() {
             id: 'CSCI 3100',
             name: 'Software Engineering',
             schedules: [
-                { type: 'Lecture', day: 'Monday', start: '11:30', end: '12:15', location: 'T.Y.Wong Hall LT' },
-                { type: 'Lecture', day: 'Tuesday', start: '12:30', end: '14:15', location: 'Lee Shau Kee Building LT6' }
+                { type: 'Lecture (8010)', day: 'Monday', start: '11:30', end: '12:15', location: 'T.Y.Wong Hall LT' },
+                { type: 'Lecture (8010)', day: 'Tuesday', start: '12:30', end: '14:15', location: 'Lee Shau Kee Building LT6' }
             ],
             color: '#c2e0c6', // light green
             selected: true
@@ -470,9 +495,9 @@ function loadDemoData() {
             id: 'CSCI 3180',
             name: 'Principles of Programming Languages',
             schedules: [
-                { type: 'Interactive Tutorial', day: 'Thursday', start: '12:30', end: '13:15', location: 'Y.C. Liang Hall 104' },
-                { type: 'Lecture', day: 'Monday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' },
-                { type: 'Lecture', day: 'Tuesday', start: '15:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' }
+                { type: 'Interactive Tutorial (8105)', day: 'Thursday', start: '12:30', end: '13:15', location: 'Y.C. Liang Hall 104' },
+                { type: 'Lecture (8015)', day: 'Monday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' },
+                { type: 'Lecture (8015)', day: 'Tuesday', start: '15:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' }
             ],
             color: '#d0e0f0', // light blue
             selected: true
@@ -481,7 +506,7 @@ function loadDemoData() {
             id: 'CSCI 3250',
             name: 'Computers and Society',
             schedules: [
-                { type: 'Lecture', day: 'Thursday', start: '13:30', end: '15:15', location: 'Lady Shaw Bldg LT1' }
+                { type: 'Lecture (8020)', day: 'Thursday', start: '13:30', end: '15:15', location: 'Lady Shaw Bldg LT1' }
             ],
             color: '#f0e0d0', // light orange
             selected: true
@@ -490,7 +515,7 @@ function loadDemoData() {
             id: 'CSCI 3251',
             name: 'Engineering Practicum',
             schedules: [
-                { type: 'Practicum', day: 'Thursday', start: '15:30', end: '16:15', location: 'Lady Shaw Bldg LT1' }
+                { type: 'Practicum (8025)', day: 'Thursday', start: '15:30', end: '16:15', location: 'Lady Shaw Bldg LT1' }
             ],
             color: '#e0d0f0', // light purple
             selected: true
@@ -499,10 +524,10 @@ function loadDemoData() {
             id: 'CSCI 4430',
             name: 'Data Communication and Computer Networks',
             schedules: [
-                { type: 'Lecture', day: 'Wednesday', start: '12:30', end: '13:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Interactive Tutorial', day: 'Wednesday', start: '13:30', end: '14:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Lecture', day: 'Monday', start: '16:30', end: '18:15', location: 'Y.C. Liang Hall 103' },
-                { type: 'Interactive Tutorial', day: 'Wednesday', start: '17:30', end: '18:15', location: 'Science Centre L3' }
+                { type: 'Lecture (8030)', day: 'Wednesday', start: '12:30', end: '13:15', location: 'Lady Shaw Bldg LT2' },
+                { type: 'Interactive Tutorial (8130)', day: 'Wednesday', start: '13:30', end: '14:15', location: 'Lady Shaw Bldg LT2' },
+                { type: 'Lecture (8030)', day: 'Monday', start: '16:30', end: '18:15', location: 'Y.C. Liang Hall 103' },
+                { type: 'Interactive Tutorial (8130)', day: 'Wednesday', start: '17:30', end: '18:15', location: 'Science Centre L3' }
             ],
             color: '#e0f0d0', // light yellow-green
             selected: true
@@ -511,7 +536,7 @@ function loadDemoData() {
             id: 'GESC 1000',
             name: 'College Assembly',
             schedules: [
-                { type: 'Assembly', day: 'Friday', start: '11:30', end: '13:15', location: 'TBA' }
+                { type: 'Assembly (8050)', day: 'Friday', start: '11:30', end: '13:15', location: 'TBA' }
             ],
             color: '#f0d0e0', // light pink
             selected: true
@@ -520,10 +545,20 @@ function loadDemoData() {
             id: 'STAT 2005',
             name: 'Statistics',
             schedules: [
-                { type: 'Lecture', day: 'Thursday', start: '16:30', end: '18:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Lecture', day: 'Tuesday', start: '17:30', end: '18:15', location: 'Y.C. Liang Hall 104' }
+                { type: 'Lecture (8040)', day: 'Thursday', start: '16:30', end: '18:15', location: 'Lady Shaw Bldg LT2' },
+                { type: 'Lecture (8040)', day: 'Tuesday', start: '17:30', end: '18:15', location: 'Y.C. Liang Hall 104' }
             ],
             color: '#d0f0e0', // light mint
+            selected: true
+        },
+        { 
+            id: 'AIST 1000',
+            name: 'Introduction to Artificial Intelligence and Machine Learning',
+            schedules: [
+                { type: 'Lecture --LEC (8137)', day: 'Tuesday', start: '10:30', end: '11:15', location: 'Mong Man Wai Bldg 707' },
+                { type: 'Lecture --LEC (8137)', day: 'Wednesday', start: '10:30', end: '11:15', location: 'Mong Man Wai Bldg 707' }
+            ],
+            color: '#b2dfdb', // light teal
             selected: true
         }
     ];
@@ -784,8 +819,8 @@ function generateSectionSelectors(course) {
             
             selectorHTML += `
                     </select>
-                </div>
-            `;
+        </div>
+    `;
         }
     }
     
@@ -859,7 +894,7 @@ function displayCoursesOnTimetable(courses) {
         'Saturday': 5, 'Sat': 5, 
         'Sunday': 6, 'Sun': 6
     };
-    
+
     // Sort courses by start time to display earlier classes first
     const sortedCourses = [...courses].sort((a, b) => {
         if (!a.schedules || !a.schedules.length) return 1;
@@ -968,16 +1003,13 @@ function displayCoursesOnTimetable(courses) {
                 courseEvent.style.height = `${heightPercentage}%`;
             }
             
-            // Extract section ID and base type
-            const sectionId = extractSectionId(schedule.type) || '';
-            const baseType = normalizeSessionType(schedule.type);
+            // Get the formatted type (keeping the original format with class code)
+            const formattedType = schedule.type || '';
             
             // Add content
             courseEvent.innerHTML = `
                 <div class="course-event-title">${course.id}</div>
-                <div class="course-event-type">
-                    ${baseType}${sectionId ? ` (Section ${sectionId})` : ''}
-                </div>
+                <div class="course-event-type">${formattedType}</div>
                 <div class="course-event-time">${schedule.start} - ${schedule.end}</div>
                 <div class="course-event-location">${schedule.location || 'TBA'}</div>
             `;
@@ -1113,11 +1145,21 @@ function showCourseDetails(course) {
 function showCourseScheduleDetails(course, schedule) {
     const detailsContent = document.querySelector('.details-content');
     
-    // Extract section identifier and base type
-    const sectionId = extractSectionId(schedule.type) || '';
-    const baseType = normalizeSessionType(schedule.type);
+    // Get the original class type and format
+    const classType = schedule.type || '';
+    
+    // Extract class code for display in the dedicated section
+    let classCode = '';
+    if (schedule.type) {
+        const codeMatch = schedule.type.match(/\((\d+)\)/);
+        if (codeMatch && codeMatch[1]) {
+            classCode = codeMatch[1];
+        }
+    }
     
     // Find all sessions that belong to this section
+    const baseType = normalizeSessionType(schedule.type);
+    const sectionId = extractSectionId(schedule.type) || '';
     let allSessions = [];
     const sections = groupSchedulesBySection(course);
     
@@ -1151,8 +1193,12 @@ function showCourseScheduleDetails(course, schedule) {
     const termInfo = schedule.term ? 
         `<p class="term"><strong>Term:</strong> ${schedule.term}</p>` : '';
     
+    // Display class code if available
+    const classCodeInfo = classCode ? 
+        `<p class="class-code"><strong>Class Code:</strong> ${classCode}</p>` : '';
+    
     // Display placeholder warning if applicable
-    const placeholderWarning = course.isPlaceholder || schedule.type.includes('Placeholder') ? 
+    const placeholderWarning = course.isPlaceholder || schedule.type?.includes('Placeholder') ? 
         '<p class="placeholder-warning">Note: Schedule information is not yet finalized. Times shown are tentative.</p>' : '';
     
     detailsContent.innerHTML = `
@@ -1162,15 +1208,16 @@ function showCourseScheduleDetails(course, schedule) {
         <div class="course-schedule">
             <h3>Schedule Details</h3>
             <div class="schedule-item">
-                <strong>${baseType}${sectionId ? ` (Section ${sectionId})` : ''}</strong>
+                <strong>${classType}</strong>
                 <div class="schedule-detail selected-section">
                     <div class="section-header">Selected Session</div>
                     <p>${schedule.day} ${schedule.start} - ${schedule.end}</p>
                     <div class="location">${schedule.location || 'Location TBA'}</div>
+                ${classCodeInfo}
                 ${instructorInfo}
                 ${termInfo}
                 ${allSessions.length > 1 ? sessionsHTML : ''}
-            </div>
+        </div>
         </div>
         </div>
     `;
@@ -1303,10 +1350,10 @@ function previewCourseOnTimetable(course) {
                 );
                 
                 return { ...schedule, hasConflict };
-            });
-        }
+        });
     }
-    
+}
+
     // Display the course with preview styling
     displayCoursesOnTimetable([...window.coursesData.filter(c => c.selected), previewedCourse]);
 }
