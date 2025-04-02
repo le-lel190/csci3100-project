@@ -3,9 +3,8 @@ services:
     build: .
     ports:
       - "3000:3000"
-    environment:
-      - MONGODB_URI=mongodb://test:test123@mongodb:27017/webapp?authSource=admin
-      - PORT=3000
+    env_file:
+      - .env
     depends_on:
       - mongodb
     restart: unless-stopped
@@ -19,8 +18,10 @@ services:
     volumes:
       - mongodb_data:/data/db
     environment:
-    - MONGO_INITDB_ROOT_USERNAME=test
-    - MONGO_INITDB_ROOT_PASSWORD=test123
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    env_file:
+      - .env
     restart: unless-stopped
 
 volumes:
