@@ -19,7 +19,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongodb:27017/webapp', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://test:test123@mongodb:27017/webapp?authSource=admin', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
