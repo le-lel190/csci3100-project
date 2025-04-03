@@ -992,4 +992,47 @@ body {
     border-left: 3px solid var(--primary-color);
 }
 
+/* CUHK Registration Section Styles */
+.cuhk-registration-section {
+    margin-top: 0.5rem;
+}
+
+.cuhk-registration-section h2 {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+}
+
+.cuhk-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.cuhk-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--white);
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.cuhk-link:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.cuhk-link i {
+    font-size: 1.2rem;
+}
+
 
