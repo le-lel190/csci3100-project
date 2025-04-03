@@ -219,7 +219,7 @@ function displayCourseCode(courseId, courseName) {
     console.log("DLLM ah 2");
 
     const commentForm = document.querySelector('.main-content');
-    console.log("Main content element:", commentForm); // Check if it's null
+    console.log("Main content element:", commentForm);
 
     if (commentForm) {
         console.log("DLLM ah 3");
@@ -235,33 +235,25 @@ function displayCourseCode(courseId, courseName) {
                 </div>
                 
                 <div class="comments-container" id="commentsContainer">
-                    <!-- Example of comment structure for JS to follow -->
-                    <div class="comment-block">
-                        <div class="rating-box">
-                        </div>
-                        <div class="comment-author">John Doe</div>
-                        <div class="comment-date">March 29, 2025</div>
-                        <div class="comment-content">
-                            <p>This course was very helpful for understanding the fundamentals of AI. The professor explained complex concepts clearly.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="comment-block">
-                        <div class="comment-author">Jane Smith</div>
-                        <div class="comment-date">March 25, 2025</div>
-                        <div class="comment-content">
-                            <p>Great course! The assignments were challenging but really helped solidify the material.</p>
-                        </div>
-                    </div>
+                    <!-- Comments will be dynamically loaded here -->
                 </div>
                 
                 <div class="comment-form">
+                    <label for="newRating">Rating:</label>
+                    <select id="newRating" class="rating-dropdown">
+                        <option value="1">⭐</option>
+                        <option value="2">⭐⭐</option>
+                        <option value="3">⭐⭐⭐</option>
+                        <option value="4">⭐⭐⭐⭐</option>
+                        <option value="5" selected>⭐⭐⭐⭐⭐</option>
+                    </select>
+                    
                     <textarea id="newComment" placeholder="Share your experience with this course..."></textarea>
                     <button id="postComment" class="post-btn">Post Comment</button>
                 </div>
             </div>
-
         `;
+
         // Set up the comment form and fetch existing comments
         setupCommentForm(courseId, courseName);
         fetchComments(courseId);

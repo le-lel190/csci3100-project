@@ -911,6 +911,8 @@ body {
     position: absolute;
     top: 10px;
     right: 10px;
+    gap: 0.5rem; /* Space between label and dropdown */
+    margin-bottom: 1rem; /* Add space below the rating dropdown */
 }
 
 /* Style for the dropdown */
@@ -921,6 +923,7 @@ body {
     padding: 0.25rem;
     font-size: 0.9rem;
     cursor: pointer;
+    margin-bottom: 1rem; /* Add space below the rating dropdown */
 }
 
 /* Add hover effect for dropdown */
