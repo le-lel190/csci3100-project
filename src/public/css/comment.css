@@ -829,12 +829,14 @@ body {
   
   /* Individual Comment Styling */
   .comment-block {
+    position: relative; /* Required for positioning child elements like .rating-box */
     background-color: var(--background-color);
     border-left: 4px solid var(--primary-color);
     border-radius: 8px;
     padding: 1rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
+}
+
   
   .comment-block:hover {
     transform: translateX(3px);
@@ -904,3 +906,24 @@ body {
     transform: translateY(0);
   }
   
+  /* Style for the rating box */
+.rating-box {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+/* Style for the dropdown */
+.rating-dropdown {
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.25rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+/* Add hover effect for dropdown */
+.rating-dropdown:hover {
+    border-color: var(--primary-color);
+}

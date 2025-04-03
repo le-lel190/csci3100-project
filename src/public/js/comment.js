@@ -117,7 +117,6 @@ function displayCourseCode(courseId, courseName) {
             <div class="comment-section">
                 <div class="comment-header">
                     <h2>Course Comments</h2>
-                    <p>Comment Section</p>
                 </div>
                 
                 <div class="course-info" id="courseInfo">
@@ -128,6 +127,15 @@ function displayCourseCode(courseId, courseName) {
                 <div class="comments-container" id="commentsContainer">
                     <!-- Example of comment structure for JS to follow -->
                     <div class="comment-block">
+                        <div class="rating-box">
+                            <select class="rating-dropdown">
+                                <option value="1">⭐</option>
+                                <option value="2">⭐⭐</option>
+                                <option value="3">⭐⭐⭐</option>
+                                <option value="4">⭐⭐⭐⭐</option>
+                                <option value="5">⭐⭐⭐⭐⭐</option>
+                            </select>
+                        </div>
                         <div class="comment-author">John Doe</div>
                         <div class="comment-date">March 29, 2025</div>
                         <div class="comment-content">
