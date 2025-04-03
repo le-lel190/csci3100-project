@@ -248,17 +248,7 @@ function applyTheme(theme) {
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     
     if (metaThemeColor) {
-        switch(theme) {
-            case 'dark':
-                metaThemeColor.setAttribute('content', '#1a1a1a');
-                break;
-            case 'contrast':
-                metaThemeColor.setAttribute('content', '#000000');
-                break;
-            default:
-                metaThemeColor.setAttribute('content', '#2c7a4f');
-                break;
-        }
+        metaThemeColor.setAttribute('content', '#663399');
     }
 }
 

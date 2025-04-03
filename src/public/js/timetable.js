@@ -135,11 +135,30 @@ function initializeSearch() {
         
         courseItems.forEach(item => {
             const courseText = item.textContent.toLowerCase();
+            const courseId = item.querySelector('input[type="checkbox"]')?.id;
             
-            // Standard search
+            // Find the corresponding course data to check schedules for class codes
+            const courseData = window.coursesData?.find(c => c.id === courseId);
+            
+            // Standard search - check if text content contains the search term
             let isMatch = courseText.includes(searchTerm);
             
-            // If no match and potential course code (contains letters and numbers)
+            // Check if the search term is purely numeric (likely a class code)
+            if (!isMatch && /^\d+$/.test(searchTerm)) {
+                // Search through schedules for class code matches
+                isMatch = courseData?.schedules?.some(schedule => {
+                    if (schedule.type) {
+                        // Extract class code from type (format: "Type (CODE)")
+                        const codeMatch = schedule.type.match(/\((\d+)\)/);
+                        if (codeMatch && codeMatch[1]) {
+                            return codeMatch[1].includes(searchTerm);
+                        }
+                    }
+                    return false;
+                }) || false;
+            }
+            
+            // If still no match and potential course code (contains letters and numbers)
             if (!isMatch && /[a-z]+[0-9]+/.test(searchTerm)) {
                 // Try matching with spaces removed
                 const courseTextNoSpaces = courseText.replace(/\s+/g, '');
@@ -334,56 +353,148 @@ function exportTimetableToCsv() {
  * Capture and save timetable as image
  */
 function captureAndSaveTimetable() {
-            const timetableElement = document.querySelector('.timetable');
-            if (!timetableElement) {
-                alert('Could not find timetable to capture.');
-                return;
+    // Show loading indicator
+    const loadingMessage = document.createElement('div');
+    loadingMessage.className = 'loading-indicator';
+    loadingMessage.textContent = 'Generating timetable image...';
+    document.body.appendChild(loadingMessage);
+
+    // Get the timetable elements
+    const timetableElement = document.querySelector('.timetable');
+    const timetableGridContainer = document.querySelector('.timetable-grid-container');
+    const timetableGrid = document.querySelector('.timetable-grid');
+    
+    // Store original styles
+    const originalStyles = {
+        body: {
+            overflow: document.body.style.overflow
+        },
+        timetable: {
+            height: timetableElement.style.height,
+            overflow: timetableElement.style.overflow,
+            minHeight: timetableElement.style.minHeight
+        },
+        gridContainer: {
+            overflow: timetableGridContainer.style.overflow,
+            height: timetableGridContainer.style.height,
+            maxHeight: timetableGridContainer.style.maxHeight
+        }
+    };
+    
+    // Create a clone of the timetable for capturing
+    const timetableClone = timetableElement.cloneNode(true);
+    timetableClone.id = 'timetable-clone';
+    timetableClone.style.position = 'absolute';
+    timetableClone.style.left = '-9999px';
+    timetableClone.style.top = '0';
+    timetableClone.style.width = timetableGrid.scrollWidth + 'px';
+    timetableClone.style.height = 'auto';
+    timetableClone.style.overflow = 'visible';
+    timetableClone.style.minHeight = 'auto';
+    timetableClone.style.transform = 'none';
+    timetableClone.style.zIndex = '-9999';
+    
+    // Adjust clone's grid container to show everything
+    const gridContainerClone = timetableClone.querySelector('.timetable-grid-container');
+    if (gridContainerClone) {
+        gridContainerClone.style.overflow = 'visible';
+        gridContainerClone.style.height = 'auto';
+        gridContainerClone.style.maxHeight = 'none';
+    }
+    
+    // Adjust clone's grid to show everything
+    const gridClone = timetableClone.querySelector('.timetable-grid');
+    if (gridClone) {
+        gridClone.style.height = 'auto';
+    }
+    
+    // Add the clone to the body
+    document.body.appendChild(timetableClone);
+    
+    // Use html2canvas on the clone with proper settings
+    html2canvas(timetableClone, {
+        scale: 2, // Higher resolution for better quality
+        useCORS: true, // Handle cross-origin resources
+        allowTaint: true, // Allow tainted canvas
+        backgroundColor: '#ffffff', // Ensure white background
+        width: timetableGrid.scrollWidth, // Capture full width
+        height: timetableClone.scrollHeight, // Capture full height
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: timetableGrid.scrollWidth,
+        windowHeight: timetableClone.scrollHeight,
+        logging: true, // Enable logging for debugging
+        onclone: (clonedDoc) => {
+            // Further adjustments to the clone if needed
+            const finalClone = clonedDoc.getElementById('timetable-clone');
+            if (finalClone) {
+                const containers = finalClone.querySelectorAll('.timetable-grid-container, .timetable-grid');
+                containers.forEach(container => {
+                    container.style.overflow = 'visible';
+                    container.style.height = 'auto';
+                    container.style.maxHeight = 'none';
+                });
             }
-
-            const loadingMessage = document.createElement('div');
-            loadingMessage.textContent = 'Capturing timetable...';
-            loadingMessage.style.position = 'fixed';
-            loadingMessage.style.top = '50%';
-            loadingMessage.style.left = '50%';
-            loadingMessage.style.transform = 'translate(-50%, -50%)';
-            loadingMessage.style.padding = '1rem';
-            loadingMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            loadingMessage.style.color = 'white';
-            loadingMessage.style.borderRadius = '5px';
-            loadingMessage.style.zIndex = '9999';
-            document.body.appendChild(loadingMessage);
-
-            window.scrollTo(0, 0); // Ensure the element is fully visible
-            html2canvas(timetableElement, {
-                backgroundColor: '#f5f6fa',
-                scale: 2,
-                useCORS: true, // Handle external resources like FontAwesome icons
-                logging: false
-            }).then(canvas => {
-                document.body.removeChild(loadingMessage);
-                canvas.toBlob(blob => {
-                    try {
-                        const clipboardItem = new ClipboardItem({ 'image/png': blob });
-                        navigator.clipboard.write([clipboardItem])
-                            .then(() => console.log('Image copied to clipboard'))
-                            .catch(err => console.error('Error copying to clipboard:', err));
-                    } catch (e) {
-                        console.warn('Clipboard copy not supported:', e);
-                    }
-
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = URL.createObjectURL(blob);
-                    const activeSemester = document.querySelector('.semester-btn.active');
-                    const semesterName = activeSemester ? activeSemester.textContent.replace(/\s+/g, '_') : 'timetable';
-            downloadLink.download = `${semesterName}.png`;
-                    downloadLink.click();
-                    URL.revokeObjectURL(downloadLink.href);
-        }, 'image/png');
-            }).catch(error => {
-                document.body.removeChild(loadingMessage);
-                console.error('Error capturing timetable:', error);
-                alert('Error capturing timetable. Please try again.');
-        });
+        }
+    }).then(canvas => {
+        // Convert canvas to data URL
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Create download link
+        const downloadLink = document.createElement('a');
+        downloadLink.href = imgData;
+        
+        // Get the active semester name for the filename
+        const activeSemester = document.querySelector('.semester-btn.active');
+        const semesterName = activeSemester ? activeSemester.textContent.replace(/\s+/g, '_') : 'timetable';
+        
+        // Use semester name in the filename
+        downloadLink.download = `${semesterName}_timetable.png`;
+        
+        // Trigger download
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // Remove the clone
+        document.body.removeChild(timetableClone);
+        
+        // Remove loading indicator
+        document.body.removeChild(loadingMessage);
+        
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.style.position = 'fixed';
+        successMessage.style.top = '20px';
+        successMessage.style.left = '50%';
+        successMessage.style.transform = 'translateX(-50%)';
+        successMessage.style.padding = '12px 24px';
+        successMessage.style.backgroundColor = 'rgba(102, 51, 153, 0.9)';
+        successMessage.style.color = 'white';
+        successMessage.style.borderRadius = '4px';
+        successMessage.style.zIndex = '9999';
+        successMessage.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        successMessage.textContent = 'Timetable image saved successfully!';
+        document.body.appendChild(successMessage);
+        
+        // Remove success message after 3 seconds
+        setTimeout(() => {
+            document.body.removeChild(successMessage);
+        }, 3000);
+    }).catch(error => {
+        console.error('Error generating timetable image:', error);
+        
+        // Remove the clone
+        if (document.getElementById('timetable-clone')) {
+            document.body.removeChild(timetableClone);
+        }
+        
+        // Remove loading indicator
+        document.body.removeChild(loadingMessage);
+        
+        // Show error message
+        alert('Failed to generate timetable image. Please try again.');
+    });
 }
 
 /**
@@ -495,6 +606,19 @@ function loadSemesterData(semester) {
             return response.json();
         })
         .then(courses => {
+            // Process courses to extract class codes from section key
+            courses.forEach(course => {
+                if (course.schedules) {
+                    course.schedules.forEach(schedule => {
+                        // Check if the schedules were parsed from JSON with class codes in the type
+                        // Usually in format like "--LEC (8137)"
+                        if (!schedule.type && schedule.originalKey) {
+                            schedule.type = schedule.originalKey;
+                        }
+                    });
+                }
+            });
+            
             // Store courses globally for filtering
             window.coursesData = courses;
             
@@ -535,6 +659,18 @@ function loadDemoDataFromAPI() {
             return response.json();
         })
         .then(courses => {
+            // Process courses to ensure class codes are preserved
+            courses.forEach(course => {
+                if (course.schedules) {
+                    course.schedules.forEach(schedule => {
+                        // Check if the schedules were parsed from JSON with class codes in the type
+                        if (!schedule.type && schedule.originalKey) {
+                            schedule.type = schedule.originalKey;
+                        }
+                    });
+                }
+            });
+            
             // Store courses globally for filtering
             window.coursesData = courses;
             
@@ -562,21 +698,21 @@ function loadDemoData() {
             name: 'Data Structures',
             schedules: [
                 // Lecture section A (meets twice a week)
-                { type: 'Lecture A-LEC', day: 'Tuesday', start: '10:30', end: '12:15', location: 'Y.C. Liang Hall 104' },
-                { type: 'Lecture A-LEC', day: 'Wednesday', start: '10:30', end: '11:15', location: 'Y.C. Liang Hall 104' },
+                { type: 'Lecture A-LEC (8001)', day: 'Tuesday', start: '10:30', end: '12:15', location: 'Y.C. Liang Hall 104' },
+                { type: 'Lecture A-LEC (8001)', day: 'Wednesday', start: '10:30', end: '11:15', location: 'Y.C. Liang Hall 104' },
                 
                 // Lecture section B (meets twice a week)
-                { type: 'Lecture B-LEC', day: 'Thursday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg 1004' },
-                { type: 'Lecture B-LEC', day: 'Wednesday', start: '12:30', end: '14:15', location: 'Science Centre L2' },
+                { type: 'Lecture B-LEC (8002)', day: 'Thursday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg 1004' },
+                { type: 'Lecture B-LEC (8002)', day: 'Wednesday', start: '12:30', end: '14:15', location: 'Science Centre L2' },
                 
                 // Tutorial section AT01 (once a week)
-                { type: 'Tutorial AT01-TUT', day: 'Thursday', start: '12:30', end: '13:15', location: 'William M W Mong Eng Bldg 702' },
+                { type: 'Tutorial AT01-TUT (8101)', day: 'Thursday', start: '12:30', end: '13:15', location: 'William M W Mong Eng Bldg 702' },
                 
                 // Tutorial section AT02 (once a week)
-                { type: 'Tutorial AT02-TUT', day: 'Friday', start: '12:30', end: '13:15', location: 'Mong Man Wai Bldg 702' },
+                { type: 'Tutorial AT02-TUT (8102)', day: 'Friday', start: '12:30', end: '13:15', location: 'Mong Man Wai Bldg 702' },
                 
                 // Tutorial section BT01 (once a week)
-                { type: 'Tutorial BT01-TUT', day: 'Thursday', start: '16:30', end: '17:15', location: 'William M W Mong Eng Bldg 1004' }
+                { type: 'Tutorial BT01-TUT (8103)', day: 'Thursday', start: '16:30', end: '17:15', location: 'William M W Mong Eng Bldg 1004' }
             ],
             color: '#fae3d9', // light peach
             selected: true
@@ -585,8 +721,8 @@ function loadDemoData() {
             id: 'CSCI 3100',
             name: 'Software Engineering',
             schedules: [
-                { type: 'Lecture', day: 'Monday', start: '11:30', end: '12:15', location: 'T.Y.Wong Hall LT' },
-                { type: 'Lecture', day: 'Tuesday', start: '12:30', end: '14:15', location: 'Lee Shau Kee Building LT6' }
+                { type: 'Lecture (8010)', day: 'Monday', start: '11:30', end: '12:15', location: 'T.Y.Wong Hall LT' },
+                { type: 'Lecture (8010)', day: 'Tuesday', start: '12:30', end: '14:15', location: 'Lee Shau Kee Building LT6' }
             ],
             color: '#c2e0c6', // light green
             selected: true
@@ -595,9 +731,9 @@ function loadDemoData() {
             id: 'CSCI 3180',
             name: 'Principles of Programming Languages',
             schedules: [
-                { type: 'Interactive Tutorial', day: 'Thursday', start: '12:30', end: '13:15', location: 'Y.C. Liang Hall 104' },
-                { type: 'Lecture', day: 'Monday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' },
-                { type: 'Lecture', day: 'Tuesday', start: '15:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' }
+                { type: 'Interactive Tutorial (8105)', day: 'Thursday', start: '12:30', end: '13:15', location: 'Y.C. Liang Hall 104' },
+                { type: 'Lecture (8015)', day: 'Monday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' },
+                { type: 'Lecture (8015)', day: 'Tuesday', start: '15:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' }
             ],
             color: '#d0e0f0', // light blue
             selected: true
@@ -606,7 +742,7 @@ function loadDemoData() {
             id: 'CSCI 3250',
             name: 'Computers and Society',
             schedules: [
-                { type: 'Lecture', day: 'Thursday', start: '13:30', end: '15:15', location: 'Lady Shaw Bldg LT1' }
+                { type: 'Lecture (8020)', day: 'Thursday', start: '13:30', end: '15:15', location: 'Lady Shaw Bldg LT1' }
             ],
             color: '#f0e0d0', // light orange
             selected: true
@@ -615,7 +751,7 @@ function loadDemoData() {
             id: 'CSCI 3251',
             name: 'Engineering Practicum',
             schedules: [
-                { type: 'Practicum', day: 'Thursday', start: '15:30', end: '16:15', location: 'Lady Shaw Bldg LT1' }
+                { type: 'Practicum (8025)', day: 'Thursday', start: '15:30', end: '16:15', location: 'Lady Shaw Bldg LT1' }
             ],
             color: '#e0d0f0', // light purple
             selected: true
@@ -624,10 +760,10 @@ function loadDemoData() {
             id: 'CSCI 4430',
             name: 'Data Communication and Computer Networks',
             schedules: [
-                { type: 'Lecture', day: 'Wednesday', start: '12:30', end: '13:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Interactive Tutorial', day: 'Wednesday', start: '13:30', end: '14:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Lecture', day: 'Monday', start: '16:30', end: '18:15', location: 'Y.C. Liang Hall 103' },
-                { type: 'Interactive Tutorial', day: 'Wednesday', start: '17:30', end: '18:15', location: 'Science Centre L3' }
+                { type: 'Lecture (8030)', day: 'Wednesday', start: '12:30', end: '13:15', location: 'Lady Shaw Bldg LT2' },
+                { type: 'Interactive Tutorial (8130)', day: 'Wednesday', start: '13:30', end: '14:15', location: 'Lady Shaw Bldg LT2' },
+                { type: 'Lecture (8030)', day: 'Monday', start: '16:30', end: '18:15', location: 'Y.C. Liang Hall 103' },
+                { type: 'Interactive Tutorial (8130)', day: 'Wednesday', start: '17:30', end: '18:15', location: 'Science Centre L3' }
             ],
             color: '#e0f0d0', // light yellow-green
             selected: true
@@ -636,7 +772,7 @@ function loadDemoData() {
             id: 'GESC 1000',
             name: 'College Assembly',
             schedules: [
-                { type: 'Assembly', day: 'Friday', start: '11:30', end: '13:15', location: 'TBA' }
+                { type: 'Assembly (8050)', day: 'Friday', start: '11:30', end: '13:15', location: 'TBA' }
             ],
             color: '#f0d0e0', // light pink
             selected: true
@@ -645,10 +781,20 @@ function loadDemoData() {
             id: 'STAT 2005',
             name: 'Statistics',
             schedules: [
-                { type: 'Lecture', day: 'Thursday', start: '16:30', end: '18:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Lecture', day: 'Tuesday', start: '17:30', end: '18:15', location: 'Y.C. Liang Hall 104' }
+                { type: 'Lecture (8040)', day: 'Thursday', start: '16:30', end: '18:15', location: 'Lady Shaw Bldg LT2' },
+                { type: 'Lecture (8040)', day: 'Tuesday', start: '17:30', end: '18:15', location: 'Y.C. Liang Hall 104' }
             ],
             color: '#d0f0e0', // light mint
+            selected: true
+        },
+        { 
+            id: 'AIST 1000',
+            name: 'Introduction to Artificial Intelligence and Machine Learning',
+            schedules: [
+                { type: 'Lecture --LEC (8137)', day: 'Tuesday', start: '10:30', end: '11:15', location: 'Mong Man Wai Bldg 707' },
+                { type: 'Lecture --LEC (8137)', day: 'Wednesday', start: '10:30', end: '11:15', location: 'Mong Man Wai Bldg 707' }
+            ],
+            color: '#b2dfdb', // light teal
             selected: true
         }
     ];
@@ -705,6 +851,26 @@ function populateCourseList(courses) {
         
         courseInfo.appendChild(courseId);
         courseInfo.appendChild(courseName);
+        
+        // Extract and display class codes
+        if (course.schedules && course.schedules.length > 0) {
+            const classCodes = new Set();
+            course.schedules.forEach(schedule => {
+                if (schedule.type) {
+                    const codeMatch = schedule.type.match(/\((\d+)\)/);
+                    if (codeMatch && codeMatch[1]) {
+                        classCodes.add(codeMatch[1]);
+                    }
+                }
+            });
+            
+            // if (classCodes.size > 0) {
+            //     const classCodeElement = document.createElement('div');
+            //     // classCodeElement.className = 'course-class-code';
+            //     // classCodeElement.textContent = `Class Code: ${Array.from(classCodes).join(', ')}`;
+            //     courseInfo.appendChild(classCodeElement);
+            // }
+        }
         
         if (course.isPlaceholder) {
             const placeholderIndicator = document.createElement('div');
@@ -909,8 +1075,8 @@ function generateSectionSelectors(course) {
             
             selectorHTML += `
                     </select>
-                </div>
-            `;
+        </div>
+    `;
         }
     }
     
@@ -984,7 +1150,7 @@ function displayCoursesOnTimetable(courses) {
         'Saturday': 5, 'Sat': 5, 
         'Sunday': 6, 'Sun': 6
     };
-    
+
     // Sort courses by start time to display earlier classes first
     const sortedCourses = [...courses].sort((a, b) => {
         if (!a.schedules || !a.schedules.length) return 1;
@@ -1097,16 +1263,13 @@ function displayCoursesOnTimetable(courses) {
                 courseEvent.style.height = `${heightPercentage}%`;
             }
             
-            // Extract section ID and base type
-            const sectionId = extractSectionId(schedule.type) || '';
-            const baseType = normalizeSessionType(schedule.type);
+            // Get the formatted type (keeping the original format with class code)
+            const formattedType = schedule.type || '';
             
             // Add content
             courseEvent.innerHTML = `
                 <div class="course-event-title">${course.id}</div>
-                <div class="course-event-type">
-                    ${baseType}${sectionId ? ` (Section ${sectionId})` : ''}
-                </div>
+                <div class="course-event-type section-type-code">${formattedType}</div>
                 <div class="course-event-time">${schedule.start} - ${schedule.end}</div>
                 <div class="course-event-location">${schedule.location || 'TBA'}</div>
                 ${(course.isPlaceholder || schedule.type?.includes('Placeholder')) ? 
@@ -1192,8 +1355,7 @@ function showCourseDetails(course) {
     // Generate HTML for each schedule group
     let schedulesHTML = '';
     Object.entries(sectionsByType).forEach(([baseType, typeSections]) => {
-        schedulesHTML += `<div class="schedule-item">
-            <strong>${baseType}</strong>`;
+        schedulesHTML += `<div class="schedule-item">`;
         
         // Check if this type has multiple sections
         const hasMultipleSections = typeSections.length > 1;
@@ -1213,7 +1375,19 @@ function showCourseDetails(course) {
             const selectedIndicator = isSelected && hasMultipleSections ? 
                 '<span class="selected-indicator">Selected</span>' : '';
             
-            // Section header with id
+            // Extract class code for this section
+            let classCode = '';
+            if (section.schedules[0] && section.schedules[0].type) {
+                const codeMatch = section.schedules[0].type.match(/\((\d+)\)/);
+                if (codeMatch) {
+                    classCode = section.schedules[0].type;
+                }
+            }
+            
+            // Show type with class code in the heading
+            schedulesHTML += `<strong class="section-type-code">${classCode || baseType}</strong>`;
+            
+            // Section header with id and class code
             schedulesHTML += `
                 <div class="schedule-detail ${selectedClass}">
                     <div class="section-header">Section ${section.sectionId} ${selectedIndicator}</div>`;
@@ -1254,11 +1428,12 @@ function showCourseDetails(course) {
 function showCourseScheduleDetails(course, schedule) {
     const detailsContent = document.querySelector('.details-content');
     
-    // Extract section identifier and base type
-    const sectionId = extractSectionId(schedule.type) || '';
-    const baseType = normalizeSessionType(schedule.type);
+    // Get the original class type and format
+    const classType = schedule.type || '';
     
     // Find all sessions that belong to this section
+    const baseType = normalizeSessionType(schedule.type);
+    const sectionId = extractSectionId(schedule.type) || '';
     let allSessions = [];
     const sections = groupSchedulesBySection(course);
     
@@ -1293,7 +1468,7 @@ function showCourseScheduleDetails(course, schedule) {
         `<p class="term"><strong>Term:</strong> ${schedule.term}</p>` : '';
     
     // Display placeholder warning if applicable
-    const placeholderWarning = course.isPlaceholder || schedule.type.includes('Placeholder') ? 
+    const placeholderWarning = course.isPlaceholder || schedule.type?.includes('Placeholder') ? 
         '<p class="placeholder-warning">Note: Schedule information is not yet finalized. Times shown are tentative.</p>' : '';
     
     detailsContent.innerHTML = `
@@ -1303,16 +1478,16 @@ function showCourseScheduleDetails(course, schedule) {
         <div class="course-schedule">
             <h3>Schedule Details</h3>
             <div class="schedule-item">
-                <strong>${baseType}${sectionId ? ` (Section ${sectionId})` : ''}</strong>
+                <strong class="section-type-code">${classType}</strong>
                 <div class="schedule-detail selected-section">
                     <div class="section-header">Selected Session</div>
                     <p>${schedule.day} ${schedule.start} - ${schedule.end}</p>
                     <div class="location">${schedule.location || 'Location TBA'}</div>
-                ${instructorInfo}
-                ${termInfo}
-                ${allSessions.length > 1 ? sessionsHTML : ''}
-            </div>
+                    ${instructorInfo}
+                    ${termInfo}
+                    ${allSessions.length > 1 ? sessionsHTML : ''}
         </div>
+            </div>
         </div>
     `;
 }
@@ -1444,10 +1619,10 @@ function previewCourseOnTimetable(course) {
                 );
                 
                 return { ...schedule, hasConflict };
-            });
-        }
+        });
     }
-    
+}
+
     // Display the course with preview styling
     displayCoursesOnTimetable([...window.coursesData.filter(c => c.selected), previewedCourse]);
 }

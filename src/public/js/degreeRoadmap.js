@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUserInfo();
     setupLogout();
     setupDegreeSelection();
+    setupCUHKRegistrationLink();
 });
 
 function loadUserInfo() {
@@ -257,4 +258,30 @@ function displaySampleRoadmap(degreeName) {
         }
     `;
     document.head.appendChild(style);
+}
+
+function setupCUHKRegistrationLink() {
+    const cuhkLink = document.querySelector('.cuhk-link');
+    if (cuhkLink) {
+        cuhkLink.addEventListener('click', function(e) {
+            // Optional: Track analytics for link clicks
+            console.log('CUHK Registration link clicked');
+            
+            // You could add more sophisticated tracking here
+            // For example, sending an analytics event to your backend
+            try {
+                if (typeof gtag === 'function') { // If Google Analytics is available
+                    gtag('event', 'click', {
+                        'event_category': 'external_link',
+                        'event_label': 'CUHK Registration',
+                        'transport_type': 'beacon'
+                    });
+                }
+            } catch (error) {
+                console.error('Analytics tracking error:', error);
+            }
+            
+            // Link will open in new tab due to target="_blank" in HTML
+        });
+    }
 }
