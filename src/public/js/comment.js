@@ -1,24 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("1");
-
     initializeSemesterButtons();
-    console.log("2");
-
     initializeCourseSelection();
-    console.log("3");
-
     initializeSearch();
-    console.log("4");
-
     loadCourseData();
-    console.log("5");
-
     loadUserInfo();
-    console.log("6");
-
     setupLogout();
-    console.log("7");
-
 });
 
 function setupSorting(courseId) {
@@ -127,7 +113,7 @@ function fetchComments(courseId) {
       }
       
       // Get author name (you might want to get this from a logged-in user)
-      const author = 'Current User'; // Replace with actual username
+      const author = document.getElementById('userUsername').textContent; // Replace with actual username
       
       // Get selected rating
       const ratingDropdown = document.querySelector('.rating-dropdown');
@@ -239,7 +225,6 @@ function populateCourseList(courses) {
             });
 
             if (e.target.checked) {
-                console.log("DLLM ah");
 
                 displayCourseCode(course.id, course.name);
             } else {
@@ -253,13 +238,8 @@ function populateCourseList(courses) {
 
 
 function displayCourseCode(courseId, courseName) {
-    console.log("DLLM ah 2");
-
     const commentForm = document.querySelector('.main-content');
-    console.log("Main content element:", commentForm);
-
     if (commentForm) {
-        console.log("DLLM ah 3");
         commentForm.innerHTML = `
             <div class="comment-section">
                 <div class="comment-header">

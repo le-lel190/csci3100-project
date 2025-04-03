@@ -774,7 +774,8 @@ body {
     padding: 2rem;
     overflow-y: auto;
   }
-  
+
+
   /* Comment Section Styling */
   .comment-section {
     width: 100%;
@@ -788,16 +789,17 @@ body {
   
   /* Comment Header Styling */
   .comment-header {
+    margin-top: 1rem; /* Move the entire header down */
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid var(--border-color);
   }
   
   .comment-header h2 {
-    color: var(--primary-color);
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-  }
+    color: var(--primary-color); /* Use primary color for emphasis */
+    font-size: 1.5rem; /* Adjust font size if needed */
+    font-weight: 700; /* Make it bold */
+}
   
   .course-title {
     color: var(--text-light);
