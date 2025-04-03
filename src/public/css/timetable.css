@@ -1,8 +1,8 @@
 :root {
-    --primary-color: #2c7a4f;
-    --primary-light: #e8f5e9;
-    --secondary-color: #4a90e2;
-    --accent-color: #f39c12;
+    --primary-color: #663399;
+    --primary-light: #f0e6ff;
+    --secondary-color: #9370DB;
+    --accent-color: #ffb700;
     --text-color: #2c3e50;
     --text-light: #7f8c8d;
     --border-color: #dcdde1;
@@ -230,6 +230,13 @@ body {
     margin-bottom: 3px;
 }
 
+.course-class-code {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
 /* Checkbox styling */
 .course-item input[type="checkbox"] {
     appearance: none;
@@ -405,6 +412,11 @@ body {
     line-height: 1.4;
 }
 
+.course-event-type {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.75);
+}
+
 /* Placeholder styling */
 .placeholder-course {
     opacity: 0.85;
@@ -433,6 +445,193 @@ body {
     background-color: rgba(255, 255, 255, 0.7);
     padding: 1px 3px;
     border-radius: 2px;
+}
+
+/* Add edit button styling for tentative events */
+.edit-tentative-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 3px;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.edit-tentative-btn:hover {
+    opacity: 1;
+}
+
+/* Highlight updated event */
+.highlight-updated {
+    animation: highlight 2s ease;
+}
+
+@keyframes highlight {
+    0%, 100% {
+        box-shadow: none;
+    }
+    50% {
+        box-shadow: 0 0 10px 3px var(--primary-color);
+    }
+}
+
+/* Tentative schedule edit popup */
+.tentative-edit-popup {
+    position: absolute;
+    width: 320px;
+    background-color: white;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+    z-index: 1000;
+    animation: popup-fade-in 0.2s ease;
+}
+
+@keyframes popup-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: var(--primary-light);
+    border-radius: 10px 10px 0 0;
+}
+
+.popup-header h3 {
+    font-size: 16px;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.2s ease;
+}
+
+.close-btn:hover {
+    color: var(--primary-color);
+}
+
+.popup-content {
+    padding: 15px;
+}
+
+.course-info {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.popup-course-id {
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+.popup-course-name {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 5px;
+}
+
+.popup-course-type {
+    font-size: 12px;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.schedule-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-group select,
+.form-group input {
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.form-group select:focus,
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(44, 122, 79, 0.1);
+}
+
+.popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.popup-actions button {
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cancel-btn {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.cancel-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.save-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.save-btn:hover {
+    background-color: #236a3f;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
 }
 
 /* Preview event styling */
@@ -493,6 +692,15 @@ body {
     margin-bottom: 1rem;
     font-size: 1rem;
     line-height: 1.4;
+}
+
+.class-codes {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
 }
 
 .course-schedule {
@@ -572,7 +780,7 @@ body {
     cursor: pointer;
     transition: all var(--transition-speed) ease;
     display: flex;
-    align-items: center;
+    align-items: center;    
     justify-content: center;
     gap: 0.5rem;
     font-size: 0.9rem;
@@ -580,17 +788,6 @@ body {
 
 .action-btn:first-child {
     grid-column: span 2;
-}
-
-.save-btn {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.save-btn:hover {
-    background-color: #236a3f;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
 }
 
 .export-btn {
@@ -846,4 +1043,33 @@ body {
 
 #conflict-popup.fade-out {
     animation: fadeOut 0.5s forwards;
+}
+
+.time-format-hint {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 3px;
+    font-style: italic;
+}
+
+.validation-error {
+    color: #d32f2f;
+    font-size: 13px;
+    margin-top: 8px;
+    font-weight: 500;
+    padding: 5px 0;
+    min-height: 24px;
+}
+
+.save-btn:disabled {
+    background-color: #b0b0b0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.save-btn:disabled:hover {
+    background-color: #b0b0b0;
+    transform: none;
+    box-shadow: none;
 }

@@ -1,8 +1,10 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const User = require('../models/User');
 const { JWT_SECRET, auth } = require('../middleware/auth');
+const { sendVerificationEmail } = require('../utils/email');
 
 const router = express.Router();
 
@@ -46,9 +48,22 @@ router.post('/register',
         });
       }
 
+      // Generate verification token
+      const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+      const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
       // Create new user
-      const user = new User({ username, email, password });
+      const user = new User({ 
+        username, 
+        email, 
+        password, 
+        emailVerificationToken,
+        emailVerificationExpires
+      });
       await user.save();
+
+      // Send verification email
+      const emailSent = await sendVerificationEmail(email, username, emailVerificationToken);
 
       // Generate token
       const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
@@ -62,11 +77,13 @@ router.post('/register',
       });
 
       res.status(201).json({
-        message: 'User created successfully',
+        message: 'User created successfully. Please verify your email.',
+        verificationEmailSent: emailSent,
         user: {
           id: user._id,
           username: user.username,
-          email: user.email
+          email: user.email,
+          isEmailVerified: user.isEmailVerified
         }
       });
     } catch (error) {
@@ -124,7 +141,8 @@ router.post('/login',
         user: {
           id: user._id,
           username: user.username,
-          email: user.email
+          email: user.email,
+          isEmailVerified: user.isEmailVerified
         }
       });
     } catch (error) {
@@ -132,6 +150,69 @@ router.post('/login',
     }
   }
 );
+
+// Email verification
+router.get('/verify-email/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    
+    const user = await User.findOne({
+      emailVerificationToken: token,
+      emailVerificationExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ 
+        message: 'Invalid or expired verification token' 
+      });
+    }
+
+    // Update user verification status
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    // Redirect to login with success message
+    res.redirect('/?verified=true');
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Resend verification email
+router.post('/resend-verification', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({ message: 'Email already verified' });
+    }
+
+    // Generate new verification token
+    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    const emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    // Update user
+    user.emailVerificationToken = emailVerificationToken;
+    user.emailVerificationExpires = emailVerificationExpires;
+    await user.save();
+
+    // Send email
+    const emailSent = await sendVerificationEmail(user.email, user.username, emailVerificationToken);
+
+    res.json({
+      message: 'Verification email sent',
+      success: emailSent
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // Logout
 router.post('/logout', (req, res) => {

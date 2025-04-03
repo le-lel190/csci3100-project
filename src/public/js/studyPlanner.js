@@ -5,11 +5,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setupLogout();
     initializeSemesterButtons();
     initializeSearch();
+    initializeDayFilters();
     setupDemoButton();
     loadCourseData();
     setupDragAndDrop();
     setupAddYearButton();
     updateProgressBars();
+    setupImageExport();
 });
 
 function setupDemoButton() {
@@ -86,6 +88,8 @@ function populateCourseList(courses) {
     courseItems.innerHTML = '';
 
     courses.forEach(course => {
+        console.log(`Course ${course.id}: Units = ${course.units}, Type = ${course.type}`); // Debug log
+
         const courseItem = document.createElement('div');
         courseItem.className = 'course-item';
         courseItem.innerHTML = `
@@ -152,6 +156,53 @@ function initializeSearch() {
     });
 }
 
+function initializeDayFilters() {
+    let dayFilterContainer = document.querySelector('.day-filter-container');
+    if (!dayFilterContainer) {
+        dayFilterContainer = document.createElement('div');
+        dayFilterContainer.className = 'day-filter-container';
+        const searchBox = document.querySelector('.search-box');
+        if (searchBox) searchBox.parentNode.insertBefore(dayFilterContainer, searchBox.nextSibling);
+    }
+
+    dayFilterContainer.innerHTML = `
+        <div class="filter-header">Day Filters</div>
+        <div class="day-filters">
+            <label><input type="checkbox" data-day="0" checked> Mon</label>
+            <label><input type="checkbox" data-day="1" checked> Tue</label>
+            <label><input type="checkbox" data-day="2" checked> Wed</label>
+            <label><input type="checkbox" data-day="3" checked> Thu</label>
+            <label><input type="checkbox" data-day="4" checked> Fri</label>
+            <label><input type="checkbox" data-day="5" checked> Sat</label>
+            <label><input type="checkbox" data-day="6" checked> Sun</label>
+        </div>
+        <div class="filter-actions">
+            <button id="selectAllDays">Select All</button>
+            <button id="clearAllDays">Clear All</button>
+        </div>
+    `;
+
+    const dayCheckboxes = dayFilterContainer.querySelectorAll('input[type="checkbox"]');
+    dayCheckboxes.forEach(checkbox => checkbox.addEventListener('change', updateVisibleDays));
+
+    document.getElementById('selectAllDays').addEventListener('click', () => {
+        dayCheckboxes.forEach(cb => cb.checked = true);
+        updateVisibleDays();
+    });
+
+    document.getElementById('clearAllDays').addEventListener('click', () => {
+        dayCheckboxes.forEach(cb => cb.checked = false);
+        updateVisibleDays();
+    });
+
+    function updateVisibleDays() {
+        window.visibleDays = Array.from(dayCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => parseInt(cb.dataset.day));
+        console.log('Visible days:', window.visibleDays); // Placeholder
+    }
+}
+
 function setupDragAndDrop() {
     const cells = document.querySelectorAll('.timetable td:not(:first-child)');
     cells.forEach(cell => {
@@ -177,7 +228,7 @@ function setupDragAndDrop() {
                 const courseBlock = document.createElement('div');
                 courseBlock.className = 'course-block';
                 courseBlock.dataset.courseId = course.id;
-                courseBlock.style.backgroundColor = course.color || '#e8f5e9';
+                courseBlock.style.backgroundColor = course.color || '#f0e6ff'; // Update to use purple theme
                 courseBlock.innerHTML = `
                     <div class="course-title">${course.id}</div>
                     <div class="course-name">${course.name}</div>
@@ -191,9 +242,17 @@ function setupDragAndDrop() {
 
 function setupAddYearButton() {
     const addYearBtn = document.getElementById('addYearBtn');
-    let yearCount = 4;
-
+    let yearCount = 4; // Starting with 4 years
+    const MAX_YEARS = 8; // Maximum number of years allowed
+    
+    // Update button state on initialization
+    updateAddYearButtonState();
+    
     addYearBtn.addEventListener('click', () => {
+        if (yearCount >= MAX_YEARS) {
+            return; // Don't add more years if maximum is reached
+        }
+        
         yearCount++;
         const thead = document.querySelector('.timetable thead tr');
         const th = document.createElement('th');
@@ -227,7 +286,7 @@ function setupAddYearButton() {
                     const courseBlock = document.createElement('div');
                     courseBlock.className = 'course-block';
                     courseBlock.dataset.courseId = course.id;
-                    courseBlock.style.backgroundColor = course.color || '#e8f5e9';
+                    courseBlock.style.backgroundColor = course.color || '#f0e6ff'; // Update to use purple theme
                     courseBlock.innerHTML = `
                         <div class="course-title">${course.id}</div>
                         <div class="course-name">${course.name}</div>
@@ -237,7 +296,23 @@ function setupAddYearButton() {
                 }
             });
         });
+        
+        // Update button state after adding a year
+        updateAddYearButtonState();
     });
+    
+    // Function to update the button state based on current year count
+    function updateAddYearButtonState() {
+        if (yearCount >= MAX_YEARS) {
+            addYearBtn.disabled = true;
+            addYearBtn.classList.add('disabled');
+            addYearBtn.title = 'Maximum of 8 years reached';
+        } else {
+            addYearBtn.disabled = false;
+            addYearBtn.classList.remove('disabled');
+            addYearBtn.title = 'Add another year to your study plan';
+        }
+    }
 }
 
 function updateProgressBars() {
@@ -248,27 +323,34 @@ function updateProgressBars() {
         const courseId = block.dataset.courseId;
         const course = window.coursesData.find(c => c.id === courseId);
         if (course) {
+            const units = course.units || 0; // Use the actual units from the course data
             switch (course.type) {
-                case 'Major': majorCredits += 3; break;
-                case 'UG Core': ugCoreCredits += 3; break;
-                case 'Free': freeCredits += 3; break;
+                case 'Major':
+                    majorCredits += units;
+                    break;
+                case 'UG Core':
+                    ugCoreCredits += units;
+                    break;
+                case 'Free':
+                    freeCredits += units;
+                    break;
             }
         }
     });
 
     const totalCredits = 120, majorTotal = 80, ugCoreTotal = 30, freeTotal = 10;
 
-    document.getElementById('majorCredits').textContent = majorCredits;
+    document.getElementById('majorCredits').textContent = majorCredits.toFixed(2); // Display with 2 decimal places
     document.getElementById('majorProgress').style.width = `${Math.min((majorCredits / majorTotal) * 100, 100)}%`;
 
-    document.getElementById('ugCoreCredits').textContent = ugCoreCredits;
+    document.getElementById('ugCoreCredits').textContent = ugCoreCredits.toFixed(2);
     document.getElementById('ugCoreProgress').style.width = `${Math.min((ugCoreCredits / ugCoreTotal) * 100, 100)}%`;
 
-    document.getElementById('freeCredits').textContent = freeCredits;
+    document.getElementById('freeCredits').textContent = freeCredits.toFixed(2);
     document.getElementById('freeProgress').style.width = `${Math.min((freeCredits / freeTotal) * 100, 100)}%`;
 
     const totalCompleted = majorCredits + ugCoreCredits + freeCredits;
-    document.getElementById('totalCredits').textContent = totalCompleted;
+    document.getElementById('totalCredits').textContent = totalCompleted.toFixed(2);
     document.getElementById('totalProgress').style.width = `${Math.min((totalCompleted / totalCredits) * 100, 100)}%`;
 }
 
@@ -304,4 +386,205 @@ function setupLogout() {
             console.error('Logout failed:', error);
         }
     });
+}
+
+function setupImageExport() {
+    const saveImageBtn = document.getElementById('saveImageBtn');
+    if (saveImageBtn) {
+        saveImageBtn.addEventListener('click', captureAndSaveStudyPlan);
+    }
+}
+
+function captureAndSaveStudyPlan() {
+    // Get the timetable element
+    const timetableElement = document.querySelector('.timetable');
+    
+    // Show a loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'loading-indicator';
+    loadingIndicator.textContent = 'Capturing study plan and formatting for A4...';
+    document.body.appendChild(loadingIndicator);
+    
+    // Create a clone of the timetable element to modify without affecting the visible UI
+    const timetableClone = timetableElement.cloneNode(true);
+    timetableClone.style.position = 'absolute';
+    timetableClone.style.top = '-9999px';
+    timetableClone.style.left = '-9999px';
+    document.body.appendChild(timetableClone);
+    
+    // A4 dimensions in pixels (at 300 DPI for high quality printing)
+    // A4 is 210 x 297 mm which is approximately 2480 x 3508 pixels at 300 DPI
+    const A4_WIDTH = 2480;
+    const A4_HEIGHT = 3508;
+    const A4_ASPECT_RATIO = A4_HEIGHT / A4_WIDTH; // Approximately 1.414
+    
+    // Ensure the clone has all content visible and properly sized
+    const tableElement = timetableClone.querySelector('table');
+    if (tableElement) {
+        // Prepare for A4 formatting
+        const headerElement = timetableClone.querySelector('.timetable-header');
+        
+        // Modify styles for capture
+        timetableClone.style.width = `${A4_WIDTH}px`;
+        timetableClone.style.backgroundColor = '#ffffff';
+        timetableClone.style.padding = '20px';
+        timetableClone.style.boxSizing = 'border-box';
+        
+        // Modify table styles
+        tableElement.style.height = 'auto';
+        tableElement.style.overflow = 'visible';
+        tableElement.style.width = '100%';
+        tableElement.style.tableLayout = 'fixed';
+        tableElement.style.borderCollapse = 'collapse';
+        
+        // Add a title if it doesn't exist
+        if (headerElement) {
+            headerElement.style.textAlign = 'center';
+            headerElement.style.marginBottom = '20px';
+            headerElement.style.fontSize = '24px';
+            
+            // Find the h3 element in the header
+            const headerTitle = headerElement.querySelector('h3');
+            if (headerTitle) {
+                headerTitle.style.fontSize = '28px';
+                headerTitle.style.fontWeight = 'bold';
+                headerTitle.style.color = '#663399'; // Match the primary color
+            }
+        }
+        
+        // Ensure all cells are visible and properly sized
+        timetableClone.querySelectorAll('td, th').forEach(cell => {
+            cell.style.overflow = 'visible';
+            cell.style.height = 'auto';
+            cell.style.padding = '5px';
+            cell.style.fontSize = '12px';
+            cell.style.border = '1px solid #dcdde1';
+        });
+        
+        // Style the table headers
+        timetableClone.querySelectorAll('th').forEach(th => {
+            th.style.backgroundColor = '#f0e6ff'; // Light purple
+            th.style.color = '#663399'; // Primary purple
+            th.style.fontWeight = 'bold';
+            th.style.padding = '8px';
+            th.style.fontSize = '14px';
+        });
+        
+        // Style course blocks for better printing
+        timetableClone.querySelectorAll('.course-block').forEach(block => {
+            block.style.padding = '4px';
+            block.style.margin = '2px';
+            block.style.border = '1px solid #663399';
+            block.style.borderRadius = '3px';
+            
+            // Make sure course titles are visible
+            const courseTitle = block.querySelector('.course-title');
+            if (courseTitle) {
+                courseTitle.style.fontWeight = 'bold';
+                courseTitle.style.fontSize = '11px';
+            }
+            
+            // Make sure course names are visible
+            const courseName = block.querySelector('.course-name');
+            if (courseName) {
+                courseName.style.fontSize = '10px';
+            }
+        });
+        
+        // Get the semester name for the filename and title
+        let semesterName = "Study Plan";
+        const activeBtn = document.querySelector('.semester-btn.active');
+        if (activeBtn) {
+            semesterName = activeBtn.textContent;
+        }
+        
+        // Add title and date to the document
+        const titleDiv = document.createElement('div');
+        titleDiv.style.textAlign = 'center';
+        titleDiv.style.marginBottom = '20px';
+        titleDiv.style.padding = '10px';
+        titleDiv.style.borderBottom = '2px solid #663399';
+        
+        // Format current date
+        const date = new Date();
+        const dateString = date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        
+        titleDiv.innerHTML = `
+            <h1 style="margin:0;color:#663399;font-size:28px;font-weight:bold;">
+                ${semesterName} Study Plan
+            </h1>
+            <p style="margin:5px 0 0;color:#7f8c8d;font-size:14px;">
+                Generated on ${dateString}
+            </p>
+        `;
+        
+        // Insert the title at the beginning of the clone
+        timetableClone.insertBefore(titleDiv, timetableClone.firstChild);
+        
+        // Use html2canvas to capture the element
+        html2canvas(timetableClone, {
+            scale: 1, // Scale is already handled by setting dimensions
+            width: A4_WIDTH,
+            height: A4_WIDTH * A4_ASPECT_RATIO, // Maintain A4 aspect ratio
+            scrollX: 0,
+            scrollY: 0,
+            windowWidth: A4_WIDTH,
+            windowHeight: A4_WIDTH * A4_ASPECT_RATIO,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            onclone: function(clonedDoc) {
+                // Additional adjustments to the cloned document if needed
+                const clonedTable = clonedDoc.querySelector('table');
+                if (clonedTable) {
+                    clonedTable.style.height = 'auto';
+                    clonedTable.style.maxHeight = `${A4_WIDTH * A4_ASPECT_RATIO - 200}px`; // Leave room for header/footer
+                }
+            }
+        }).then(canvas => {
+            // Remove the clone and loading indicator
+            document.body.removeChild(timetableClone);
+            document.body.removeChild(loadingIndicator);
+            
+            // Format filename
+            const semesterFilename = semesterName.replace(/\s+/g, '_').toLowerCase();
+            const dateStr = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+            
+            // Create a download link
+            const link = document.createElement('a');
+            link.download = `${semesterFilename}_study_plan_${dateStr}_A4.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            // Show a success message
+            const successMsg = document.createElement('div');
+            successMsg.style.position = 'fixed';
+            successMsg.style.top = '20px';
+            successMsg.style.left = '50%';
+            successMsg.style.transform = 'translateX(-50%)';
+            successMsg.style.padding = '10px 20px';
+            successMsg.style.backgroundColor = '#4caf50';
+            successMsg.style.color = 'white';
+            successMsg.style.borderRadius = '4px';
+            successMsg.style.zIndex = '1000';
+            successMsg.textContent = 'Study Plan saved as A4 PNG!';
+            document.body.appendChild(successMsg);
+            
+            // Remove the success message after 3 seconds
+            setTimeout(() => {
+                document.body.removeChild(successMsg);
+            }, 3000);
+        }).catch(error => {
+            console.error('Error capturing study plan:', error);
+            document.body.removeChild(timetableClone);
+            document.body.removeChild(loadingIndicator);
+            
+            // Show error message
+            alert('Failed to save study plan as image. Please try again.');
+        });
+    }
 }

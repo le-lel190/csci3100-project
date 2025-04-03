@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
+require('dotenv').config();
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://mongodb:27017/webapp', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })

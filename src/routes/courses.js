@@ -277,6 +277,7 @@ router.get('/:semester?', async (req, res) => {
             });
             
             // Process each course in the subject
+            // Inside the main route handler for GET /:semester?
             for (const courseInfo of courseData) {
                 const courseCode = courseInfo.code;
                 const courseName = courseTitles[courseCode] || courseInfo.title || 'Unknown Course';
@@ -285,7 +286,7 @@ router.get('/:semester?', async (req, res) => {
                 
                 // Check if terms exist and contain valid data
                 const hasTerms = courseInfo.terms && 
-                               Object.keys(courseInfo.terms).length > 0;
+                            Object.keys(courseInfo.terms).length > 0;
                 
                 console.log(`${subject} ${courseCode} has terms: ${hasTerms}`);
                 
@@ -300,19 +301,15 @@ router.get('/:semester?', async (req, res) => {
                     console.log(`No terms for ${subject} ${courseCode}, creating placeholder`);
                     
                     // Create a more diverse placeholder schedule based on course code
-                    // This ensures courses don't all stack in the same time slot
                     const codeNum = parseInt(courseCode.replace(/\D/g, '')) || 0;
                     
-                    // Distribute across days of week (0-6)
                     const dayIndex = codeNum % 7;
                     const day = dayIndexToName[dayIndex];
                     
-                    // Distribute across hours (8am-5pm)
                     const hour = 8 + (codeNum % 10);
                     const startTime = `${hour.toString().padStart(2, '0')}:00`;
                     const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
                     
-                    // Create placeholder schedule
                     const placeholderSchedule = {
                         type: 'TBA (Placeholder)', 
                         day: day, 
@@ -321,14 +318,15 @@ router.get('/:semester?', async (req, res) => {
                         location: 'TBA - Schedule not yet available'
                     };
                     
-                    // Create course object with the placeholder schedule
                     courses.push({
                         id: `${subject} ${courseCode}`,
                         name: courseName,
                         schedules: [placeholderSchedule],
                         color: colors[colorIndex % colors.length],
                         selected: false,
-                        isPlaceholder: true // This is a placeholder schedule
+                        isPlaceholder: true,
+                        units: parseFloat(courseInfo.units) || 0, // Add units, default to 0 if not available
+                        type: 'Major' // Since all courses are Major
                     });
                     
                     colorIndex++;
@@ -336,15 +334,12 @@ router.get('/:semester?', async (req, res) => {
                     // Create schedules from terms
                     const schedules = [];
                     
-                    // Process each term
                     for (const [termName, termData] of Object.entries(courseInfo.terms)) {
                         console.log(`Processing term ${termName} for ${subject} ${courseCode}`);
                         
-                        // Process each section in the term
                         for (const [sectionName, sectionData] of Object.entries(termData)) {
                             console.log(`Processing section ${sectionName} for ${subject} ${courseCode}`);
                             
-                            // Extract section type from the section name
                             let type = 'Class';
                             if (sectionName.includes('LEC')) {
                                 type = 'Lecture';
@@ -354,7 +349,6 @@ router.get('/:semester?', async (req, res) => {
                                 type = 'Tutorial';
                             }
                             
-                            // Skip sections with no days, start times, or end times
                             if (!sectionData.days || !sectionData.startTimes || !sectionData.endTimes ||
                                 !Array.isArray(sectionData.days) || !Array.isArray(sectionData.startTimes) || 
                                 !Array.isArray(sectionData.endTimes)) {
@@ -362,24 +356,16 @@ router.get('/:semester?', async (req, res) => {
                                 continue;
                             }
                             
-                            // Check if arrays are empty
                             if (sectionData.days.length === 0 || sectionData.startTimes.length === 0 || sectionData.endTimes.length === 0) {
                                 console.log(`Empty days/times arrays for ${subject} ${courseCode} section ${sectionName}`);
                                 continue;
                             }
                             
-                            // Process each day/time combination
                             for (let i = 0; i < sectionData.days.length; i++) {
-                                // Get day index, which could be a number or a string
                                 let dayIndex = sectionData.days[i];
                                 
-                                // If day is a string (like "Monday"), convert to index
                                 if (typeof dayIndex === 'string') {
                                     dayIndex = dayNameToIndex[dayIndex] || -1;
-                                } else if (typeof dayIndex === 'number') {
-                                    // Handle 1-indexed days (convert to 0-indexed)
-                                    // This fixes the bug where day 1 was mapped to Tuesday instead of Monday
-                                    dayIndex = dayIndex - 1;
                                 }
                                 
                                 if (dayIndex < 0 || dayIndex > 6) {
@@ -389,27 +375,22 @@ router.get('/:semester?', async (req, res) => {
                                 
                                 const day = dayIndexToName[dayIndex];
                                 
-                                // Get start and end times
                                 let startTime = sectionData.startTimes[i] || sectionData.startTimes[0] || "09:00";
                                 let endTime = sectionData.endTimes[i] || sectionData.endTimes[0] || "10:00";
                                 
-                                // Normalize time formats to HH:MM
                                 startTime = normalizeTimeFormat(startTime) || "09:00";
                                 endTime = normalizeTimeFormat(endTime) || "10:00";
                                 
-                                // Get location
                                 let location = "TBA";
                                 if (sectionData.locations && sectionData.locations[i]) {
                                     location = sectionData.locations[i];
                                 }
                                 
-                                // Add instructor information if available
                                 let instructor = "";
                                 if (sectionData.instructors && sectionData.instructors[i]) {
                                     instructor = sectionData.instructors[i];
                                 }
                                 
-                                // Create detailed type with section info
                                 const detailedType = `${type} ${sectionName}`.trim();
                                 
                                 schedules.push({
@@ -425,24 +406,18 @@ router.get('/:semester?', async (req, res) => {
                         }
                     }
                     
-                    // If we couldn't extract any valid schedules, add a placeholder
                     if (schedules.length === 0) {
                         console.log(`No valid schedules created for ${subject} ${courseCode}, adding placeholder`);
                         
-                        // Create a more diverse placeholder schedule based on course code
-                        // This ensures courses don't all stack in the same time slot
                         const codeNum = parseInt(courseCode.replace(/\D/g, '')) || 0;
                         
-                        // Distribute across days of week (0-6)
                         const dayIndex = codeNum % 7;
                         const day = dayIndexToName[dayIndex];
                         
-                        // Distribute across hours (8am-5pm)
                         const hour = 8 + (codeNum % 10);
                         const startTime = `${hour.toString().padStart(2, '0')}:00`;
                         const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
                         
-                        // Create placeholder schedule
                         const placeholderSchedule = {
                             type: 'TBA (Placeholder)', 
                             day: day, 
@@ -451,26 +426,28 @@ router.get('/:semester?', async (req, res) => {
                             location: 'TBA - Schedule not yet available'
                         };
                         
-                        // Create course object with the placeholder schedule
                         courses.push({
                             id: `${subject} ${courseCode}`,
                             name: courseName,
                             schedules: [placeholderSchedule],
                             color: colors[colorIndex % colors.length],
                             selected: false,
-                            isPlaceholder: true // This is a placeholder schedule
+                            isPlaceholder: true,
+                            units: parseFloat(courseInfo.units) || 0, // Add units
+                            type: 'Major' // Since all courses are Major
                         });
                         
                         colorIndex++;
                     } else {
-                        // Create the course object with real schedules
                         courses.push({
                             id: `${subject} ${courseCode}`,
                             name: courseName,
                             schedules,
                             color: colors[colorIndex % colors.length],
                             selected: false,
-                            isPlaceholder: false // This is a real schedule
+                            isPlaceholder: false,
+                            units: parseFloat(courseInfo.units) || 0, // Add units
+                            type: 'Major' // Since all courses are Major
                         });
                         
                         colorIndex++;

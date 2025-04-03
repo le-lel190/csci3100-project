@@ -1,4 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Check for verification success message
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('verified') === 'true') {
+        showMessage('Your email has been verified successfully. You can now log in.', 'success');
+    }
+
     // Check if user is already logged in
     checkAuthStatus();
 
@@ -44,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     const logoutBtn = document.getElementById('logoutBtn');
+    const resendVerificationBtn = document.getElementById('resendVerificationBtn');
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -109,7 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             if (response.ok) {
-                window.location.href = '/timetable';
+                // Show verification message instead of redirecting
+                showMessage(`Account created successfully! Please check your email to verify your account. ${!data.verificationEmailSent ? 'There was an issue sending the verification email. Please request a new one after logging in.' : ''}`, 'success');
+                
+                // Switch to login tab
+                document.querySelector('.tab-btn[data-tab="login"]').click();
             } else {
                 errorElement.textContent = data.message;
             }
@@ -121,6 +132,33 @@ document.addEventListener('DOMContentLoaded', () => {
             submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Account';
         }
     });
+
+    // Resend verification email
+    if (resendVerificationBtn) {
+        resendVerificationBtn.addEventListener('click', async () => {
+            try {
+                resendVerificationBtn.disabled = true;
+                resendVerificationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                
+                const response = await fetch('/api/auth/resend-verification', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showMessage('Verification email sent successfully. Please check your inbox.', 'success');
+                } else {
+                    showMessage(data.message || 'Failed to send verification email. Please try again later.', 'error');
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', 'error');
+            } finally {
+                resendVerificationBtn.disabled = false;
+                resendVerificationBtn.innerHTML = 'Resend Verification Email';
+            }
+        });
+    }
 
     logoutBtn?.addEventListener('click', async () => {
         const originalText = logoutBtn.innerHTML;
@@ -165,9 +203,57 @@ function showDashboard(user) {
     dashboard.style.display = 'block';
     document.getElementById('userUsername').textContent = user.username;
     document.getElementById('userEmail').textContent = user.email;
+    
+    // Show verification status and button if needed
+    const verificationStatus = document.getElementById('verificationStatus');
+    const resendVerificationBtn = document.getElementById('resendVerificationBtn');
+    
+    if (verificationStatus && resendVerificationBtn) {
+        if (user.isEmailVerified) {
+            verificationStatus.textContent = 'Verified';
+            verificationStatus.className = 'verified';
+            resendVerificationBtn.style.display = 'none';
+        } else {
+            verificationStatus.textContent = 'Not Verified';
+            verificationStatus.className = 'not-verified';
+            resendVerificationBtn.style.display = 'block';
+        }
+    }
 }
 
 function showAuthForms() {
     document.querySelector('.auth-container').style.display = 'block';
     document.querySelector('.dashboard').style.display = 'none';
+}
+
+// Helper function to show messages
+function showMessage(message, type = 'info') {
+    const messageContainer = document.querySelector('.message-container') || createMessageContainer();
+    
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${type}`;
+    messageElement.textContent = message;
+    
+    // Add close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', () => messageElement.remove());
+    messageElement.appendChild(closeBtn);
+    
+    messageContainer.appendChild(messageElement);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (messageElement.parentNode) {
+            messageElement.remove();
+        }
+    }, 5000);
+}
+
+function createMessageContainer() {
+    const container = document.createElement('div');
+    container.className = 'message-container';
+    document.body.appendChild(container);
+    return container;
 } 
