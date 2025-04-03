@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth');
 const coursesRoutes = require('./routes/courses');
+const commentRoutes = require('./routes/commentRoute');
 const path = require('path');
 const { auth } = require('./middleware/auth');
 
@@ -50,6 +51,9 @@ app.get('/api/users', auth, async (req, res) => {
     res.status(500).json({ message: 'Error fetching users' });
   }
 });
+
+// Comment routes
+app.use(commentRoutes);
 
 // Non-authenticated route to check users (FOR DEVELOPMENT ONLY - REMOVE IN PRODUCTION)
 app.get('/api/debug/users', async (req, res) => {

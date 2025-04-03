@@ -21,6 +21,116 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+function fetchComments(courseId) {
+    fetch(`/api/comments/${courseId}`)
+      .then(response => response.json())
+      .then(comments => {
+        displayComments(comments, courseId);
+      })
+      .catch(error => {
+        console.error('Error fetching comments:', error);
+        // Optional: Display error message to user
+      });
+  }
+  
+  // Display comments in the container
+  function displayComments(comments, courseId) {
+    const commentsContainer = document.getElementById('commentsContainer');
+    
+    // Clear existing comments
+    commentsContainer.innerHTML = '';
+    
+    if (comments.length === 0) {
+      commentsContainer.innerHTML = '<p>No comments yet. Be the first to share your experience!</p>';
+      return;
+    }
+    
+    // Add each comment to the container
+    comments.forEach(comment => {
+      const commentBlock = document.createElement('div');
+      commentBlock.className = 'comment-block';
+      
+      // Format the date
+      const date = new Date(comment.date);
+      const formattedDate = date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      });
+      
+      // Generate rating stars
+      const stars = '⭐'.repeat(comment.rating);
+      
+      commentBlock.innerHTML = `
+        <div class="rating-box">
+          <span class="rating-stars">${stars}</span>
+        </div>
+        <div class="comment-author">${comment.author}</div>
+        <div class="comment-date">${formattedDate}</div>
+        <div class="comment-content">
+          <p>${comment.content}</p>
+        </div>
+      `;
+      
+      commentsContainer.appendChild(commentBlock);
+    });
+  }
+  
+  // Handle comment form submission
+  function setupCommentForm(courseId, courseName) {
+    const postButton = document.getElementById('postComment');
+    const commentTextarea = document.getElementById('newComment');
+    
+    postButton.addEventListener('click', () => {
+      // Get input values
+      const content = commentTextarea.value.trim();
+      if (!content) {
+        alert('Please enter a comment');
+        return;
+      }
+      
+      // Get author name (you might want to get this from a logged-in user)
+      const author = 'Current User'; // Replace with actual username
+      
+      // Get selected rating
+      const ratingDropdown = document.querySelector('.rating-dropdown');
+      const rating = ratingDropdown ? parseInt(ratingDropdown.value) : 5;
+      
+      // Create comment object
+      const commentData = {
+        courseId,
+        author,
+        content,
+        rating
+      };
+      
+      // Send to server
+      fetch('/api/comments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(commentData)
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to save comment');
+        }
+        return response.json();
+      })
+      .then(savedComment => {
+        // Clear the form
+        commentTextarea.value = '';
+        
+        // Refresh comments to show the new one
+        fetchComments(courseId);
+      })
+      .catch(error => {
+        console.error('Error saving comment:', error);
+        alert('Failed to save your comment. Please try again.');
+      });
+    });
+  }
 
 function initializeSemesterButtons() {
     const buttons = document.querySelectorAll('.semester-btn');
@@ -128,13 +238,6 @@ function displayCourseCode(courseId, courseName) {
                     <!-- Example of comment structure for JS to follow -->
                     <div class="comment-block">
                         <div class="rating-box">
-                            <select class="rating-dropdown">
-                                <option value="1">⭐</option>
-                                <option value="2">⭐⭐</option>
-                                <option value="3">⭐⭐⭐</option>
-                                <option value="4">⭐⭐⭐⭐</option>
-                                <option value="5">⭐⭐⭐⭐⭐</option>
-                            </select>
                         </div>
                         <div class="comment-author">John Doe</div>
                         <div class="comment-date">March 29, 2025</div>
@@ -159,6 +262,9 @@ function displayCourseCode(courseId, courseName) {
             </div>
 
         `;
+        // Set up the comment form and fetch existing comments
+        setupCommentForm(courseId, courseName);
+        fetchComments(courseId);
     }
 }
 
