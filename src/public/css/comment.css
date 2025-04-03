@@ -273,14 +273,6 @@ body {
     gap: 0.5rem;
 }
 
-/* Timetable Grid */
-.main-content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-}
-
 .timetable {
     background: var(--white);
     border-radius: 10px;
@@ -791,6 +783,7 @@ body {
     border-radius: 12px;
     box-shadow: var(--shadow);
     padding: 1.5rem;
+    margin-top: 0; /* Remove extra margin */
   }
   
   /* Comment Header Styling */
@@ -825,6 +818,8 @@ body {
     flex-direction: column;
     gap: 1rem;
     margin-bottom: 1.5rem;
+    overflow: visible; /* Ensure no scrollable area within this container */
+    max-height: none; /* Remove height restrictions */
   }
   
   /* Individual Comment Styling */
@@ -862,7 +857,7 @@ body {
   
   /* Comment Form Styling */
   .comment-form {
-    background-color: var(--background-color);
+    background-color: var(--white);
     border-radius: 8px;
     padding: 1.25rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);

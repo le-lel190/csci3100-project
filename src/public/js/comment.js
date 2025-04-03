@@ -108,6 +108,8 @@ function fetchComments(courseId) {
       `;
       
       commentsContainer.appendChild(commentBlock);
+      commentsContainer.scrollTop = 0;
+
     });
   }
   
