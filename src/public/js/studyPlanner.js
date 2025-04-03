@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupLogout();
     initializeSemesterButtons();
     initializeSearch();
+    initializeDayFilters();
     setupDemoButton();
     loadCourseData();
     setupDragAndDrop();
@@ -86,6 +87,8 @@ function populateCourseList(courses) {
     courseItems.innerHTML = '';
 
     courses.forEach(course => {
+        console.log(`Course ${course.id}: Units = ${course.units}, Type = ${course.type}`); // Debug log
+
         const courseItem = document.createElement('div');
         courseItem.className = 'course-item';
         courseItem.innerHTML = `
@@ -150,6 +153,53 @@ function initializeSearch() {
             item.style.display = isMatch ? 'block' : 'none';
         });
     });
+}
+
+function initializeDayFilters() {
+    let dayFilterContainer = document.querySelector('.day-filter-container');
+    if (!dayFilterContainer) {
+        dayFilterContainer = document.createElement('div');
+        dayFilterContainer.className = 'day-filter-container';
+        const searchBox = document.querySelector('.search-box');
+        if (searchBox) searchBox.parentNode.insertBefore(dayFilterContainer, searchBox.nextSibling);
+    }
+
+    dayFilterContainer.innerHTML = `
+        <div class="filter-header">Day Filters</div>
+        <div class="day-filters">
+            <label><input type="checkbox" data-day="0" checked> Mon</label>
+            <label><input type="checkbox" data-day="1" checked> Tue</label>
+            <label><input type="checkbox" data-day="2" checked> Wed</label>
+            <label><input type="checkbox" data-day="3" checked> Thu</label>
+            <label><input type="checkbox" data-day="4" checked> Fri</label>
+            <label><input type="checkbox" data-day="5" checked> Sat</label>
+            <label><input type="checkbox" data-day="6" checked> Sun</label>
+        </div>
+        <div class="filter-actions">
+            <button id="selectAllDays">Select All</button>
+            <button id="clearAllDays">Clear All</button>
+        </div>
+    `;
+
+    const dayCheckboxes = dayFilterContainer.querySelectorAll('input[type="checkbox"]');
+    dayCheckboxes.forEach(checkbox => checkbox.addEventListener('change', updateVisibleDays));
+
+    document.getElementById('selectAllDays').addEventListener('click', () => {
+        dayCheckboxes.forEach(cb => cb.checked = true);
+        updateVisibleDays();
+    });
+
+    document.getElementById('clearAllDays').addEventListener('click', () => {
+        dayCheckboxes.forEach(cb => cb.checked = false);
+        updateVisibleDays();
+    });
+
+    function updateVisibleDays() {
+        window.visibleDays = Array.from(dayCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => parseInt(cb.dataset.day));
+        console.log('Visible days:', window.visibleDays); // Placeholder
+    }
 }
 
 function setupDragAndDrop() {
@@ -248,27 +298,34 @@ function updateProgressBars() {
         const courseId = block.dataset.courseId;
         const course = window.coursesData.find(c => c.id === courseId);
         if (course) {
+            const units = course.units || 0; // Use the actual units from the course data
             switch (course.type) {
-                case 'Major': majorCredits += 3; break;
-                case 'UG Core': ugCoreCredits += 3; break;
-                case 'Free': freeCredits += 3; break;
+                case 'Major':
+                    majorCredits += units;
+                    break;
+                case 'UG Core':
+                    ugCoreCredits += units;
+                    break;
+                case 'Free':
+                    freeCredits += units;
+                    break;
             }
         }
     });
 
     const totalCredits = 120, majorTotal = 80, ugCoreTotal = 30, freeTotal = 10;
 
-    document.getElementById('majorCredits').textContent = majorCredits;
+    document.getElementById('majorCredits').textContent = majorCredits.toFixed(2); // Display with 2 decimal places
     document.getElementById('majorProgress').style.width = `${Math.min((majorCredits / majorTotal) * 100, 100)}%`;
 
-    document.getElementById('ugCoreCredits').textContent = ugCoreCredits;
+    document.getElementById('ugCoreCredits').textContent = ugCoreCredits.toFixed(2);
     document.getElementById('ugCoreProgress').style.width = `${Math.min((ugCoreCredits / ugCoreTotal) * 100, 100)}%`;
 
-    document.getElementById('freeCredits').textContent = freeCredits;
+    document.getElementById('freeCredits').textContent = freeCredits.toFixed(2);
     document.getElementById('freeProgress').style.width = `${Math.min((freeCredits / freeTotal) * 100, 100)}%`;
 
     const totalCompleted = majorCredits + ugCoreCredits + freeCredits;
-    document.getElementById('totalCredits').textContent = totalCompleted;
+    document.getElementById('totalCredits').textContent = totalCompleted.toFixed(2);
     document.getElementById('totalProgress').style.width = `${Math.min((totalCompleted / totalCredits) * 100, 100)}%`;
 }
 
