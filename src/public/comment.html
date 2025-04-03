@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Planner - Study Planner</title>
+    <title>Course Planner - Comments</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="/css/studyPlanner.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="/css/comment.css">
 </head>
 <body>
     <nav class="navbar">
@@ -20,7 +19,7 @@
             <a href="./studyPlanner.html">Study Planner</a>
             <a href="./degreeRoadmap.html">Degree Roadmap</a>
             <a href="./config.html">Config</a>
-            <a href="./comment.html"  class="active">Comment</a>
+            <a href="./comment.html" class="active">Comment</a>
         </div>
         <div class="nav-user">
             <span id="userUsername"></span>
@@ -39,6 +38,7 @@
                     <button class="semester-btn" data-semester="spring">Spring 2024</button>
                     <button class="semester-btn" data-semester="summer">Summer 2024</button>
                 </div>
+
             </div>
 
             <div class="course-selector">
@@ -49,15 +49,15 @@
                 <div class="course-list">
                     <h3>All Courses</h3>
                     <div class="course-items">
+                        <!-- Courses populated dynamically -->
                     </div>
                 </div>
             </div>
         </div>
-
-      
+        <div class="main-content"> </div>
 
     </div>
 
-    <script src="/js/studyPlanner.js"></script>
+    <script src="/js/comment.js"></script>
 </body>
 </html>

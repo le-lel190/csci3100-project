@@ -1,37 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
-    window.visibleDays = [0, 1, 2, 3, 4, 5, 6]; // Mon, Tue, Wed, Thu, Fri, Sat, Sun
-    
-    loadUserInfo();
-    setupLogout();
+    console.log("1");
+
     initializeSemesterButtons();
+    console.log("2");
+
+    initializeCourseSelection();
+    console.log("3");
+
     initializeSearch();
-    initializeDayFilters();
-    setupDemoButton();
+    console.log("4");
+
     loadCourseData();
-    setupDragAndDrop();
-    setupAddYearButton();
-    updateProgressBars();
+    console.log("5");
+
+    loadUserInfo();
+    console.log("6");
+
+    setupLogout();
+    console.log("7");
+
 });
 
-function setupDemoButton() {
-    const demoButton = document.getElementById('loadDemoButton');
-    if (demoButton) {
-        demoButton.addEventListener('click', () => {
-            demoButton.textContent = 'Loading Demo...';
-            demoButton.disabled = true;
-            
-            const semesterButtons = document.querySelectorAll('.semester-btn');
-            semesterButtons.forEach(btn => btn.classList.remove('active'));
-            
-            loadDemoDataFromAPI()
-                .finally(() => {
-                    demoButton.textContent = 'Load Demo Data';
-                    demoButton.disabled = false;
-                });
-        });
-    }
-}
 
+function initializeSemesterButtons() {
+    const buttons = document.querySelectorAll('.semester-btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            buttons.forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Load semester-specific courses
+            const semester = button.dataset.semester || 'current';
+            loadCourseData(semester);
+        });
+    });
+}
 function loadCourseData(semester = 'current') {
     const courseItems = document.querySelector('.course-items');
     courseItems.innerHTML = '<div class="loading-indicator">Loading courses...</div>';
@@ -52,36 +55,6 @@ function loadCourseData(semester = 'current') {
         });
 }
 
-function loadDemoDataFromAPI() {
-    return fetch('/api/courses/demo')
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to load demo data');
-            return response.json();
-        })
-        .then(courses => {
-            window.coursesData = courses;
-            populateCourseList(courses);
-        })
-        .catch(error => {
-            console.error('Error loading demo data:', error);
-            loadDemoData();
-        });
-}
-
-function loadDemoData() {
-    const courses = [
-        { id: 'CSCI 3100', name: 'Software Engineering', color: '#c2e0c6', selected: true, type: 'Major' },
-        { id: 'CSCI 3180', name: 'Principles of Programming Languages', color: '#d0e0f0', selected: true, type: 'Major' },
-        { id: 'CSCI 3250', name: 'Computers and Society', color: '#f0e0d0', selected: true, type: 'UG Core' },
-        { id: 'CSCI 3251', name: 'Engineering Practicum', color: '#e0d0f0', selected: true, type: 'UG Core' },
-        { id: 'CSCI 4430', name: 'Data Communication and Computer Networks', color: '#e0f0d0', selected: true, type: 'Major' },
-        { id: 'GESC 1000', name: 'College Assembly', color: '#f0d0e0', selected: true, type: 'Free' },
-        { id: 'STAT 2005', name: 'Statistics', color: '#d0f0e0', selected: true, type: 'Free' }
-    ];
-    window.coursesData = courses;
-    populateCourseList(courses);
-}
-
 function populateCourseList(courses) {
     const courseItems = document.querySelector('.course-items');
     courseItems.innerHTML = '';
@@ -98,17 +71,81 @@ function populateCourseList(courses) {
         `;
         courseItem.draggable = true;
         courseItem.dataset.courseId = course.id;
-
+        courseItem.dataset.courseName = course.name;
         courseItem.addEventListener('dragstart', (e) => {
             e.dataTransfer.setData('text/plain', course.id);
         });
 
-        courseItem.querySelector('input').addEventListener('change', (e) => {
+        const checkbox = courseItem.querySelector('input');
+        checkbox.addEventListener('change', (e) => {
             course.selected = e.target.checked;
+            if (e.target.checked) {
+                console.log("DLLM ah");
+
+                displayCourseCode(course.id, course.name);
+            } else {
+                clearCourseCode();
+            }
         });
 
         courseItems.appendChild(courseItem);
     });
+}
+
+function displayCourseCode(courseId, courseName) {
+    console.log("DLLM ah 2");
+
+    const commentForm = document.querySelector('.main-content');
+    console.log("Main content element:", commentForm); // Check if it's null
+
+    if (commentForm) {
+        console.log("DLLM ah 3");
+        commentForm.innerHTML = `
+            <div class="comment-section">
+                <div class="comment-header">
+                    <h2>Course Comments</h2>
+                    <p class="course-title" id="selectedCourse">AIST 1000 - Introduction to AI</p>
+                </div>
+                
+                <div class="course-info" id="courseInfo">
+                    <p><strong>courseID:</strong> ${courseId}</p>
+                    <p><strong>Title:</strong> ${courseName}</p>
+                </div>
+                
+                <div class="comments-container" id="commentsContainer">
+                    <!-- Example of comment structure for JS to follow -->
+                    <div class="comment-block">
+                        <div class="comment-author">John Doe</div>
+                        <div class="comment-date">March 29, 2025</div>
+                        <div class="comment-content">
+                            <p>This course was very helpful for understanding the fundamentals of AI. The professor explained complex concepts clearly.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="comment-block">
+                        <div class="comment-author">Jane Smith</div>
+                        <div class="comment-date">March 25, 2025</div>
+                        <div class="comment-content">
+                            <p>Great course! The assignments were challenging but really helped solidify the material.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="comment-form">
+                    <textarea id="newComment" placeholder="Share your experience with this course..."></textarea>
+                    <button id="postComment" class="post-btn">Post Comment</button>
+                </div>
+            </div>
+
+        `;
+    }
+}
+
+function clearCourseCode() {
+    const mainContent = document.querySelector('.main-content');
+    if (mainContent) {
+        mainContent.innerHTML = '';
+    }
 }
 
 function initializeSemesterButtons() {
@@ -135,172 +172,7 @@ function initializeSearch() {
     });
 }
 
-function initializeDayFilters() {
-    let dayFilterContainer = document.querySelector('.day-filter-container');
-    if (!dayFilterContainer) {
-        dayFilterContainer = document.createElement('div');
-        dayFilterContainer.className = 'day-filter-container';
-        const searchBox = document.querySelector('.search-box');
-        if (searchBox) searchBox.parentNode.insertBefore(dayFilterContainer, searchBox.nextSibling);
-    }
 
-    dayFilterContainer.innerHTML = `
-        <div class="filter-header">Day Filters</div>
-        <div class="day-filters">
-            <label><input type="checkbox" data-day="0" checked> Mon</label>
-            <label><input type="checkbox" data-day="1" checked> Tue</label>
-            <label><input type="checkbox" data-day="2" checked> Wed</label>
-            <label><input type="checkbox" data-day="3" checked> Thu</label>
-            <label><input type="checkbox" data-day="4" checked> Fri</label>
-            <label><input type="checkbox" data-day="5" checked> Sat</label>
-            <label><input type="checkbox" data-day="6" checked> Sun</label>
-        </div>
-        <div class="filter-actions">
-            <button id="selectAllDays">Select All</button>
-            <button id="clearAllDays">Clear All</button>
-        </div>
-    `;
-
-    const dayCheckboxes = dayFilterContainer.querySelectorAll('input[type="checkbox"]');
-    dayCheckboxes.forEach(checkbox => checkbox.addEventListener('change', updateVisibleDays));
-
-    document.getElementById('selectAllDays').addEventListener('click', () => {
-        dayCheckboxes.forEach(cb => cb.checked = true);
-        updateVisibleDays();
-    });
-
-    document.getElementById('clearAllDays').addEventListener('click', () => {
-        dayCheckboxes.forEach(cb => cb.checked = false);
-        updateVisibleDays();
-    });
-
-    function updateVisibleDays() {
-        window.visibleDays = Array.from(dayCheckboxes)
-            .filter(cb => cb.checked)
-            .map(cb => parseInt(cb.dataset.day));
-        console.log('Visible days:', window.visibleDays); // Placeholder
-    }
-}
-
-function setupDragAndDrop() {
-    const cells = document.querySelectorAll('.timetable td:not(:first-child)');
-    cells.forEach(cell => {
-        cell.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            if (cell.querySelectorAll('.course-block').length < parseInt(cell.dataset.maxCourses || Infinity)) {
-                cell.classList.add('drag-over');
-            }
-        });
-
-        cell.addEventListener('dragleave', () => {
-            cell.classList.remove('drag-over');
-        });
-
-        cell.addEventListener('drop', (e) => {
-            e.preventDefault();
-            cell.classList.remove('drag-over');
-            if (cell.querySelectorAll('.course-block').length >= parseInt(cell.dataset.maxCourses || Infinity)) return;
-
-            const courseId = e.dataTransfer.getData('text/plain');
-            const course = window.coursesData.find(c => c.id === courseId);
-            if (course) {
-                const courseBlock = document.createElement('div');
-                courseBlock.className = 'course-block';
-                courseBlock.dataset.courseId = course.id;
-                courseBlock.style.backgroundColor = course.color || '#e8f5e9';
-                courseBlock.innerHTML = `
-                    <div class="course-title">${course.id}</div>
-                    <div class="course-name">${course.name}</div>
-                `;
-                cell.appendChild(courseBlock);
-                updateProgressBars();
-            }
-        });
-    });
-}
-
-function setupAddYearButton() {
-    const addYearBtn = document.getElementById('addYearBtn');
-    let yearCount = 4;
-
-    addYearBtn.addEventListener('click', () => {
-        yearCount++;
-        const thead = document.querySelector('.timetable thead tr');
-        const th = document.createElement('th');
-        th.textContent = `Year ${yearCount}`;
-        thead.appendChild(th);
-
-        const tbody = document.querySelector('.timetable tbody');
-        tbody.querySelectorAll('tr').forEach(row => {
-            const td = document.createElement('td');
-            td.dataset.year = yearCount;
-            td.dataset.semester = row.cells[0].textContent.split(' ')[1] || '1';
-            td.dataset.maxCourses = row.cells[1].dataset.maxCourses; // Copy max courses from existing cell
-            row.appendChild(td);
-            td.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                if (td.querySelectorAll('.course-block').length < parseInt(td.dataset.maxCourses || Infinity)) {
-                    td.classList.add('drag-over');
-                }
-            });
-            td.addEventListener('dragleave', () => {
-                td.classList.remove('drag-over');
-            });
-            td.addEventListener('drop', (e) => {
-                e.preventDefault();
-                td.classList.remove('drag-over');
-                if (td.querySelectorAll('.course-block').length >= parseInt(td.dataset.maxCourses || Infinity)) return;
-
-                const courseId = e.dataTransfer.getData('text/plain');
-                const course = window.coursesData.find(c => c.id === courseId);
-                if (course) {
-                    const courseBlock = document.createElement('div');
-                    courseBlock.className = 'course-block';
-                    courseBlock.dataset.courseId = course.id;
-                    courseBlock.style.backgroundColor = course.color || '#e8f5e9';
-                    courseBlock.innerHTML = `
-                        <div class="course-title">${course.id}</div>
-                        <div class="course-name">${course.name}</div>
-                    `;
-                    td.appendChild(courseBlock);
-                    updateProgressBars();
-                }
-            });
-        });
-    });
-}
-
-function updateProgressBars() {
-    const courseBlocks = document.querySelectorAll('.timetable .course-block');
-    let majorCredits = 0, ugCoreCredits = 0, freeCredits = 0;
-
-    courseBlocks.forEach(block => {
-        const courseId = block.dataset.courseId;
-        const course = window.coursesData.find(c => c.id === courseId);
-        if (course) {
-            switch (course.type) {
-                case 'Major': majorCredits += 3; break;
-                case 'UG Core': ugCoreCredits += 3; break;
-                case 'Free': freeCredits += 3; break;
-            }
-        }
-    });
-
-    const totalCredits = 120, majorTotal = 80, ugCoreTotal = 30, freeTotal = 10;
-
-    document.getElementById('majorCredits').textContent = majorCredits;
-    document.getElementById('majorProgress').style.width = `${Math.min((majorCredits / majorTotal) * 100, 100)}%`;
-
-    document.getElementById('ugCoreCredits').textContent = ugCoreCredits;
-    document.getElementById('ugCoreProgress').style.width = `${Math.min((ugCoreCredits / ugCoreTotal) * 100, 100)}%`;
-
-    document.getElementById('freeCredits').textContent = freeCredits;
-    document.getElementById('freeProgress').style.width = `${Math.min((freeCredits / freeTotal) * 100, 100)}%`;
-
-    const totalCompleted = majorCredits + ugCoreCredits + freeCredits;
-    document.getElementById('totalCredits').textContent = totalCompleted;
-    document.getElementById('totalProgress').style.width = `${Math.min((totalCompleted / totalCredits) * 100, 100)}%`;
-}
 
 function loadUserInfo() {
     fetch('/api/auth/login', {
@@ -334,4 +206,95 @@ function setupLogout() {
             console.error('Logout failed:', error);
         }
     });
+}
+
+// Load all course data from JSON files
+async function loadAllCourseData() {
+    try {
+        // Load course list
+        const courseListResponse = await fetch('courses.json');
+        const courseList = await courseListResponse.json();
+        
+        // Load department-specific course data
+        const departments = ['AIST', 'CDAS', 'CENG', 'CSCI'];
+        
+        for (const dept of departments) {
+            try {
+                const response = await fetch(`${dept}.json`);
+                const data = await response.json();
+                
+                // Process and store the course data
+                if (!courseData[dept]) {
+                    courseData[dept] = {};
+                }
+                
+                // Process each course in the JSON file
+                if (Array.isArray(data)) {
+                    data.forEach(course => {
+                        if (course.code) {
+                            const courseCode = course.code;
+                            courseData[dept][courseCode] = course;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error(`Error loading ${dept} data:`, error);
+            }
+        }
+        
+        // Initialize course selection after data is loaded
+        initializeCourseSelection();
+    } catch (error) {
+        console.error('Error loading course data:', error);
+    }
+}
+
+// Initialize course selection event listeners
+function initializeCourseSelection() {
+    // Add click event listeners to course items
+    document.addEventListener('click', (event) => {
+        // Find if a course item or its child was clicked
+        const courseItem = event.target.closest('.course-item');
+        
+        if (courseItem) {
+            // Only handle clicks on the course item, not on the checkbox
+            if (event.target.tagName.toLowerCase() !== 'input') {
+                const courseCode = courseItem.querySelector('input').id;
+                const courseName = courseItem.querySelector('.course-name').textContent;
+                
+                // Extract department and code
+                const parts = courseCode.split(' ');
+                if (parts.length >= 2) {
+                    const dept = parts[0];
+                    const code = parts[1];
+                    
+                    // Handle the course selection
+                    handleCourseSelection(dept, code, courseName);
+                }
+            }
+        }
+    });
+}
+
+// Handle course selection
+function handleCourseSelection(department, courseNumber, courseName) {
+    // Set current course
+    currentCourse = {
+        department: department,
+        code: courseNumber,
+        name: courseName
+    };
+    
+    // Get the main content area
+    const mainContent = document.querySelector('.main-content');
+    if (!mainContent) return;
+    
+    // Create and display the comment section
+    mainContent.innerHTML = createCommentSectionHTML(currentCourse);
+    
+    // Load course details and comments
+    loadCourseDetails(department, courseNumber);
+    
+    // Setup the comment form
+    setupCommentForm();
 }
