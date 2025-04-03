@@ -177,7 +177,7 @@ function setupDragAndDrop() {
                 const courseBlock = document.createElement('div');
                 courseBlock.className = 'course-block';
                 courseBlock.dataset.courseId = course.id;
-                courseBlock.style.backgroundColor = course.color || '#e8f5e9';
+                courseBlock.style.backgroundColor = course.color || '#f0e6ff'; // Update to use purple theme
                 courseBlock.innerHTML = `
                     <div class="course-title">${course.id}</div>
                     <div class="course-name">${course.name}</div>

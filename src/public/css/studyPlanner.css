@@ -3,7 +3,7 @@
     --primary-color: #663399;
     --primary-light: #f0e6ff;
     --secondary-color: #9370DB;
-    --accent-color: #DAA520;
+    --accent-color: #ffb700;
     --text-color: #2c3e50;
     --text-light: #7f8c8d;
     --border-color: #dcdde1;
@@ -146,7 +146,7 @@ body {
 
 .demo-btn {
     padding: 0.75rem 1.5rem;
-    background-color: #f39c12;
+    background-color: var(--accent-color);
     color: white;
     border: none;
     border-radius: 5px;
@@ -159,7 +159,7 @@ body {
 }
 
 .demo-btn:hover {
-    background-color: #e67e22;
+    background-color: #B8860B;
     transform: translateY(-2px);
     box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
@@ -305,7 +305,7 @@ body {
 
 /* Drop Zone Highlight */
 .timetable td.drag-over {
-    background-color: #e0f0e0;
+    background-color: var(--primary-light);
 }
 
 /* Add Year Button */
@@ -323,7 +323,7 @@ body {
 }
 
 .submit-btn:hover {
-    background-color: #225f3d;
+    background-color: #542980;
     transform: translateY(-1px);
 }
 

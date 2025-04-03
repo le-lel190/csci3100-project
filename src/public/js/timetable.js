@@ -231,56 +231,148 @@ function exportTimetableToCsv() {
  * Capture and save timetable as image
  */
 function captureAndSaveTimetable() {
-            const timetableElement = document.querySelector('.timetable');
-            if (!timetableElement) {
-                alert('Could not find timetable to capture.');
-                return;
+    // Show loading indicator
+    const loadingMessage = document.createElement('div');
+    loadingMessage.className = 'loading-indicator';
+    loadingMessage.textContent = 'Generating timetable image...';
+    document.body.appendChild(loadingMessage);
+
+    // Get the timetable elements
+    const timetableElement = document.querySelector('.timetable');
+    const timetableGridContainer = document.querySelector('.timetable-grid-container');
+    const timetableGrid = document.querySelector('.timetable-grid');
+    
+    // Store original styles
+    const originalStyles = {
+        body: {
+            overflow: document.body.style.overflow
+        },
+        timetable: {
+            height: timetableElement.style.height,
+            overflow: timetableElement.style.overflow,
+            minHeight: timetableElement.style.minHeight
+        },
+        gridContainer: {
+            overflow: timetableGridContainer.style.overflow,
+            height: timetableGridContainer.style.height,
+            maxHeight: timetableGridContainer.style.maxHeight
+        }
+    };
+    
+    // Create a clone of the timetable for capturing
+    const timetableClone = timetableElement.cloneNode(true);
+    timetableClone.id = 'timetable-clone';
+    timetableClone.style.position = 'absolute';
+    timetableClone.style.left = '-9999px';
+    timetableClone.style.top = '0';
+    timetableClone.style.width = timetableGrid.scrollWidth + 'px';
+    timetableClone.style.height = 'auto';
+    timetableClone.style.overflow = 'visible';
+    timetableClone.style.minHeight = 'auto';
+    timetableClone.style.transform = 'none';
+    timetableClone.style.zIndex = '-9999';
+    
+    // Adjust clone's grid container to show everything
+    const gridContainerClone = timetableClone.querySelector('.timetable-grid-container');
+    if (gridContainerClone) {
+        gridContainerClone.style.overflow = 'visible';
+        gridContainerClone.style.height = 'auto';
+        gridContainerClone.style.maxHeight = 'none';
+    }
+    
+    // Adjust clone's grid to show everything
+    const gridClone = timetableClone.querySelector('.timetable-grid');
+    if (gridClone) {
+        gridClone.style.height = 'auto';
+    }
+    
+    // Add the clone to the body
+    document.body.appendChild(timetableClone);
+    
+    // Use html2canvas on the clone with proper settings
+    html2canvas(timetableClone, {
+        scale: 2, // Higher resolution for better quality
+        useCORS: true, // Handle cross-origin resources
+        allowTaint: true, // Allow tainted canvas
+        backgroundColor: '#ffffff', // Ensure white background
+        width: timetableGrid.scrollWidth, // Capture full width
+        height: timetableClone.scrollHeight, // Capture full height
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: timetableGrid.scrollWidth,
+        windowHeight: timetableClone.scrollHeight,
+        logging: true, // Enable logging for debugging
+        onclone: (clonedDoc) => {
+            // Further adjustments to the clone if needed
+            const finalClone = clonedDoc.getElementById('timetable-clone');
+            if (finalClone) {
+                const containers = finalClone.querySelectorAll('.timetable-grid-container, .timetable-grid');
+                containers.forEach(container => {
+                    container.style.overflow = 'visible';
+                    container.style.height = 'auto';
+                    container.style.maxHeight = 'none';
+                });
             }
-
-            const loadingMessage = document.createElement('div');
-            loadingMessage.textContent = 'Capturing timetable...';
-            loadingMessage.style.position = 'fixed';
-            loadingMessage.style.top = '50%';
-            loadingMessage.style.left = '50%';
-            loadingMessage.style.transform = 'translate(-50%, -50%)';
-            loadingMessage.style.padding = '1rem';
-            loadingMessage.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-            loadingMessage.style.color = 'white';
-            loadingMessage.style.borderRadius = '5px';
-            loadingMessage.style.zIndex = '9999';
-            document.body.appendChild(loadingMessage);
-
-            window.scrollTo(0, 0); // Ensure the element is fully visible
-            html2canvas(timetableElement, {
-                backgroundColor: '#f5f6fa',
-                scale: 2,
-                useCORS: true, // Handle external resources like FontAwesome icons
-                logging: false
-            }).then(canvas => {
-                document.body.removeChild(loadingMessage);
-                canvas.toBlob(blob => {
-                    try {
-                        const clipboardItem = new ClipboardItem({ 'image/png': blob });
-                        navigator.clipboard.write([clipboardItem])
-                            .then(() => console.log('Image copied to clipboard'))
-                            .catch(err => console.error('Error copying to clipboard:', err));
-                    } catch (e) {
-                        console.warn('Clipboard copy not supported:', e);
-                    }
-
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = URL.createObjectURL(blob);
-                    const activeSemester = document.querySelector('.semester-btn.active');
-                    const semesterName = activeSemester ? activeSemester.textContent.replace(/\s+/g, '_') : 'timetable';
-            downloadLink.download = `${semesterName}.png`;
-                    downloadLink.click();
-                    URL.revokeObjectURL(downloadLink.href);
-        }, 'image/png');
-            }).catch(error => {
-                document.body.removeChild(loadingMessage);
-                console.error('Error capturing timetable:', error);
-                alert('Error capturing timetable. Please try again.');
-        });
+        }
+    }).then(canvas => {
+        // Convert canvas to data URL
+        const imgData = canvas.toDataURL('image/png');
+        
+        // Create download link
+        const downloadLink = document.createElement('a');
+        downloadLink.href = imgData;
+        
+        // Get the active semester name for the filename
+        const activeSemester = document.querySelector('.semester-btn.active');
+        const semesterName = activeSemester ? activeSemester.textContent.replace(/\s+/g, '_') : 'timetable';
+        
+        // Use semester name in the filename
+        downloadLink.download = `${semesterName}_timetable.png`;
+        
+        // Trigger download
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // Remove the clone
+        document.body.removeChild(timetableClone);
+        
+        // Remove loading indicator
+        document.body.removeChild(loadingMessage);
+        
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.style.position = 'fixed';
+        successMessage.style.top = '20px';
+        successMessage.style.left = '50%';
+        successMessage.style.transform = 'translateX(-50%)';
+        successMessage.style.padding = '12px 24px';
+        successMessage.style.backgroundColor = 'rgba(102, 51, 153, 0.9)';
+        successMessage.style.color = 'white';
+        successMessage.style.borderRadius = '4px';
+        successMessage.style.zIndex = '9999';
+        successMessage.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        successMessage.textContent = 'Timetable image saved successfully!';
+        document.body.appendChild(successMessage);
+        
+        // Remove success message after 3 seconds
+        setTimeout(() => {
+            document.body.removeChild(successMessage);
+        }, 3000);
+    }).catch(error => {
+        console.error('Error generating timetable image:', error);
+        
+        // Remove the clone
+        if (document.getElementById('timetable-clone')) {
+            document.body.removeChild(timetableClone);
+        }
+        
+        // Remove loading indicator
+        document.body.removeChild(loadingMessage);
+        
+        // Show error message
+        alert('Failed to generate timetable image. Please try again.');
+    });
 }
 
 /**
