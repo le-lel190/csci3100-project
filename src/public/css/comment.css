@@ -930,3 +930,48 @@ body {
 .rating-dropdown:hover {
     border-color: var(--primary-color);
 }
+
+/* Styling for low ratings (1-2 stars) */
+.comment-block.low-rating {
+    background-color: #ffebee; /* Light red background */
+    border-left-color: #e53935; /* Red border */
+}
+
+/* Styling for neutral ratings (3 stars) */
+.comment-block.neutral-rating {
+    background-color:  #dceefb; /* Keep current design */
+    border-left-color: #3a7bc8; /* Default border color */
+}
+
+/* Styling for high ratings (4-5 stars) */
+.comment-block.high-rating {
+    background-color: #e8f5e9; /* Light green background */
+    border-left-color: #2e7d32; /* Green border */
+}
+
+/* Styling for sort buttons */
+.sort-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+.sort-btn {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+}
+
+.sort-btn:hover {
+    background-color: #236b42; /* Darker green on hover */
+}
+
+.sort-btn:active {
+    transform: translateY(2px); /* Button press effect */
+}

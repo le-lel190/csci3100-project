@@ -21,6 +21,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
+function setupSorting(courseId) {
+    const sortByTimeBtn = document.getElementById('sortByTime');
+    const sortByRatingBtn = document.getElementById('sortByRating');
+
+    sortByTimeBtn.addEventListener('click', () => {
+        fetch(`/api/comments/${courseId}`)
+            .then(response => response.json())
+            .then(comments => {
+                // Sort comments by time (newest first)
+                comments.sort((a, b) => new Date(b.date) - new Date(a.date));
+                displayComments(comments, courseId);
+            })
+            .catch(error => console.error('Error fetching comments:', error));
+    });
+
+    sortByRatingBtn.addEventListener('click', () => {
+        fetch(`/api/comments/${courseId}`)
+            .then(response => response.json())
+            .then(comments => {
+                // Sort comments by rating (highest first)
+                comments.sort((a, b) => b.rating - a.rating);
+                displayComments(comments, courseId);
+            })
+            .catch(error => console.error('Error fetching comments:', error));
+    });
+}
+
+
 function fetchComments(courseId) {
     fetch(`/api/comments/${courseId}`)
       .then(response => response.json())
@@ -50,6 +78,13 @@ function fetchComments(courseId) {
       const commentBlock = document.createElement('div');
       commentBlock.className = 'comment-block';
       
+    if (comment.rating <= 2) {
+        commentBlock.classList.add('low-rating'); // Red background for 1-2 stars
+    } else if (comment.rating === 3) {
+        commentBlock.classList.add('neutral-rating'); // Current design for 3 stars
+    } else if (comment.rating >= 4) {
+        commentBlock.classList.add('high-rating'); // Green background for 4-5 stars
+    }
       // Format the date
       const date = new Date(comment.date);
       const formattedDate = date.toLocaleDateString('en-US', { 
@@ -227,6 +262,10 @@ function displayCourseCode(courseId, courseName) {
             <div class="comment-section">
                 <div class="comment-header">
                     <h2>Course Comments</h2>
+                    <div class="sort-buttons">
+                        <button id="sortByTime" class="sort-btn">Sort by Time</button>
+                        <button id="sortByRating" class="sort-btn">Sort by Rating</button>
+                    </div>
                 </div>
                 
                 <div class="course-info" id="courseInfo">
@@ -255,8 +294,13 @@ function displayCourseCode(courseId, courseName) {
         `;
 
         // Set up the comment form and fetch existing comments
+        // Set up sorting functionality
+        setupSorting(courseId);
+        fetchComments(courseId);
         setupCommentForm(courseId, courseName);
         fetchComments(courseId);
+        
+
     }
 }
 
