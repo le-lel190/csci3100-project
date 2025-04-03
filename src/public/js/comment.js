@@ -78,7 +78,19 @@ function populateCourseList(courses) {
 
         const checkbox = courseItem.querySelector('input');
         checkbox.addEventListener('change', (e) => {
-            course.selected = e.target.checked;
+            // Uncheck all other checkboxes
+            const allCheckboxes = document.querySelectorAll('.course-item input[type="checkbox"]');
+            allCheckboxes.forEach(cb => {
+                if (cb !== e.target) {
+                    cb.checked = false;
+                }
+            });
+
+            // Update the `selected` property for all courses
+            courses.forEach(c => {
+                c.selected = c.id === course.id ? e.target.checked : false;
+            });
+
             if (e.target.checked) {
                 console.log("DLLM ah");
 
@@ -92,6 +104,7 @@ function populateCourseList(courses) {
     });
 }
 
+
 function displayCourseCode(courseId, courseName) {
     console.log("DLLM ah 2");
 
@@ -104,11 +117,11 @@ function displayCourseCode(courseId, courseName) {
             <div class="comment-section">
                 <div class="comment-header">
                     <h2>Course Comments</h2>
-                    <p class="course-title" id="selectedCourse">AIST 1000 - Introduction to AI</p>
+                    <p>Comment Section</p>
                 </div>
                 
                 <div class="course-info" id="courseInfo">
-                    <p><strong>courseID:</strong> ${courseId}</p>
+                    <p><strong>Course ID:</strong> ${courseId}</p>
                     <p><strong>Title:</strong> ${courseName}</p>
                 </div>
                 
