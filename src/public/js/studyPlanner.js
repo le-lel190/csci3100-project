@@ -231,7 +231,6 @@ function setupDragAndDrop() {
                 courseBlock.style.backgroundColor = course.color || '#f0e6ff'; // Update to use purple theme
                 courseBlock.innerHTML = `
                     <div class="course-title">${course.id}</div>
-                    <div class="course-name">${course.name}</div>
                 `;
                 cell.appendChild(courseBlock);
                 updateProgressBars();
@@ -289,7 +288,6 @@ function setupAddYearButton() {
                     courseBlock.style.backgroundColor = course.color || '#f0e6ff'; // Update to use purple theme
                     courseBlock.innerHTML = `
                         <div class="course-title">${course.id}</div>
-                        <div class="course-name">${course.name}</div>
                     `;
                     td.appendChild(courseBlock);
                     updateProgressBars();
@@ -483,12 +481,15 @@ function captureAndSaveStudyPlan() {
                 courseTitle.style.fontWeight = 'bold';
                 courseTitle.style.fontSize = '11px';
             }
-            
+
+            //Remove the course name to save space
+            /*
             // Make sure course names are visible
             const courseName = block.querySelector('.course-name');
             if (courseName) {
                 courseName.style.fontSize = '10px';
             }
+            */
         });
         
         // Get the semester name for the filename and title
