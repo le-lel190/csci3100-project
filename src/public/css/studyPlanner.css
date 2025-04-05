@@ -322,6 +322,8 @@ body {
 }
 .course-block.dragging {
     opacity: 0.6; /* Reduce opacity while dragging */
+    border: 2px dashed #663399; /* Add a dashed border while dragging */
+    background-color: #fff; /* Change background to white while dragging */
 }
 
 /* Drop Zone Highlight */

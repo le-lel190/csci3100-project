@@ -225,6 +225,12 @@ function setupDragAndDrop() {
             const courseId = e.dataTransfer.getData('text/plain');
             const course = window.coursesData.find(c => c.id === courseId);
             if (course) {
+                // Check if the course is already in another cell in the planner
+                const existingCourseBlock = document.querySelector(`.course-block[data-course-id="${courseId}"]`);
+                if (existingCourseBlock) {
+                    // Remove the course from its original cell
+                    existingCourseBlock.remove();
+                }
                 const courseBlock = document.createElement('div');
                 courseBlock.className = 'course-block';
                 courseBlock.dataset.courseId = course.id;
