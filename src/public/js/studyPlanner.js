@@ -297,6 +297,7 @@ function setupAddYearButton() {
             td.dataset.semester = row.cells[0].textContent.split(' ')[1] || '1';
             td.dataset.maxCourses = row.cells[1].dataset.maxCourses; // Copy max courses from existing cell
             row.appendChild(td);
+            
             td.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 if (td.querySelectorAll('.course-block').length < parseInt(td.dataset.maxCourses || Infinity)) {

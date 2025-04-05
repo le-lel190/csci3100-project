@@ -257,7 +257,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    height: calc(100% - 2.5rem); /* Adjust for header height */
+    height: 100%
 }
 
 .timetable thead {
@@ -268,42 +268,46 @@ body {
 }
 
 .timetable tbody {
-    flex: 1;
+    height: calc(100% - 40px);
 }
 
-.timetable th,
 .timetable td {
     border: 1px solid var(--border-color);
     padding: 0.4rem;
     text-align: center;
-    min-height: 30px;
-    vertical-align: middle;
+    vertical-align: top; /* Align content to the top */
+    height: 33.33%; /* Distribute height equally among 3 semesters */
 }
 
 .timetable th {
     background-color: var(--primary-light);
     color: var(--primary-color);
     font-weight: 600;
-    vertical-align: middle;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+/* First column (Semester labels) */
+.timetable td:first-child {
+    font-weight: 600;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
 }
 
 /* Draggable Course Block - Adapted */
 .course-block {
     background-color: var(--primary-light);
     border-radius: 4px;
-    padding: 0.2rem 0.5rem;
-    margin: 0.1rem 0;
-    font-size: 0.8rem;
+    padding: 0.3rem 0.5rem;
+    margin: 0.2rem 0;
+    font-size: 0.85rem;
     cursor: move;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 1;
-    overflow: hidden;
-    min-height: 24px;
+    display: inline-block; /* Display blocks inline to allow multiple courses per cell */
+    width: calc(100% - 4px); /* Full width minus margins */
+    box-sizing: border-box;
+    min-height: 28px;
+    text-align: center;
 }
 
 .course-title {
@@ -314,7 +318,7 @@ body {
 .course-block:hover {
     transform: scale(1.02);
     box-shadow: 0 2px 8px rgba(102, 51, 153, 0.25);
-    z-index: 10;
+
 }
 .course-block.dragging {
     opacity: 0.6; /* Reduce opacity while dragging */
