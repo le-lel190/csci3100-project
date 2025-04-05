@@ -180,11 +180,40 @@ body {
     overflow-y: auto;
 }
 
+.course-list h3 {
+    margin-top: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
 .course-items {
     margin-top: 0.75rem;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+}
+
+.selected-course-items {
+    margin-top: 0.75rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.selected-course-items:empty {
+    display: none;
+}
+
+.selected-course-items .course-item {
+    border-left: 3px solid var(--primary-color);
+}
+
+.course-item.highlighted {
+    background-color: var(--primary-light);
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all var(--transition-speed) ease;
 }
 
 /* Fix for course items to prevent indentation */

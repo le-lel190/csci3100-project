@@ -131,9 +131,11 @@ function initializeSearch() {
     const searchInput = document.getElementById('courseSearch');
     searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
-        const courseItems = document.querySelectorAll('.course-item');
         
-        courseItems.forEach(item => {
+        // Get all course items from both sections
+        const allCourseItems = document.querySelectorAll('.course-item');
+        
+        allCourseItems.forEach(item => {
             const courseText = item.textContent.toLowerCase();
             const courseId = item.querySelector('input[type="checkbox"]')?.id;
             
@@ -174,7 +176,33 @@ function initializeSearch() {
             
             item.style.display = isMatch ? 'block' : 'none';
         });
+        
+        // Show/hide section headers based on whether they have any visible courses
+        updateCourseListHeaders();
     });
+}
+
+/**
+ * Update course list headers visibility based on search results
+ */
+function updateCourseListHeaders() {
+    const selectedCourseItems = document.querySelector('.selected-course-items');
+    const courseItems = document.querySelector('.course-items');
+    
+    // Get all headers in the course list
+    const courseListHeaders = document.querySelectorAll('.course-list h3');
+    
+    // Check if there are any visible courses in the selected section
+    const hasVisibleSelectedCourses = Array.from(selectedCourseItems.querySelectorAll('.course-item'))
+        .some(item => item.style.display !== 'none');
+    
+    // Check if there are any visible courses in the all courses section
+    const hasVisibleCourses = Array.from(courseItems.querySelectorAll('.course-item'))
+        .some(item => item.style.display !== 'none');
+    
+    // Update visibility of headers - first header is Selected Courses, second is All Courses
+    courseListHeaders[0].style.display = hasVisibleSelectedCourses ? 'block' : 'none';
+    courseListHeaders[1].style.display = hasVisibleCourses ? 'block' : 'none';
 }
 
 /**
@@ -813,9 +841,18 @@ function loadDemoData() {
  */
 function populateCourseList(courses) {
     const courseItems = document.querySelector('.course-items');
+    const selectedCourseItems = document.querySelector('.selected-course-items');
+    
+    // Clear both sections
     courseItems.innerHTML = '';
+    selectedCourseItems.innerHTML = '';
+    
+    // Separate courses into selected and unselected
+    const selectedCourses = courses.filter(course => course.selected);
+    const unselectedCourses = courses.filter(course => !course.selected);
 
-    courses.forEach(course => {
+    // Helper function to create course items
+    const createCourseItem = (course) => {
         const courseItem = document.createElement('div');
         courseItem.className = 'course-item';
         
@@ -916,12 +953,28 @@ function populateCourseList(courses) {
                 updateTimetableDisplay(courses);
             }
         });
-
-        courseItems.appendChild(courseItem);
         
         // Add course selection handler - this handles conflict checking
         handleCourseSelection(checkbox, course);
+        
+        return courseItem;
+    };
+
+    // Populate selected courses
+    selectedCourses.forEach(course => {
+        const courseItem = createCourseItem(course);
+        selectedCourseItems.appendChild(courseItem);
     });
+    
+    // Populate unselected courses
+    unselectedCourses.forEach(course => {
+        const courseItem = createCourseItem(course);
+        courseItems.appendChild(courseItem);
+    });
+    
+    // Show/hide the "Selected Courses" header based on whether there are any selected courses
+    const courseListHeaders = document.querySelectorAll('.course-list h3');
+    courseListHeaders[0].style.display = selectedCourses.length > 0 ? 'block' : 'none';
 }
 
 /**
@@ -1323,15 +1376,17 @@ function getRandomColor(courseId) {
  * Highlight a course in the course list
  */
 function highlightCourseInList(courseId) {
-                const courseItems = document.querySelectorAll('.course-item');
-                courseItems.forEach(item => {
+    // Look in both selected and unselected course lists
+    const allCourseItems = document.querySelectorAll('.course-item');
+    
+    allCourseItems.forEach(item => {
         const itemCheckbox = item.querySelector('input[type="checkbox"]');
         if (itemCheckbox && itemCheckbox.id === courseId) {
-                        item.classList.add('highlighted');
-                    } else {
-                        item.classList.remove('highlighted');
-                    }
-                });
+            item.classList.add('highlighted');
+        } else {
+            item.classList.remove('highlighted');
+        }
+    });
 }
 
 /**
@@ -1660,6 +1715,9 @@ function handleCourseSelection(checkbox, course) {
         
         // Update the timetable display
         updateTimetableDisplay(window.coursesData);
+        
+        // Refresh the course list to move the course to the appropriate section
+        populateCourseList(window.coursesData);
     });
 }
 
