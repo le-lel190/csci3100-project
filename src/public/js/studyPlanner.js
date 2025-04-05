@@ -232,10 +232,42 @@ function setupDragAndDrop() {
                 courseBlock.innerHTML = `
                     <div class="course-title">${course.id}</div>
                 `;
+                courseBlock.draggable = true; // Make the course block draggable
+                courseBlock.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', course.id);
+                    e.target.classList.add('dragging');
+                });
+                courseBlock.addEventListener('dragend', (e) => {
+                    e.target.classList.remove('dragging');
+                });
+                
                 cell.appendChild(courseBlock);
                 updateProgressBars();
             }
         });
+    });
+    // Set up the search panel as a drop target
+    const courseItems = document.querySelector('.course-items');
+    courseItems.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        courseItems.classList.add('drag-over');
+    });
+
+    courseItems.addEventListener('dragleave', () => {
+        courseItems.classList.remove('drag-over');
+    });
+
+    courseItems.addEventListener('drop', (e) => {
+        e.preventDefault();
+        courseItems.classList.remove('drag-over');
+        const courseId = e.dataTransfer.getData('text/plain');
+        
+        // Find and remove the course block from the timetable
+        const courseBlock = document.querySelector(`.course-block[data-course-id="${courseId}"]`);
+        if (courseBlock) {
+            courseBlock.remove();
+            updateProgressBars();
+        }
     });
 }
 
@@ -289,6 +321,14 @@ function setupAddYearButton() {
                     courseBlock.innerHTML = `
                         <div class="course-title">${course.id}</div>
                     `;
+                    courseBlock.draggable = true;
+                    courseBlock.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', course.id);
+                        e.target.classList.add('dragging');
+                    });
+                    courseBlock.addEventListener('dragend', (e) => {
+                        e.target.classList.remove('dragging');
+                    });
                     td.appendChild(courseBlock);
                     updateProgressBars();
                 }

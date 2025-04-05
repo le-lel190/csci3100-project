@@ -211,10 +211,18 @@ body {
     cursor: pointer;
 }
 
+.course-items.drag-over {
+    background-color: rgba(102, 51, 153, 0.1); /* Light purple highlight */
+    border: 2px dashed var(--primary-color);
+}
+
+/*remove name*/
+/*
 .course-name {
     font-size: 0.9rem;
     color: var(--text-light);
 }
+*/
 
 /* Main Content and Timetable Styles - Adapted for Study Plan */
 .main-content {
@@ -307,6 +315,9 @@ body {
     transform: scale(1.02);
     box-shadow: 0 2px 8px rgba(102, 51, 153, 0.25);
     z-index: 10;
+}
+.course-block.dragging {
+    opacity: 0.6; /* Reduce opacity while dragging */
 }
 
 /* Drop Zone Highlight */
