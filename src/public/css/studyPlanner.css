@@ -287,6 +287,7 @@ body {
     border: 1px solid var(--border-color);
     padding: 0.4rem;
     text-align: center;
+    box-sizing: border-box;
     vertical-align: top; /* Align content to the top */
     height: 33.33%; /* Distribute height equally among 3 semesters */
 }
@@ -296,6 +297,7 @@ body {
     color: var(--primary-color);
     font-weight: 600;
     padding: 0.5rem;
+    box-sizing: border-box;
     border: 1px solid var(--border-color);
 }
 
