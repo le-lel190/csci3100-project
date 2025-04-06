@@ -276,6 +276,12 @@ body {
 .timetable tbody {
     height: calc(100% - 40px);
 }
+/* Center the semester labels in the first column of the table body */
+.timetable tbody tr td:first-child {
+    text-align: center;
+    vertical-align: middle;
+    font-weight: bold;
+}
 
 .timetable td {
     border: 1px solid var(--border-color);
