@@ -404,7 +404,7 @@ body {
     border-radius: 4px;
     color: var(--text-color);
     font-size: 0.9rem;
-    min-height: 150px;
+    min-height: 250x;
 }
 
 .details-content p {
@@ -530,6 +530,7 @@ body {
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 1rem;
+    flex-shrink:  0;
 }
 
 .button-row {
