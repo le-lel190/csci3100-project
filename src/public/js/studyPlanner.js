@@ -21,11 +21,12 @@ function setupDemoButton() {
             const semesterButtons = document.querySelectorAll('.semester-btn');
             semesterButtons.forEach(btn => btn.classList.remove('active'));
             
-            loadDemoDataFromAPI()
-                .finally(() => {
-                    demoButton.textContent = 'Load Demo Data';
-                    demoButton.disabled = false;
-                });
+            // Call loadDemoData directly instead of loadDemoDataFromAPI
+            loadDemoData();
+            
+            // Re-enable the button after loading
+            demoButton.textContent = 'Load Demo Data';
+            demoButton.disabled = false;
         });
     }
 }
@@ -49,7 +50,8 @@ function loadCourseData(semester = 'current') {
             document.getElementById('loadDemoData').addEventListener('click', loadDemoDataFromAPI);
         });
 }
-
+/* remove this*/
+/*
 function loadDemoDataFromAPI() {
     return fetch('/api/courses/demo')
         .then(response => {
@@ -65,19 +67,72 @@ function loadDemoDataFromAPI() {
             loadDemoData();
         });
 }
-
+*/
 function loadDemoData() {
+    // Define demo courses with name, type, and credits (units)
     const courses = [
-        { id: 'CSCI 3100', name: 'Software Engineering', color: '#c2e0c6', selected: true, type: 'Major' },
-        { id: 'CSCI 3180', name: 'Principles of Programming Languages', color: '#d0e0f0', selected: true, type: 'Major' },
-        { id: 'CSCI 3250', name: 'Computers and Society', color: '#f0e0d0', selected: true, type: 'UG Core' },
-        { id: 'CSCI 3251', name: 'Engineering Practicum', color: '#e0d0f0', selected: true, type: 'UG Core' },
-        { id: 'CSCI 4430', name: 'Data Communication and Computer Networks', color: '#e0f0d0', selected: true, type: 'Major' },
-        { id: 'GESC 1000', name: 'College Assembly', color: '#f0d0e0', selected: true, type: 'Free' },
-        { id: 'STAT 2005', name: 'Statistics', color: '#d0f0e0', selected: true, type: 'Free' }
+        { id: 'CSCI 3100', name: 'Software Engineering', type: 'Major', units: 3, color: '#c2e0c6', selected: true },
+        { id: 'CSCI 3180', name: 'Principles of Programming Languages', type: 'Major', units: 3, color: '#d0e0f0', selected: true },
+        { id: 'CSCI 3250', name: 'Computers and Society', type: 'UG Core', units: 3, color: '#f0e0d0', selected: true },
+        { id: 'CSCI 3251', name: 'Engineering Practicum', type: 'UG Core', units: 1, color: '#e0d0f0', selected: true },
+        { id: 'CSCI 4430', name: 'Data Communication and Computer Networks', type: 'Major', units: 3, color: '#e0f0d0', selected: true },
+        { id: 'GESC 1000', name: 'College Assembly', type: 'Free', units: 1, color: '#f0d0e0', selected: true },
+        { id: 'STAT 2005', name: 'Statistics', type: 'Free', units: 3, color: '#d0f0e0', selected: true },
+        { id: 'AIST 2010', name: 'Introduction to Artificial Intelligence', type: 'Major', units: 3, color: '#f0d0d0', selected: true },
+        { id: 'AIST 2601', name: 'Machine Learning Fundamentals', type: 'Major', units: 3, color: '#d0f0e0', selected: true },
+        { id: 'AIST 3010', name: 'Advanced Data Science', type: 'Major', units: 3, color: '#e0d0f0', selected: true }
     ];
+
+    // Store the courses in the global variable
     window.coursesData = courses;
+
+    // Populate the course list in the sidebar
     populateCourseList(courses);
+
+    // Pre-populate the study plan with some courses
+    const timetableCells = document.querySelectorAll('.timetable td:not(:first-child)');
+    timetableCells.forEach(cell => {
+        cell.innerHTML = ''; // Clear any existing courses in the study plan
+    });
+
+    // Define which courses to place in specific semesters and years
+    const demoPlacements = [
+        { courseId: 'CSCI 3100', year: 1, semester: 1 }, // Software Engineering in Year 1, Semester 1
+        { courseId: 'CSCI 3251', year: 1, semester: 1 }, // Engineering Practicum in Year 1, Semester 1
+        { courseId: 'AIST 2601', year: 1, semester: 2 }, // Machine Learning Fundamentals in Year 1, Semester 2
+        { courseId: 'AIST 2010', year: 2, semester: 1 }, // Introduction to AI in Year 2, Semester 1
+        { courseId: 'AIST 3010', year: 2, semester: 2 }  // Advanced Data Science in Year 2, Semester 2
+    ];
+
+    demoPlacements.forEach(placement => {
+        const { courseId, year, semester } = placement;
+        const course = courses.find(c => c.id === courseId);
+        if (course) {
+            // Find the cell for the specified year and semester
+            const cell = document.querySelector(`.timetable td[data-year="${year}"][data-semester="${semester}"]`);
+            if (cell && cell.querySelectorAll('.course-block').length < parseInt(cell.dataset.maxCourses || Infinity)) {
+                const courseBlock = document.createElement('div');
+                courseBlock.className = 'course-block';
+                courseBlock.dataset.courseId = course.id;
+                courseBlock.style.backgroundColor = course.color || '#f0e6ff';
+                courseBlock.innerHTML = `
+                    <div class="course-title">${course.id}</div>
+                `;
+                courseBlock.draggable = true;
+                courseBlock.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', course.id);
+                    e.target.classList.add('dragging');
+                });
+                courseBlock.addEventListener('dragend', (e) => {
+                    e.target.classList.remove('dragging');
+                });
+                cell.appendChild(courseBlock);
+            }
+        }
+    });
+
+    // Update the progress bars after placing the courses
+    updateProgressBars();
 }
 
 function populateCourseList(courses) {

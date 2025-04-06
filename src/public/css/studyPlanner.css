@@ -313,7 +313,8 @@ body {
     background-color: var(--primary-light);
     border-radius: 4px;
     padding: 0.3rem 0.5rem;
-    margin: 0.2rem 0;
+    display: block;
+    margin: 6px 0;
     font-size: 0.85rem;
     cursor: move;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
