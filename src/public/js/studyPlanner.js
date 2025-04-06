@@ -71,16 +71,47 @@ function loadDemoDataFromAPI() {
 function loadDemoData() {
     // Define demo courses with name, type, and credits (units)
     const courses = [
-        { id: 'CSCI 3100', name: 'Software Engineering', type: 'Major', units: 3, color: '#c2e0c6', selected: true },
-        { id: 'CSCI 3180', name: 'Principles of Programming Languages', type: 'Major', units: 3, color: '#d0e0f0', selected: true },
-        { id: 'CSCI 3250', name: 'Computers and Society', type: 'UG Core', units: 3, color: '#f0e0d0', selected: true },
-        { id: 'CSCI 3251', name: 'Engineering Practicum', type: 'UG Core', units: 1, color: '#e0d0f0', selected: true },
-        { id: 'CSCI 4430', name: 'Data Communication and Computer Networks', type: 'Major', units: 3, color: '#e0f0d0', selected: true },
-        { id: 'GESC 1000', name: 'College Assembly', type: 'Free', units: 1, color: '#f0d0e0', selected: true },
-        { id: 'STAT 2005', name: 'Statistics', type: 'Free', units: 3, color: '#d0f0e0', selected: true },
-        { id: 'AIST 2010', name: 'Introduction to Artificial Intelligence', type: 'Major', units: 3, color: '#f0d0d0', selected: true },
-        { id: 'AIST 2601', name: 'Machine Learning Fundamentals', type: 'Major', units: 3, color: '#d0f0e0', selected: true },
-        { id: 'AIST 3010', name: 'Advanced Data Science', type: 'Major', units: 3, color: '#e0d0f0', selected: true }
+        { id: 'CSCI 3100', name: 'Software Engineering', units: 3, color: '#d0e0f0', selected: true, type: 'Major' },
+        { id: 'CSCI 3180', name: 'Principles of Programming Lang', units: 3, color: '#f0e0d0', selected: true, type: 'Major' },
+        { id: 'CSCI 3250', name: 'Computers and Society', units: 2, color: '#e0d0f0', selected: true, type: 'Major' },
+        { id: 'CSCI 3251', name: 'Engineering Practicum', units: 1, color: '#e0f0d0', selected: true, type: 'Major' },
+        { id: 'CSCI 3320', name: 'Fund. of Machine Learning', units: 3, color: '#f0d0e0', selected: true, type: 'Major' },
+        { id: 'ELTU 3014', name: 'English for ERG Studs II', units: 2, color: '#c2e0c6', selected: true, type: 'UG Core' },
+        { id: 'STAT 2005', name: 'Programming Lang for Stat', units: 3, color: '#f0e0d0', selected: true, type: 'Major' },
+        { id: 'UGCP 1001', name: 'Understanding China', units: 1, color: '#e0d0f0', selected: true, type: 'UG Core' },
+        { id: 'CSCI 3130', name: 'Formal Lang & Automata Theory', units: 3, color: '#e0f0d0', selected: true, type: 'Major' },
+        { id: 'CSCI 3150', name: 'Intro to Operating Systems', units: 3, color: '#f0d0e0', selected: true, type: 'Major' },
+        { id: 'CSCI 3160', name: 'Design & Analysis of Algo', units: 3, color: '#d0f0e0', selected: true, type: 'Major' },
+        { id: 'CSCI 3230', name: 'Fundamentals of AI', units: 3, color: '#f0d0d0', selected: true, type: 'Major' },
+        { id: 'GECC 3230', name: 'Service-Learning Programme', units: 3, color: '#c2e0c6', selected: true, type: 'Major' },
+        { id: 'UGEC 1511', name: 'Perspectives in Economics', units: 3, color: '#d0e0f0', selected: true, type: 'UG Core' },
+        { id: 'CENG 3420', name: 'Computer Organization & Design', units: 3, color: '#f0e0d0', selected: true, type: 'Major' },
+        { id: 'CSCI 2100', name: 'Data Structures', units: 3, color: '#e0d0f0', selected: true, type: 'Major' },
+        { id: 'ELTU 2014', name: 'English for ERG Studs I', units: 3, color: '#e0f0d0', selected: true, type: 'UG Core' },    
+        { id: 'ENGG 2780', name: 'Statistics for Engineers', units: 2, color: '#c2e0c6', selected: true, type: 'Major' },
+        { id: 'UGED 1111', name: 'Logic', units: 2, color: '#d0e0f0', selected: true, type: 'UG Core' },
+        { id: 'CHLT 1002', name: 'University Chinese II', units: 2, color: '#f0e0d0', selected: true, type: 'UG Core' },
+        { id: 'CSCI 1130', name: 'Intro to Computing Using Java', units: 3, color: '#e0d0f0', selected: true, type: 'Major' },
+        { id: 'ENGG 2440', name: 'Discrete Math for Engineers', units: 3, color: '#e0f0d0', selected: true, type: 'Major' },
+        { id: 'ENGG 2760', name: 'Probability for Engineers', units: 2, color: '#f0d0e0', selected: true, type: 'Major' },
+        { id: 'UGEA 2100', name: 'Outline of Chinese Culture', units: 2, color: '#d0f0e0', selected: true, type: 'UG Core' },
+        { id: 'UGFH 1000', name: 'In Dialogue with Humanity', units: 3, color: '#e0d0f0', selected: true, type: 'UG Core' },
+        { id: 'UGCP 1002', name: 'HK-Wider Constitutional Order', units: 1, color: '#f0d0e0', selected: true, type: 'UG Core' },
+        { id: 'UGFN 1000', name: 'In Dialogue With Nature', units: 3, color: '#f0d0d0', selected: true, type: 'UG Core' },
+        { id: 'ELTU 1001', name: 'Foundation Eng for Uni Studies', units: 3, color: '#d0e0f0', selected: true, type: 'UG Core' },
+        { id: 'ENGG 1120', name: 'Linear Algebra for Engineers', units: 3, color: '#c2e0c6', selected: true, type: 'Major' },
+        { id: 'ENGG 1130', name: 'Multivariable Calculus for Eng', units: 3, color: '#c2e0c6', selected: true, type: 'Major' },
+        { id: 'ENGG 2020', name: 'Digital Logic and Systems', units: 3, color: '#d0e0f0', selected: true, type: 'Major' },
+        { id: 'MAEG 1020', name: 'Comput\'nal Design & Fabric\'n', units: 3, color: '#e0d0f0', selected: true, type: 'Free' },
+        { id: 'PHED 1031', name: 'Tennis (Men)', units: 1, color: '#e0f0d0', selected: true, type: 'UG Core' },
+        { id: 'CHLT 1001', name: 'University Chinese I', units: 3, color: '#f0d0e0', selected: true, type: 'UG Core' },
+        { id: 'ENGG 1003', name: 'Digit. Lit. & Comp. Thinking—P', units: 3, color: '#d0f0e0', selected: true, type: 'Major' },
+        { id: 'ENGG 1110', name: 'Problem Solving By Programming', units: 3, color: '#f0d0d0', selected: true, type: 'Major' },
+        { id: 'GECC 1130', name: 'Idea of a University', units: 2, color: '#d0f0e0', selected: true, type: 'College' },
+        { id: 'GECC 1131', name: 'Idea of a University: STOT', units: 1, color: '#e0d0f0', selected: true, type: 'College' },
+        { id: 'MATH 1510', name: 'Calculus for Engineers', units: 3, color: '#e0f0d0', selected: true, type: 'Major' },
+        { id: 'PHED 1180', name: 'Badminton', units: 1, color: '#f0d0e0', selected: true, type: 'UG Core' },
+        { id: 'PHYS 1110', name: 'Engineering Phy: Mech & Thermo', units: 3, color: '#d0f0e0', selected: true, type: 'Major' }
     ];
 
     // Store the courses in the global variable
@@ -97,11 +128,47 @@ function loadDemoData() {
 
     // Define which courses to place in specific semesters and years
     const demoPlacements = [
-        { courseId: 'CSCI 3100', year: 1, semester: 1 }, // Software Engineering in Year 1, Semester 1
-        { courseId: 'CSCI 3251', year: 1, semester: 1 }, // Engineering Practicum in Year 1, Semester 1
-        { courseId: 'AIST 2601', year: 1, semester: 2 }, // Machine Learning Fundamentals in Year 1, Semester 2
-        { courseId: 'AIST 2010', year: 2, semester: 1 }, // Introduction to AI in Year 2, Semester 1
-        { courseId: 'AIST 3010', year: 2, semester: 2 }  // Advanced Data Science in Year 2, Semester 2
+        { courseId: 'CSCI 3100', year: 3, semester: 2 },
+        { courseId: 'CSCI 3180', year: 3, semester: 2 },
+        { courseId: 'CSCI 3250', year: 3, semester: 2 },
+        { courseId: 'CSCI 3251', year: 3, semester: 2 },
+        { courseId: 'CSCI 3320', year: 3, semester: 2 },
+        { courseId: 'ELTU 3014', year: 3, semester: 2 },
+        { courseId: 'STAT 2005', year: 3, semester: 2 },
+        { courseId: 'UGCP 1001', year: 3, semester: 2 },
+        { courseId: 'CSCI 3130', year: 3, semester: 1 },
+        { courseId: 'CSCI 3150', year: 3, semester: 1 },
+        { courseId: 'CSCI 3160', year: 3, semester: 1 },
+        { courseId: 'CSCI 3230', year: 3, semester: 1 },
+        { courseId: 'GECC 3230', year: 2, semester: 3 },
+        { courseId: 'UGEC 1511', year: 3, semester: 1 },
+        { courseId: 'CENG 3420', year: 2, semester: 2 },
+        { courseId: 'CSCI 2100', year: 2, semester: 2 },
+        { courseId: 'ELTU 2014', year: 2, semester: 2 },
+        { courseId: 'ENGG 2780', year: 2, semester: 2 },
+        { courseId: 'UGED 1111', year: 2, semester: 2 },
+        { courseId: 'CHLT 1002', year: 2, semester: 1 },
+        { courseId: 'CSCI 1130', year: 2, semester: 1 },
+        { courseId: 'ENGG 2440', year: 2, semester: 1 },
+        { courseId: 'ENGG 2760', year: 2, semester: 1 },
+        { courseId: 'UGEA 2100', year: 2, semester: 1 },
+        { courseId: 'UGFH 1000', year: 2, semester: 1 },
+        { courseId: 'UGCP 1002', year: 1, semester: 3 },
+        { courseId: 'UGFN 1000', year: 1, semester: 3 },
+        { courseId: 'ELTU 1001', year: 1, semester: 2 },
+        { courseId: 'ENGG 1120', year: 1, semester: 2 },
+        { courseId: 'ENGG 1130', year: 1, semester: 2 },
+        { courseId: 'ENGG 2020', year: 1, semester: 2 },
+        { courseId: 'MAEG 1020', year: 1, semester: 2 },
+        { courseId: 'PHED 1031', year: 1, semester: 2 },
+        { courseId: 'CHLT 1001', year: 1, semester: 1 },
+        { courseId: 'ENGG 1003', year: 1, semester: 1 },
+        { courseId: 'ENGG 1110', year: 1, semester: 1 },
+        { courseId: 'GECC 1130', year: 1, semester: 1 },
+        { courseId: 'GECC 1131', year: 1, semester: 1 },
+        { courseId: 'MATH 1510', year: 1, semester: 1 },
+        { courseId: 'PHED 1180', year: 1, semester: 1 },
+        { courseId: 'PHYS 1110', year: 1, semester: 1 }
     ];
 
     demoPlacements.forEach(placement => {
@@ -128,6 +195,8 @@ function loadDemoData() {
                 });
                 cell.appendChild(courseBlock);
             }
+        } else {
+            console.error(`Course with ID ${courseId} not found in demo data.`);
         }
     });
 
@@ -369,7 +438,7 @@ function setupAddYearButton() {
 
 function updateProgressBars() {
     const courseBlocks = document.querySelectorAll('.timetable .course-block');
-    let majorCredits = 0, ugCoreCredits = 0, freeCredits = 0;
+    let majorCredits = 0, ugCoreCredits = 0, freeCredits = 0, CollegeCredits = 0;
 
     courseBlocks.forEach(block => {
         const courseId = block.dataset.courseId;
@@ -386,11 +455,14 @@ function updateProgressBars() {
                 case 'Free':
                     freeCredits += units;
                     break;
+                case 'College':
+                    CollegeCredits += units;
+                    break;
             }
         }
     });
 
-    const totalCredits = 120, majorTotal = 80, ugCoreTotal = 30, freeTotal = 10;
+    const totalCredits = 123, majorTotal = 75, ugCoreTotal = 33, freeTotal = 9, CollegeTotal = 6;
 
     document.getElementById('majorCredits').textContent = majorCredits.toFixed(2); // Display with 2 decimal places
     document.getElementById('majorProgress').style.width = `${Math.min((majorCredits / majorTotal) * 100, 100)}%`;
@@ -401,7 +473,10 @@ function updateProgressBars() {
     document.getElementById('freeCredits').textContent = freeCredits.toFixed(2);
     document.getElementById('freeProgress').style.width = `${Math.min((freeCredits / freeTotal) * 100, 100)}%`;
 
-    const totalCompleted = majorCredits + ugCoreCredits + freeCredits;
+    document.getElementById('CollegeCredits').textContent = CollegeCreditsCredits.toFixed(2);
+    document.getElementById('CollegeProgress').style.width = `${Math.min((CollegeCredits / CollegeTotal) * 100, 100)}%`;
+
+    const totalCompleted = majorCredits + ugCoreCredits + freeCredits + CollegeCredits;
     document.getElementById('totalCredits').textContent = totalCompleted.toFixed(2);
     document.getElementById('totalProgress').style.width = `${Math.min((totalCompleted / totalCredits) * 100, 100)}%`;
 }

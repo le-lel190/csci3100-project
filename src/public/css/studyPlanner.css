@@ -428,6 +428,7 @@ body {
 #majorProgress,
 #ugCoreProgress,
 #freeProgress,
+#CollegeProgress,
 #totalProgress {
     height: 100%;
     background-color: var(--primary-color);
