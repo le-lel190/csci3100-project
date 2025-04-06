@@ -83,7 +83,7 @@ function loadDemoData() {
         { id: 'CSCI 3150', name: 'Intro to Operating Systems', units: 3, color: '#f0d0e0', selected: true, type: 'Major' },
         { id: 'CSCI 3160', name: 'Design & Analysis of Algo', units: 3, color: '#d0f0e0', selected: true, type: 'Major' },
         { id: 'CSCI 3230', name: 'Fundamentals of AI', units: 3, color: '#f0d0d0', selected: true, type: 'Major' },
-        { id: 'GECC 3230', name: 'Service-Learning Programme', units: 3, color: '#c2e0c6', selected: true, type: 'Major' },
+        { id: 'GECC 3230', name: 'Service-Learning Programme', units: 3, color: '#c2e0c6', selected: true, type: 'College' },
         { id: 'UGEC 1511', name: 'Perspectives in Economics', units: 3, color: '#d0e0f0', selected: true, type: 'UG Core' },
         { id: 'CENG 3420', name: 'Computer Organization & Design', units: 3, color: '#f0e0d0', selected: true, type: 'Major' },
         { id: 'CSCI 2100', name: 'Data Structures', units: 3, color: '#e0d0f0', selected: true, type: 'Major' },
@@ -473,7 +473,7 @@ function updateProgressBars() {
     document.getElementById('freeCredits').textContent = freeCredits.toFixed(2);
     document.getElementById('freeProgress').style.width = `${Math.min((freeCredits / freeTotal) * 100, 100)}%`;
 
-    document.getElementById('CollegeCredits').textContent = CollegeCreditsCredits.toFixed(2);
+    document.getElementById('CollegeCredits').textContent = CollegeCredits.toFixed(2);
     document.getElementById('CollegeProgress').style.width = `${Math.min((CollegeCredits / CollegeTotal) * 100, 100)}%`;
 
     const totalCompleted = majorCredits + ugCoreCredits + freeCredits + CollegeCredits;
