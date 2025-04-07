@@ -1,4 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === konamiCode[konamiIndex]) {
+            konamiIndex++;
+            if (konamiIndex === konamiCode.length) {
+                // Activate dev mode
+                alert('Dev mode activated! You can now delete comments.');
+                konamiIndex = 0;
+                enableDeleteMode();
+            }
+        } else {
+            konamiIndex = 0;
+        }
+    });
     initializeSemesterButtons();
     initializeCourseSelection();
     initializeSearch();
@@ -6,6 +23,33 @@ document.addEventListener('DOMContentLoaded', () => {
     loadUserInfo();
     setupLogout();
 });
+
+
+
+function enableDeleteMode() {
+    // Add functionality to delete comments
+    const commentBlocks = document.querySelectorAll('.comment-block');
+    
+    commentBlocks.forEach(block => {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-comment-btn';
+        deleteBtn.innerHTML = '❌';
+        deleteBtn.style.position = 'absolute';
+        deleteBtn.style.top = '10px';
+        deleteBtn.style.right = '10px';
+        deleteBtn.style.background = 'none';
+        deleteBtn.style.border = 'none';
+        deleteBtn.style.cursor = 'pointer';
+        
+        deleteBtn.addEventListener('click', function() {
+            if (confirm('Are you sure you want to delete this comment?')) {
+                block.remove();
+            }
+        });
+        
+        block.appendChild(deleteBtn);
+    });
+}
 
 function setupSorting(courseId) {
     const sortByTimeBtn = document.getElementById('sortByTime');
