@@ -2,18 +2,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
     let konamiIndex = 0;
-
+    let devModeEnabled = false;
+    const searchBox = document.querySelector('.search-box input');
+    
+    // Add input event listener to check for "dev" in the search box
+    if (searchBox) {
+        searchBox.addEventListener('input', function(event) {
+            // Check if the search box contains "dev"
+            devModeEnabled = this.value.toLowerCase().includes('dev');
+        });
+    }
     document.addEventListener('keydown', function(event) {
-        if (event.key === konamiCode[konamiIndex]) {
-            konamiIndex++;
-            if (konamiIndex === konamiCode.length) {
-                // Activate dev mode
-                alert('Dev mode activated! You can now delete comments.');
+        // Only process Konami Code if dev mode is enabled
+        if (devModeEnabled) {
+            if (event.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    // Activate dev mode
+                    alert('Dev mode activated! You can now delete comments.');
+                    konamiIndex = 0;
+                    enableDeleteMode();
+                }
+            } else {
                 konamiIndex = 0;
-                enableDeleteMode();
             }
-        } else {
-            konamiIndex = 0;
         }
     });
     initializeSemesterButtons();
@@ -35,8 +47,8 @@ function enableDeleteMode() {
         deleteBtn.className = 'delete-comment-btn';
         deleteBtn.innerHTML = '❌';
         deleteBtn.style.position = 'absolute';
-        deleteBtn.style.top = '10px';
-        deleteBtn.style.right = '10px';
+        deleteBtn.style.top = '2px';
+        deleteBtn.style.left = '2px';
         deleteBtn.style.background = 'none';
         deleteBtn.style.border = 'none';
         deleteBtn.style.cursor = 'pointer';
