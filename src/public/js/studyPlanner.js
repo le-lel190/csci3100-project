@@ -9,6 +9,20 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAddYearButton();
     updateProgressBars();
     setupImageExport();
+    setupSaveButton();
+    
+    // Chain loadCourseData and loadUserStudyPlan
+    loadCourseData()
+        .then(() => {
+            console.log('Course data loaded successfully, now loading user study plan...');
+            loadUserStudyPlan();
+        })
+        .catch(error => {
+            console.error('Failed to load course data:', error);
+            // Even if course data fails to load, we can still try to load the study plan
+            // But we'll need to handle the undefined window.coursesData case in loadUserStudyPlan
+            loadUserStudyPlan();
+        });
 });
 
 function setupDemoButton() {
@@ -32,23 +46,28 @@ function setupDemoButton() {
 }
 
 function loadCourseData(semester = 'current') {
-    const courseItems = document.querySelector('.course-items');
-    courseItems.innerHTML = '<div class="loading-indicator">Loading courses...</div>';
+    //ensure loadUserStudyPlan is called before loadCourseData
+    return new Promise((resolve, reject) => {
+        const courseItems = document.querySelector('.course-items');
+        courseItems.innerHTML = '<div class="loading-indicator">Loading courses...</div>';
 
-    fetch(`/api/courses/${semester}`)
-        .then(response => {
-            if (!response.ok) throw new Error(`Failed to load ${semester} data`);
-            return response.json();
-        })
-        .then(courses => {
-            window.coursesData = courses;
-            populateCourseList(courses);
-        })
-        .catch(error => {
-            console.error('Error loading course data:', error);
-            courseItems.innerHTML = `<div class="error-message">Failed to load courses: ${error.message}<button id="loadDemoData">Load Demo Data</button></div>`;
-            document.getElementById('loadDemoData').addEventListener('click', loadDemoDataFromAPI);
-        });
+        fetch(`/api/courses/${semester}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`Failed to load ${semester} data`);
+                return response.json();
+            })
+            .then(courses => {
+                window.coursesData = courses;
+                populateCourseList(courses);
+                resolve(); // Resolve the Promise when courses are loaded
+            })
+            .catch(error => {
+                console.error('Error loading course data:', error);
+                courseItems.innerHTML = `<div class="error-message">Failed to load courses: ${error.message}<button id="loadDemoData">Load Demo Data</button></div>`;
+                document.getElementById('loadDemoData').addEventListener('click', loadDemoData);
+                reject(error); // Reject the Promise if there's an error
+            });
+    });
 }
 /* remove this*/
 /*
@@ -755,5 +774,167 @@ function captureAndSaveStudyPlan() {
 
         // Show error message
         alert('Failed to generate study plan image. Please try again.');
+    });
+}
+
+// function to load the user's saved study plan
+function loadUserStudyPlan() {
+    console.log('Fetching user study plan...');
+    fetch('/api/studyplan', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => {
+        console.log('GET /api/studyplan response status:', response.status);
+        console.log('GET /api/studyplan response ok:', response.ok);
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(`Failed to load study plan: ${data.error || data.message || 'Unknown error'}`);
+            });
+        }
+        return response.json();
+    })
+    .then(studyPlan => {
+        console.log('Loaded study plan:', studyPlan);
+        // Clear the timetable
+        const timetableCells = document.querySelectorAll('.timetable td:not(:first-child)');
+        timetableCells.forEach(cell => {
+            cell.innerHTML = '';
+        });
+
+        // If studyPlan is empty or null, just leave the timetable empty
+        if (!studyPlan || studyPlan.length === 0) {
+            console.log('No saved study plan found. Displaying empty timetable.');
+            updateProgressBars(); // Update progress bars (will show 0 credits)
+            return;
+        }
+
+        // Check if window.coursesData is defined
+        if (!window.coursesData) {
+            console.error('Course data not loaded. Cannot populate study plan.');
+            updateProgressBars(); // Update progress bars (will show 0 credits)
+            return;
+        }
+
+        // Populate the timetable with the saved study plan
+        studyPlan.forEach(placement => {
+            const { courseId, year, semester } = placement;
+            const course = window.coursesData.find(c => c.id === courseId);
+            if (course) {
+                const cell = document.querySelector(`.timetable td[data-year="${year}"][data-semester="${semester}"]`);
+                if (cell && cell.querySelectorAll('.course-block').length < parseInt(cell.dataset.maxCourses || Infinity)) {
+                    const courseBlock = document.createElement('div');
+                    courseBlock.className = 'course-block';
+                    courseBlock.dataset.courseId = course.id;
+                    courseBlock.style.backgroundColor = course.color || '#f0e6ff';
+                    courseBlock.innerHTML = `
+                        <div class="course-title">${course.id}</div>
+                    `;
+                    courseBlock.draggable = true;
+                    courseBlock.addEventListener('dragstart', (e) => {
+                        e.dataTransfer.setData('text/plain', course.id);
+                        e.target.classList.add('dragging');
+                    });
+                    courseBlock.addEventListener('dragend', (e) => {
+                        e.target.classList.remove('dragging');
+                    });
+                    cell.appendChild(courseBlock);
+                }
+            } else {
+                console.error(`Course with ID ${courseId} not found in courses data.`);
+            }
+        });
+
+        updateProgressBars();
+    })
+    .catch(error => {
+        console.error('Error loading study plan:', error);
+        // Clear the timetable
+        const timetableCells = document.querySelectorAll('.timetable td:not(:first-child)');
+        timetableCells.forEach(cell => {
+            cell.innerHTML = '';
+        });
+        updateProgressBars(); // Update progress bars (will show 0 credits)
+
+        // Show an error message
+        const errorMessage = document.createElement('div');
+        errorMessage.style.position = 'fixed';
+        errorMessage.style.top = '20px';
+        errorMessage.style.left = '50%';
+        errorMessage.style.transform = 'translateX(-50%)';
+        errorMessage.style.padding = '12px 24px';
+        errorMessage.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
+        errorMessage.style.color = 'white';
+        errorMessage.style.borderRadius = '4px';
+        errorMessage.style.zIndex = '9999';
+        errorMessage.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        errorMessage.textContent = 'Failed to load your study plan. Please try again.';
+        document.body.appendChild(errorMessage);
+
+        setTimeout(() => {
+            document.body.removeChild(errorMessage);
+        }, 3000);
+    });
+}
+
+// function to set up the Save button
+function setupSaveButton() {
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveStudyPlan);
+    }
+}
+
+// New function to save the study plan
+function saveStudyPlan() {
+    // Collect the current study plan from the timetable
+    const studyPlan = [];
+    const cells = document.querySelectorAll('.timetable td:not(:first-child)');
+    cells.forEach(cell => {
+        const year = parseInt(cell.dataset.year);
+        const semester = parseInt(cell.dataset.semester);
+        const courseBlocks = cell.querySelectorAll('.course-block');
+        courseBlocks.forEach(block => {
+            const courseId = block.dataset.courseId;
+            studyPlan.push({ courseId, year, semester });
+        });
+    });
+
+    // Send the study plan to the server
+    fetch('/api/studyplan', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ studyPlan }),
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to save study plan');
+        return response.json();
+    })
+    .then(data => {
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.style.position = 'fixed';
+        successMessage.style.top = '20px';
+        successMessage.style.left = '50%';
+        successMessage.style.transform = 'translateX(-50%)';
+        successMessage.style.padding = '12px 24px';
+        successMessage.style.backgroundColor = 'rgba(102, 51, 153, 0.9)';
+        successMessage.style.color = 'white';
+        successMessage.style.borderRadius = '4px';
+        successMessage.style.zIndex = '9999';
+        successMessage.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        successMessage.textContent = 'Study Plan saved successfully!';
+        document.body.appendChild(successMessage);
+
+        setTimeout(() => {
+            document.body.removeChild(successMessage);
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error saving study plan:', error);
+        alert('Failed to save your study plan. Please try again.');
     });
 }

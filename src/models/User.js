@@ -34,7 +34,23 @@ const userSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
+  studyPlan: [
+    {
+      courseId: {
+        type: String,
+        required: true
+      },
+      year: {
+        type: Number,
+        required: true
+      },
+      semester: {
+        type: Number,
+        required: true
+      }
+    }
+  ]
 });
 
 // Hash password before saving
