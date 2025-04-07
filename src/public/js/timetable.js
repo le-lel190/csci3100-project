@@ -305,23 +305,6 @@ function loadTentativeSchedules(semester) {
 }
 
 /**
- * Show/hide columns based on visible days
- */
-function updateColumnVisibility() {
-    // All days are visible by default
-    const headerCells = document.querySelectorAll('.timetable-header .header-cell');
-    for (let i = 1; i < headerCells.length; i++) { // Skip first (empty) cell
-        headerCells[i].style.display = '';
-    }
-    
-    // All time slots are visible
-    const timeSlots = document.querySelectorAll('.time-slot');
-    timeSlots.forEach(slot => {
-        slot.style.display = '';
-    });
-}
-
-/**
  * Export timetable to CSV
  */
 function exportTimetableToCsv() {
