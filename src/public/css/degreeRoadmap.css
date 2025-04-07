@@ -1035,4 +1035,210 @@ body {
     font-size: 1.2rem;
 }
 
+/* new feature in degreeRoadmap.html */ 
+.roadmap-content-frame {
+    flex: 1;
+    overflow: auto;
+    height: 100%;
+}
 
+.roadmap-content-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.roadmap-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.roadmap-content.hidden {
+    display: none;
+}
+
+
+/* Curriculum Diagram Styles */
+.curriculum-diagram-container {
+    position: relative;
+    width: 100%;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: auto;
+}
+
+.diagram-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    white-space: pre-line;
+}
+
+.semester-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    position: relative;
+}
+
+.semester-header {
+    text-align: center;
+    font-weight: bold;
+    padding: 10px;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    border-radius: 5px;
+}
+
+.semester-column {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+    min-height: 200px;
+}
+
+.course-box {
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.course-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 2;
+}
+
+.course-code {
+    font-weight: bold;
+    text-align: center;
+}
+
+.course-credits {
+    text-align: center;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.highlight-course {
+    box-shadow: 0 0 0 3px var(--primary-color);
+    z-index: 3;
+}
+
+.highlight-prereq {
+    box-shadow: 0 0 0 3px var(--secondary-color);
+    z-index: 2;
+}
+
+.view-options {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.view-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.view-btn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.course-tooltip {
+    position: absolute;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    z-index: 1000;
+    pointer-events: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.tooltip-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.error-message {
+    text-align: center;
+    padding: 20px;
+    color: var(--error-color);
+}
+
+
+/* Interactive Diagram CSS Styles */
+.add-interactive-diagram {
+    /* CSS rules for the interactive diagram */
+}
+
+.curriculum-diagram-container {
+    position: relative;
+    width: 100%;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: auto;
+}
+
+.diagram-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    white-space: pre-line;
+}
+
+.semester-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    position: relative;
+}
+
+.course-box {
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.course-box:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    z-index: 2;
+}
+
+.highlight-course {
+    box-shadow: 0 0 0 3px var(--primary-color);
+    z-index: 3;
+}
+
+.highlight-prereq {
+    box-shadow: 0 0 0 3px var(--secondary-color);
+    z-index: 2;
+}
