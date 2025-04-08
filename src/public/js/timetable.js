@@ -85,41 +85,7 @@ function initializeSemesterButtons() {
             // Load semester-specific courses
             const semester = button.dataset.semester || 'current';
             
-            // First check if we have a saved timetable in localStorage
-            const savedTimetable = localStorage.getItem(`timetable_${semester}`);
-            
-            if (savedTimetable) {
-                try {
-                    // Parse the saved timetable
-                    const savedCourses = JSON.parse(savedTimetable);
-                    console.log(`Loading saved timetable for ${semester} with ${savedCourses.length} courses`);
-                    
-                    // Replace window.coursesData with the saved data
-                    if (window.coursesData) {
-                        // Mark courses as selected/unselected based on saved data
-                        const savedCourseIds = savedCourses.map(c => c.id);
-                        window.coursesData.forEach(course => {
-                            course.selected = savedCourseIds.includes(course.id);
-                        });
-                        
-                        // Load any saved tentative schedules
-                        loadTentativeSchedules(semester);
-                        
-                        // Update the UI
-                        populateCourseList(window.coursesData);
-                        updateTimetableDisplay(window.coursesData);
-                    } else {
-                        // If we don't have course data yet, load it from the server
-                        loadCourseData(semester);
-                    }
-                } catch (e) {
-                    console.error('Error loading saved timetable:', e);
-                    loadCourseData(semester);
-                }
-            } else {
-                // No saved timetable, load from server
-                loadCourseData(semester);
-            }
+            loadTimetableFromServer(semester);
         });
     });
 }
@@ -216,8 +182,7 @@ function setupTimetableActions() {
     // Save button functionality
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
-            saveTimetableToLocalStorage();
-            alert('Timetable saved successfully!');
+            saveTimetableToServer();
         });
     }
 
@@ -237,22 +202,94 @@ function setupTimetableActions() {
 }
 
 /**
- * Save timetable data to localStorage
+ * Save timetable data to the server
  */
-function saveTimetableToLocalStorage() {
-    // Get the current semester
+function saveTimetableToServer() {
     const activeSemester = document.querySelector('.semester-btn.active');
     const semesterName = activeSemester ? activeSemester.dataset.semester : 'current';
     
     // Get selected courses only
     const selectedCourses = window.coursesData ? 
-        window.coursesData.filter(course => course.selected) : [];
+        window.coursesData.filter(course => course.selected).map(course => course.id) : [];
     
-    // Store in localStorage
-    localStorage.setItem(`timetable_${semesterName}`, JSON.stringify(selectedCourses));
+    // Prepare data to send to server
+    const timetableData = {
+        semester: semesterName,
+        selectedCourses
+    };
+
+    // Send to server
+    fetch('/api/timetable', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(timetableData),
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to save timetable');
+        return response.json();
+    })
+    .then(data => {
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.style.position = 'fixed';
+        successMessage.style.top = '20px';
+        successMessage.style.left = '50%';
+        successMessage.style.transform = 'translateX(-50%)';
+        successMessage.style.padding = '12px 24px';
+        successMessage.style.backgroundColor = 'rgba(102, 51, 153, 0.9)';
+        successMessage.style.color = 'white';
+        successMessage.style.borderRadius = '4px';
+        successMessage.style.zIndex = '9999';
+        successMessage.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        successMessage.textContent = 'Timetable saved successfully!';
+        document.body.appendChild(successMessage);
+
+        setTimeout(() => {
+            document.body.removeChild(successMessage);
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error saving timetable:', error);
+        alert('Failed to save your timetable. Please try again.');
+    });
+}
+
+/**
+ * Load timetable from server
+ */
+function loadTimetableFromServer(semester) {
+    const semesterName = semester || 'current';
     
-    // Also save any tentative schedule modifications
-    saveTentativeSchedules();
+    fetch(`/api/timetable/${semesterName}`, {
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 404) {
+                return [];
+            }
+            throw new Error('Failed to load timetable');
+        }
+        return response.json();
+    })
+    .then(selectedCourseIds => {
+        if (window.coursesData) {
+            // Update course selection state
+            window.coursesData.forEach(course => {
+                course.selected = selectedCourseIds.includes(course.id);
+            });
+            
+            // Update UI
+            populateCourseList(window.coursesData);
+            updateTimetableDisplay(window.coursesData);
+        }
+    })
+    .catch(error => {
+        console.error('Error loading timetable:', error);
+    });
 }
 
 /**

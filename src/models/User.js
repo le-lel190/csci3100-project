@@ -50,7 +50,12 @@ const userSchema = new mongoose.Schema({
         required: true
       }
     }
-  ]
+  ],
+  timetable: {
+    type: Map,
+    of: [String], // Array of course IDs for each semester
+    default: {}
+  }
 });
 
 // Hash password before saving
