@@ -288,7 +288,7 @@ body {
 }
 
 /* Main Content Styles */
-.main-content, .roadmap-content {
+.main-content {
     background: var(--white);
     border-radius: 8px;
     box-shadow: var(--shadow);
@@ -1052,12 +1052,14 @@ body {
     display: flex;
     flex-direction: column;
     height: 100%;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .roadmap-content.hidden {
     display: none;
 }
-
 
 /* Curriculum Diagram Styles */
 .curriculum-diagram-container {
@@ -1092,6 +1094,9 @@ body {
     background-color: var(--primary-light);
     color: var(--primary-color);
     border-radius: 5px;
+    border: 2px solid black;
+    margin: 2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);   
 }
 
 .semester-column {
@@ -1105,7 +1110,16 @@ body {
 }
 
 .course-box {
+    margin: 5px;
     padding: 10px;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 14px;
+    border: 1px solid #ccc;
     border-radius: 5px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     cursor: pointer;
@@ -1123,11 +1137,12 @@ body {
 .course-code {
     font-weight: bold;
     text-align: center;
+    font-size: 14px;
 }
 
-.course-credits {
+.course-credits, .course-units {
     text-align: center;
-    font-size: 0.9em;
+    font-size: 14px;
     color: #666;
 }
 
@@ -1180,65 +1195,134 @@ body {
     margin-bottom: 5px;
 }
 
-.error-message {
-    text-align: center;
-    padding: 20px;
-    color: var(--error-color);
+/* Course Category Colors */
+.faculty-package {
+    background-color: #ffcce0; /* Pink */
 }
 
-
-/* Interactive Diagram CSS Styles */
-.add-interactive-diagram {
-    /* CSS rules for the interactive diagram */
+.foundation-course {
+    background-color: #c0f0e8; /* Light teal */
 }
 
-.curriculum-diagram-container {
-    position: relative;
-    width: 100%;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: var(--shadow);
-    overflow: auto;
+.major-required {
+    background-color: #fff0a0; /* Yellow */
 }
 
-.diagram-title {
-    text-align: center;
+.stream-course {
+    background-color: #a0e0a0; /* Green */
+}
+
+.final-year-project {
+    background-color: #ff8000; /* Orange */
+}
+
+/* Curriculum Flowchart Layout */
+.curriculum-header {
+    padding: 10px;
+}
+
+.curriculum-header h2 {
+    font-size: 1.1rem;
+    text-align: left;
     font-weight: bold;
-    margin-bottom: 20px;
-    color: var(--primary-color);
-    white-space: pre-line;
+    margin: 0;
+    color: #000;
 }
 
-.semester-grid {
+.curriculum-header p {
+    text-align: left;
+    font-size: 14px;
+    margin: 0;
+    color: #000;
+}
+
+.semester-row {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 10px;
-    position: relative;
+    border-bottom: 2px solid #000;
 }
 
-.course-box {
+.semester-header:last-child {
+    border-right: none;
+}
+
+.curriculum-grid {
+    display: grid;
+    grid-template-rows: auto;
+}
+
+.course-row {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    min-height: 70px;
+}
+
+.empty-cell {
+    min-height: 60px;
+}
+
+.curriculum-legend {
+    border-top: 1px solid #000;
     padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.legend-title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 5px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.key-color {
+    width: 20px;
+    height: 15px;
+    border: 1px solid #000;
+}
+
+.legend-text {
+    font-size: 14px;
+}
+
+.view-pdf-btn {
+  margin-left: 10px;
+  padding: 5px 10px;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  float: right;
+}
+
+.view-pdf-btn:hover {
+  background-color: #542980;
+}
+
+.view-pdf-btn {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 1;
-}
-
-.course-box:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    z-index: 2;
-}
-
-.highlight-course {
-    box-shadow: 0 0 0 3px var(--primary-color);
-    z-index: 3;
-}
-
-.highlight-prereq {
-    box-shadow: 0 0 0 3px var(--secondary-color);
-    z-index: 2;
-}
+    transition: background-color 0.3s;
+    float: right;
+  }
+  
+  .view-pdf-btn:hover {
+    background-color: #542980;
+  }
+  
