@@ -53,9 +53,29 @@ function enableDeleteMode() {
         deleteBtn.style.border = 'none';
         deleteBtn.style.cursor = 'pointer';
         
-        deleteBtn.addEventListener('click', function() {
+        deleteBtn.addEventListener('click', async function(e) {
+            e.stopPropagation(); // Prevent event bubbling
+            
             if (confirm('Are you sure you want to delete this comment?')) {
-                block.remove();
+                // Get the comment ID from the data attribute
+                const commentId = block.dataset.commentId;
+                
+                try {
+                    // Send request to delete from database
+                    const response = await fetch(`/api/comments/${commentId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        // If successful, remove from UI
+                        block.remove();
+                        console.log('Comment deleted successfully');
+                    } else {
+                        console.error('Failed to delete comment from database');
+                    }
+                } catch (error) {
+                    console.error('Error deleting comment:', error);
+                }
             }
         });
         
@@ -119,6 +139,8 @@ function fetchComments(courseId) {
     comments.forEach(comment => {
       const commentBlock = document.createElement('div');
       commentBlock.className = 'comment-block';
+      commentBlock.dataset.commentId = comment._id;
+
       
     if (comment.rating <= 2) {
         commentBlock.classList.add('low-rating'); // Red background for 1-2 stars
