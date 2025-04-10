@@ -342,7 +342,7 @@ function loadTentativeSchedules(semester) {
 }
 
 /**
- * Export timetable to CSV
+ * Export timetable to CSV for Google Calendar import
  */
 function exportTimetableToCsv() {
             const selectedCourses = window.coursesData ? window.coursesData.filter(course => course.selected) : [];
@@ -351,37 +351,69 @@ function exportTimetableToCsv() {
                 return;
             }
 
-            // Prepare CSV headers
-            const headers = ['Course ID', 'Course Name', 'Type', 'Day', 'Start Time', 'End Time', 'Location'];
+            // Google Calendar CSV format headers - must keep these exact headers for import compatibility
+            // https://support.google.com/calendar/answer/37118?hl=en
+            const headers = ['Subject', 'Start Date', 'Start Time', 'End Date', 'End Time', 'All Day', 'Description', 'Location'];
             const csvRows = [headers.join(',')];
 
+            // Map day names to date format for Google Calendar
+            const dayMap = {
+                'Monday': 1, 'Mon': 1,
+                'Tuesday': 2, 'Tue': 2,
+                'Wednesday': 3, 'Wed': 3,
+                'Thursday': 4, 'Thu': 4,
+                'Friday': 5, 'Fri': 5,
+                'Saturday': 6, 'Sat': 6,
+                'Sunday': 0, 'Sun': 0
+            };
+
+            // Get next Monday's date as a starting point for the academic week
+            const today = new Date();
+            const nextMonday = new Date();
+            nextMonday.setDate(today.getDate() + ((7 - today.getDay()) % 7) + 1);
+            
             // Add each course schedule as a row
             selectedCourses.forEach(course => {
                 if (course.schedules && course.schedules.length > 0) {
                     course.schedules.forEach(schedule => {
+                        // Calculate the date for this class based on the day of week
+                        const classDate = new Date(nextMonday);
+                        const dayOffset = (dayMap[schedule.day] - 1 + 7) % 7;
+                        classDate.setDate(classDate.getDate() + dayOffset);
+                        
+                        // Format the date as MM/DD/YYYY for Google Calendar
+                        const formattedDate = `${(classDate.getMonth() + 1).toString().padStart(2, '0')}/${classDate.getDate().toString().padStart(2, '0')}/${classDate.getFullYear()}`;
+                        
+                        // Extract simplified session type (lecture or tutorial only)
+                        let sessionType = "";
+                        if (schedule.type) {
+                            if (schedule.type.toLowerCase().includes('lec')) {
+                                sessionType = "Lecture";
+                            } else if (schedule.type.toLowerCase().includes('tut')) {
+                                sessionType = "Tutorial";
+                            } else {
+                                sessionType = schedule.type;
+                            }
+                        }
+                        
+                        // Format the time for display in description
+                        const timeDisplay = `${schedule.start} - ${schedule.end}`;
+                        
+                        // Create description with course name and type only
+                        const description = `${course.name}, ${sessionType}`;
+                        
                         const row = [
-                            `"${course.id}"`,
-                            `"${course.name}"`,
-                            `"${schedule.type}"`,
-                            `"${schedule.day}"`,
-                            `"${schedule.start}"`,
-                            `"${schedule.end}"`,
-                            `"${schedule.location}"`
+                            `"${course.id}"`, // Subject = Course Code
+                            `"${formattedDate}"`, // Start Date
+                            `"${schedule.start}"`, // Start Time
+                            `"${formattedDate}"`, // End Date
+                            `"${schedule.end}"`, // End Time
+                            '"False"', // All Day
+                            `"${description}"`, // Description = Course name, type
+                            `"${schedule.location}"` // Location = Venue
                         ];
                         csvRows.push(row.join(','));
                     });
-                } else {
-                    // If no schedules, add a row with empty schedule fields
-                    const row = [
-                        `"${course.id}"`,
-                        `"${course.name}"`,
-                        '""', // Type
-                        '""', // Day
-                        '""', // Start Time
-                        '""', // End Time
-                        '""'  // Location
-                    ];
-                    csvRows.push(row.join(','));
                 }
             });
 
@@ -392,7 +424,7 @@ function exportTimetableToCsv() {
             downloadLink.href = URL.createObjectURL(blob);
             const activeSemester = document.querySelector('.semester-btn.active');
             const semesterName = activeSemester ? activeSemester.textContent.replace(/\s+/g, '_') : 'timetable';
-            downloadLink.download = `${semesterName}_timetable.csv`;
+            downloadLink.download = `${semesterName}_google_calendar.csv`;
             downloadLink.click();
             URL.revokeObjectURL(downloadLink.href);
 }
