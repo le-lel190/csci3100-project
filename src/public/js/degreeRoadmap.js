@@ -340,8 +340,8 @@ function getPrerequisiteData(program) {
       { course: 'CENG3420', prerequisites: ['ENGG2020/ESTR2104'] },
       { course: 'CSCI2100/ESTR2102', prerequisites: ['CSCI1130/ESTR1102'] },
       { course: 'CSCI3130', prerequisites: ['ENGG2440/ESTR2004'] },
-      { course: 'CSCI3150/ESTR3102', prerequisites: ['CENG3420'] }, // 2 pre - requsiste ?
-      { course: 'CSCI3160', prerequisites: ['ENGG2440/ESTR2004'] }, // 2 pre - requsiste ?
+      { course: 'CSCI3150/ESTR3102', prerequisites: ['CENG3420', 'CSCI2100/ESTR2102'] }, 
+      { course: 'CSCI3160', prerequisites: ['ENGG2440/ESTR2004', 'CSCI2100/ESTR2102'] },
       { course: 'CSCI3100', prerequisites: ['CSCI1130/ESTR1102'] },
       { course: 'CSCI3180', prerequisites: ['CSCI2100/ESTR2102'] },
       { course: 'CSCI3251', prerequisites: ['CSCI3250'] },
@@ -368,11 +368,11 @@ function getPrerequisiteData(program) {
       { course: 'CSCI2100/ESTR2102', prerequisites: ['AIST1110'] },
       { course: 'ENGG2780/ESTR2020', prerequisites: ['ENGG2760/ESTR2018'] },
       { course: 'AIST2602', prerequisites: ['AIST2601'] },
-      { course: 'AIST3030', prerequisites: ['ENGG1120/ESTR1005'] }, // 2 pre
-      { course: 'CSCI3160/ESTR3104', prerequisites: ['ENGG2440/ESTR2004'] }, // 2 pre 
+      { course: 'AIST3030', prerequisites: ['ENGG1120/ESTR1005', 'MATH1510'] },
+      { course: 'CSCI3160/ESTR3104', prerequisites: ['ENGG2440/ESTR2004', 'CSCI2100/ESTR2102'] },
       { course: 'CSCI3230/ESTR3108', prerequisites: ['CSCI2100/ESTR2102'] },
-      { course: 'CSCI3320', prerequisites: ['ENGG2780/ESTR2020'] }, // 2 pre
-      { course: 'AIST4010/ESTR4140', prerequisites: ['CSCI3320'] }, // 2 pre
+      { course: 'CSCI3320', prerequisites: ['ENGG2780/ESTR2020', 'ENGG2760/ESTR2018'] },
+      { course: 'AIST4010/ESTR4140', prerequisites: ['CSCI3320', 'CSCI3230/ESTR3108'] },
       { course: 'AIST4999/ESTR4999', prerequisites: ['AIST4998/ESTR4998'] }
     ];
   } else if (program === 'CDAS') {
