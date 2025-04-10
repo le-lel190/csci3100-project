@@ -36,4 +36,13 @@ router.post('/api/comments', async (req, res) => {
   }
 });
 
+router.delete('/api/comments/:id', async (req, res) => {
+  try {
+    await Comment.findByIdAndDelete(req.params.id);
+    res.status(200).send({ message: 'Comment deleted successfully' });
+  } catch (error) {
+    res.status(500).send({ message: 'Error deleting comment', error });
+  }
+});
+
 module.exports = router;

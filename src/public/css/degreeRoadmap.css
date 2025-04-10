@@ -444,54 +444,6 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
   
-  /* Modal Styles */
-  .modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    position: relative;
-    margin: auto;
-    padding: 20px;
-    width: 90%;
-    max-width: 1200px;
-    max-height: 90vh;
-    background-color: var(--white);
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: auto;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  
-  .close-modal {
-    position: absolute;
-    right: 20px;
-    top: 10px;
-    font-size: 28px;
-    font-weight: bold;
-    color: var(--text-color);
-    cursor: pointer;
-    transition: color 0.3s ease;
-  }
-  
-  .close-modal:hover {
-    color: var(--primary-color);
-  }
-  
-  #roadmapImage {
-    width: 100%;
-    height: auto;
-    display: block;
-  }
-  
   /* Error Message */
   .error-message {
     display: flex;
@@ -533,5 +485,75 @@
       padding: 0.25rem 0.5rem;
       font-size: 0.9rem;
     }
+  }
+  
+  .external-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .external-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: var(--error-color);
+    font-size: 1.2rem;
+    text-align: center;
+    padding: 2rem;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 1200px) {
+    .roadmap-container {
+      grid-template-columns: 250px minmax(0, 1fr);
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .roadmap-container {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+    }
+    
+    .sidebar {
+      max-height: 300px;
+    }
+    
+    .navbar {
+      padding: 0.5rem 1rem;
+    }
+    
+    .nav-links {
+      gap: 0.5rem;
+    }
+    
+    .nav-links a {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.9rem;
+    }
+    padding: 10px 15px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 250px;
+    justify-content: flex-start;
+  }
+  
+  .external-btn:hover {
+    background-color: #B8860B;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-icon {
+    margin-right: 10px;
+    font-size: 1.2em;
   }
   

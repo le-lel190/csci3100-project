@@ -248,10 +248,10 @@ function getCourseData(program) {
         },
         year3: {
           semester1: [
+            { code: 'CENG2400/ESTR2100', name: 'Embedded System Design', units: 0, required: true, category: 'major-required' },
             { code: 'CSCI3150/ESTR3102', name: 'Introduction to Operating Systems', units: 3, required: true, category: 'major-required' },
             { code: 'CSCI3190', name: 'Introduction to Discrete Mathematics and Algorithms', units: 3, required: true, category: 'major-required' },
             { code: 'ELEG2202', name: 'Fundamentals of Electric Circuits', units: 3, required: true, category: 'major-required' },
-            { code: 'Stream courses', name: 'Stream Electives', units: 0, required: false, category: 'stream-course' }
           ],
           semester2: [
             { code: 'CSCI3100', name: 'Software Engineering', units: 3, required: true, category: 'major-required' },
@@ -335,27 +335,45 @@ function getPrerequisiteData(program) {
   // Define prerequisite relationships for each program
   if (program === 'CSCI') {
     return [
-      { course: 'CSCI4999/ESTR4999', prerequisites: ['CSCI4998/ESTR4998'] },
-      { course: 'CSCI3100', prerequisites: ['CSCI2100/ESTR2102'] },
-      { course: 'CSCI3150/ESTR3102', prerequisites: ['CSCI2100/ESTR2102'] },
-      { course: 'CSCI3160', prerequisites: ['ENGG2440/ESTR2004'] },
-      { course: 'CSCI3180', prerequisites: ['CSCI1130/ESTR1102'] }
+      { course: 'ENGG1130/ESTR1006', prerequisites: ['MATH1510'] },
+      { course: 'ENGG2780/ESTR2020', prerequisites: ['ENGG2760/ESTR2018'] },
+      { course: 'CENG3420', prerequisites: ['ENGG2020/ESTR2104'] },
+      { course: 'CSCI2100/ESTR2102', prerequisites: ['CSCI1130/ESTR1102'] },
+      { course: 'CSCI3130', prerequisites: ['ENGG2440/ESTR2004'] },
+      { course: 'CSCI3150/ESTR3102', prerequisites: ['CENG3420', 'CSCI2100/ESTR2102'] }, 
+      { course: 'CSCI3160', prerequisites: ['ENGG2440/ESTR2004', 'CSCI2100/ESTR2102'] },
+      { course: 'CSCI3100', prerequisites: ['CSCI1130/ESTR1102'] },
+      { course: 'CSCI3180', prerequisites: ['CSCI2100/ESTR2102'] },
+      { course: 'CSCI3251', prerequisites: ['CSCI3250'] },
+      { course: 'CSCI4999/ESTR4999', prerequisites: ['CSCI4998/ESTR4998'] }
     ];
   } else if (program === 'CENG') {
     return [
-      { course: 'CENG4999/ESTR4999', prerequisites: ['CENG4998/ESTR4998'] },
-      { course: 'CENG2010', prerequisites: ['ENGG2020/ESTR2104'] },
+      { course: 'ENGG1130/ESTR1006', prerequisites: ['MATH1510'] },
+      { course: 'ENGG2780/ESTR2020', prerequisites: ['ENGG2760/ESTR2018'] },
+      { course: 'CENG2030', prerequisites: ['ENGG1110/ESTR1002'] },
       { course: 'CENG3420', prerequisites: ['ENGG2020/ESTR2104'] },
-      { course: 'CSCI3150/ESTR3102', prerequisites: ['CSCI2100/ESTR2102'] }
+      { course: 'CSCI2100/ESTR2102', prerequisites: ['CSCI1120/ESTR1100'] },
+      { course: 'CENG2400/ESTR2100', prerequisites: ['ENGG2020/ESTR2104'] },
+      { course: 'CSCI3150/ESTR3102', prerequisites: ['CSCI2100/ESTR2102'] },
+      { course: 'CSCI3190', prerequisites: ['CSCI2100/ESTR2102'] },
+      { course: 'CSCI3100', prerequisites: ['CSCI1120/ESTR1100'] },
+      { course: 'CSCI3251', prerequisites: ['CSCI3250'] },
+      { course: 'CENG4999/ESTR4999', prerequisites: ['CENG4998/ESTR4998'] }
     ];
   } else if (program === 'AIST') {
     return [
-      { course: 'AIST4999/ESTR4999', prerequisites: ['AIST4998/ESTR4998'] },
+      { course: 'ENGG1130/ESTR1006', prerequisites: ['MATH1050'] },
+      { course: 'AIST1110', prerequisites: ['ENGG1100/ESTR1002'] },
+      { course: 'CSCI2100/ESTR2102', prerequisites: ['AIST1110'] },
+      { course: 'ENGG2780/ESTR2020', prerequisites: ['ENGG2760/ESTR2018'] },
       { course: 'AIST2602', prerequisites: ['AIST2601'] },
-      { course: 'CSCI3320', prerequisites: ['AIST3030'] },
-      { course: 'AIST3030', prerequisites: ['ENGG2780/ESTR2020'] },
-      { course: 'CSCI3160/ESTR3104', prerequisites: ['ENGG2440/ESTR2004'] },
-      { course: 'CSCI3230/ESTR3108', prerequisites: ['CSCI2100/ESTR2102'] }
+      { course: 'AIST3030', prerequisites: ['ENGG1120/ESTR1005', 'MATH1510'] },
+      { course: 'CSCI3160/ESTR3104', prerequisites: ['ENGG2440/ESTR2004', 'CSCI2100/ESTR2102'] },
+      { course: 'CSCI3230/ESTR3108', prerequisites: ['CSCI2100/ESTR2102'] },
+      { course: 'CSCI3320', prerequisites: ['ENGG2780/ESTR2020', 'ENGG2760/ESTR2018'] },
+      { course: 'AIST4010/ESTR4140', prerequisites: ['CSCI3320', 'CSCI3230/ESTR3108'] },
+      { course: 'AIST4999/ESTR4999', prerequisites: ['AIST4998/ESTR4998'] }
     ];
   } else if (program === 'CDAS') {
     // Define CDAS prerequisite relationships

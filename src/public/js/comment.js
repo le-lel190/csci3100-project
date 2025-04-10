@@ -1,4 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
+
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+    let devModeEnabled = false;
+    const searchBox = document.querySelector('.search-box input');
+    
+    // Add input event listener to check for "dev" in the search box
+    if (searchBox) {
+        searchBox.addEventListener('input', function(event) {
+            // Check if the search box contains "dev"
+            devModeEnabled = this.value.toLowerCase().includes('dev');
+        });
+    }
+    document.addEventListener('keydown', function(event) {
+        // Only process Konami Code if dev mode is enabled
+        if (devModeEnabled) {
+            if (event.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konamiCode.length) {
+                    // Activate dev mode
+                    alert('Dev mode activated! You can now delete comments.');
+                    konamiIndex = 0;
+                    enableDeleteMode();
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        }
+    });
     initializeSemesterButtons();
     initializeCourseSelection();
     initializeSearch();
@@ -6,6 +35,53 @@ document.addEventListener('DOMContentLoaded', () => {
     loadUserInfo();
     setupLogout();
 });
+
+
+
+function enableDeleteMode() {
+    // Add functionality to delete comments
+    const commentBlocks = document.querySelectorAll('.comment-block');
+    
+    commentBlocks.forEach(block => {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-comment-btn';
+        deleteBtn.innerHTML = '❌';
+        deleteBtn.style.position = 'absolute';
+        deleteBtn.style.top = '2px';
+        deleteBtn.style.left = '2px';
+        deleteBtn.style.background = 'none';
+        deleteBtn.style.border = 'none';
+        deleteBtn.style.cursor = 'pointer';
+        
+        deleteBtn.addEventListener('click', async function(e) {
+            e.stopPropagation(); // Prevent event bubbling
+            
+            if (confirm('Are you sure you want to delete this comment?')) {
+                // Get the comment ID from the data attribute
+                const commentId = block.dataset.commentId;
+                
+                try {
+                    // Send request to delete from database
+                    const response = await fetch(`/api/comments/${commentId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        // If successful, remove from UI
+                        block.remove();
+                        console.log('Comment deleted successfully');
+                    } else {
+                        console.error('Failed to delete comment from database');
+                    }
+                } catch (error) {
+                    console.error('Error deleting comment:', error);
+                }
+            }
+        });
+        
+        block.appendChild(deleteBtn);
+    });
+}
 
 function setupSorting(courseId) {
     const sortByTimeBtn = document.getElementById('sortByTime');
@@ -63,6 +139,8 @@ function fetchComments(courseId) {
     comments.forEach(comment => {
       const commentBlock = document.createElement('div');
       commentBlock.className = 'comment-block';
+      commentBlock.dataset.commentId = comment._id;
+
       
     if (comment.rating <= 2) {
         commentBlock.classList.add('low-rating'); // Red background for 1-2 stars

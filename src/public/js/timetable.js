@@ -85,41 +85,7 @@ function initializeSemesterButtons() {
             // Load semester-specific courses
             const semester = button.dataset.semester || 'current';
             
-            // First check if we have a saved timetable in localStorage
-            const savedTimetable = localStorage.getItem(`timetable_${semester}`);
-            
-            if (savedTimetable) {
-                try {
-                    // Parse the saved timetable
-                    const savedCourses = JSON.parse(savedTimetable);
-                    console.log(`Loading saved timetable for ${semester} with ${savedCourses.length} courses`);
-                    
-                    // Replace window.coursesData with the saved data
-                    if (window.coursesData) {
-                        // Mark courses as selected/unselected based on saved data
-                        const savedCourseIds = savedCourses.map(c => c.id);
-                        window.coursesData.forEach(course => {
-                            course.selected = savedCourseIds.includes(course.id);
-                        });
-                        
-                        // Load any saved tentative schedules
-                        loadTentativeSchedules(semester);
-                        
-                        // Update the UI
-                        populateCourseList(window.coursesData);
-                        updateTimetableDisplay(window.coursesData);
-                    } else {
-                        // If we don't have course data yet, load it from the server
-                        loadCourseData(semester);
-                    }
-                } catch (e) {
-                    console.error('Error loading saved timetable:', e);
-                    loadCourseData(semester);
-                }
-            } else {
-                // No saved timetable, load from server
-                loadCourseData(semester);
-            }
+            loadTimetableFromServer(semester);
         });
     });
 }
@@ -131,9 +97,11 @@ function initializeSearch() {
     const searchInput = document.getElementById('courseSearch');
     searchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value.toLowerCase();
-        const courseItems = document.querySelectorAll('.course-item');
         
-        courseItems.forEach(item => {
+        // Get all course items from both sections
+        const allCourseItems = document.querySelectorAll('.course-item');
+        
+        allCourseItems.forEach(item => {
             const courseText = item.textContent.toLowerCase();
             const courseId = item.querySelector('input[type="checkbox"]')?.id;
             
@@ -174,7 +142,33 @@ function initializeSearch() {
             
             item.style.display = isMatch ? 'block' : 'none';
         });
+        
+        // Show/hide section headers based on whether they have any visible courses
+        updateCourseListHeaders();
     });
+}
+
+/**
+ * Update course list headers visibility based on search results
+ */
+function updateCourseListHeaders() {
+    const selectedCourseItems = document.querySelector('.selected-course-items');
+    const courseItems = document.querySelector('.course-items');
+    
+    // Get all headers in the course list
+    const courseListHeaders = document.querySelectorAll('.course-list h3');
+    
+    // Check if there are any visible courses in the selected section
+    const hasVisibleSelectedCourses = Array.from(selectedCourseItems.querySelectorAll('.course-item'))
+        .some(item => item.style.display !== 'none');
+    
+    // Check if there are any visible courses in the all courses section
+    const hasVisibleCourses = Array.from(courseItems.querySelectorAll('.course-item'))
+        .some(item => item.style.display !== 'none');
+    
+    // Update visibility of headers - first header is Selected Courses, second is All Courses
+    courseListHeaders[0].style.display = hasVisibleSelectedCourses ? 'block' : 'none';
+    courseListHeaders[1].style.display = hasVisibleCourses ? 'block' : 'none';
 }
 
 /**
@@ -188,8 +182,7 @@ function setupTimetableActions() {
     // Save button functionality
     if (saveBtn) {
         saveBtn.addEventListener('click', () => {
-            saveTimetableToLocalStorage();
-            alert('Timetable saved successfully!');
+            saveTimetableToServer();
         });
     }
 
@@ -209,22 +202,94 @@ function setupTimetableActions() {
 }
 
 /**
- * Save timetable data to localStorage
+ * Save timetable data to the server
  */
-function saveTimetableToLocalStorage() {
-    // Get the current semester
+function saveTimetableToServer() {
     const activeSemester = document.querySelector('.semester-btn.active');
     const semesterName = activeSemester ? activeSemester.dataset.semester : 'current';
     
     // Get selected courses only
     const selectedCourses = window.coursesData ? 
-        window.coursesData.filter(course => course.selected) : [];
+        window.coursesData.filter(course => course.selected).map(course => course.id) : [];
     
-    // Store in localStorage
-    localStorage.setItem(`timetable_${semesterName}`, JSON.stringify(selectedCourses));
+    // Prepare data to send to server
+    const timetableData = {
+        semester: semesterName,
+        selectedCourses
+    };
+
+    // Send to server
+    fetch('/api/timetable', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(timetableData),
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Failed to save timetable');
+        return response.json();
+    })
+    .then(data => {
+        // Show success message
+        const successMessage = document.createElement('div');
+        successMessage.style.position = 'fixed';
+        successMessage.style.top = '20px';
+        successMessage.style.left = '50%';
+        successMessage.style.transform = 'translateX(-50%)';
+        successMessage.style.padding = '12px 24px';
+        successMessage.style.backgroundColor = 'rgba(102, 51, 153, 0.9)';
+        successMessage.style.color = 'white';
+        successMessage.style.borderRadius = '4px';
+        successMessage.style.zIndex = '9999';
+        successMessage.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        successMessage.textContent = 'Timetable saved successfully!';
+        document.body.appendChild(successMessage);
+
+        setTimeout(() => {
+            document.body.removeChild(successMessage);
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error saving timetable:', error);
+        alert('Failed to save your timetable. Please try again.');
+    });
+}
+
+/**
+ * Load timetable from server
+ */
+function loadTimetableFromServer(semester) {
+    const semesterName = semester || 'current';
     
-    // Also save any tentative schedule modifications
-    saveTentativeSchedules();
+    fetch(`/api/timetable/${semesterName}`, {
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            if (response.status === 404) {
+                return [];
+            }
+            throw new Error('Failed to load timetable');
+        }
+        return response.json();
+    })
+    .then(selectedCourseIds => {
+        if (window.coursesData) {
+            // Update course selection state
+            window.coursesData.forEach(course => {
+                course.selected = selectedCourseIds.includes(course.id);
+            });
+            
+            // Update UI
+            populateCourseList(window.coursesData);
+            updateTimetableDisplay(window.coursesData);
+        }
+    })
+    .catch(error => {
+        console.error('Error loading timetable:', error);
+    });
 }
 
 /**
@@ -274,23 +339,6 @@ function loadTentativeSchedules(semester) {
             console.error('Error loading tentative schedules:', e);
         }
     }
-}
-
-/**
- * Show/hide columns based on visible days
- */
-function updateColumnVisibility() {
-    // All days are visible by default
-    const headerCells = document.querySelectorAll('.timetable-header .header-cell');
-    for (let i = 1; i < headerCells.length; i++) { // Skip first (empty) cell
-        headerCells[i].style.display = '';
-    }
-    
-    // All time slots are visible
-    const timeSlots = document.querySelectorAll('.time-slot');
-    timeSlots.forEach(slot => {
-        slot.style.display = '';
-    });
 }
 
 /**
@@ -813,9 +861,18 @@ function loadDemoData() {
  */
 function populateCourseList(courses) {
     const courseItems = document.querySelector('.course-items');
+    const selectedCourseItems = document.querySelector('.selected-course-items');
+    
+    // Clear both sections
     courseItems.innerHTML = '';
+    selectedCourseItems.innerHTML = '';
+    
+    // Separate courses into selected and unselected
+    const selectedCourses = courses.filter(course => course.selected);
+    const unselectedCourses = courses.filter(course => !course.selected);
 
-    courses.forEach(course => {
+    // Helper function to create course items
+    const createCourseItem = (course) => {
         const courseItem = document.createElement('div');
         courseItem.className = 'course-item';
         
@@ -916,12 +973,28 @@ function populateCourseList(courses) {
                 updateTimetableDisplay(courses);
             }
         });
-
-        courseItems.appendChild(courseItem);
         
         // Add course selection handler - this handles conflict checking
         handleCourseSelection(checkbox, course);
+        
+        return courseItem;
+    };
+
+    // Populate selected courses
+    selectedCourses.forEach(course => {
+        const courseItem = createCourseItem(course);
+        selectedCourseItems.appendChild(courseItem);
     });
+    
+    // Populate unselected courses
+    unselectedCourses.forEach(course => {
+        const courseItem = createCourseItem(course);
+        courseItems.appendChild(courseItem);
+    });
+    
+    // Show/hide the "Selected Courses" header based on whether there are any selected courses
+    const courseListHeaders = document.querySelectorAll('.course-list h3');
+    courseListHeaders[0].style.display = selectedCourses.length > 0 ? 'block' : 'none';
 }
 
 /**
@@ -1323,15 +1396,17 @@ function getRandomColor(courseId) {
  * Highlight a course in the course list
  */
 function highlightCourseInList(courseId) {
-                const courseItems = document.querySelectorAll('.course-item');
-                courseItems.forEach(item => {
+    // Look in both selected and unselected course lists
+    const allCourseItems = document.querySelectorAll('.course-item');
+    
+    allCourseItems.forEach(item => {
         const itemCheckbox = item.querySelector('input[type="checkbox"]');
         if (itemCheckbox && itemCheckbox.id === courseId) {
-                        item.classList.add('highlighted');
-                    } else {
-                        item.classList.remove('highlighted');
-                    }
-                });
+            item.classList.add('highlighted');
+        } else {
+            item.classList.remove('highlighted');
+        }
+    });
 }
 
 /**
@@ -1523,8 +1598,28 @@ function schedulesConflict(schedule1, schedule2) {
 function findScheduleConflicts(courseToCheck, existingCourses) {
     const conflicts = [];
     
-    // Get the schedules for the course to check
-    const schedulesToCheck = courseToCheck.schedules || [];
+    // Get only the relevant schedules for the course to check (different sections for tut/lec)
+    let schedulesToCheck = [];
+    
+    // If we have section selections, use only those schedules
+    if (courseToCheck.selectedSections) {
+        const sections = groupSchedulesBySection(courseToCheck);
+        
+        // For each type, add only the schedules from the selected section
+        for (const [sectionKey, section] of Object.entries(sections)) {
+            const baseType = section.baseType;
+            const sectionId = section.sectionId;
+            
+            // If this is the selected section for this type, or if there's only one section of this type
+            if (sectionId === courseToCheck.selectedSections[baseType] || 
+                !courseToCheck.selectedSections[baseType]) {
+                schedulesToCheck = schedulesToCheck.concat(section.schedules);
+            }
+        }
+    } else {
+        // No selections, use all schedules
+        schedulesToCheck = courseToCheck.schedules || [];
+    }
     
     // Loop through existing courses
     for (const existingCourse of existingCourses) {
@@ -1533,7 +1628,28 @@ function findScheduleConflicts(courseToCheck, existingCourses) {
             continue;
         }
         
-        const existingSchedules = existingCourse.schedules || [];
+        // Get only the relevant schedules for the existing course
+        let existingSchedules = [];
+        
+        // If we have section selections, use only those schedules
+        if (existingCourse.selectedSections) {
+            const sections = groupSchedulesBySection(existingCourse);
+            
+            // For each type, add only the schedules from the selected section
+            for (const [sectionKey, section] of Object.entries(sections)) {
+                const baseType = section.baseType;
+                const sectionId = section.sectionId;
+                
+                // If this is the selected section for this type, or if there's only one section of this type
+                if (sectionId === existingCourse.selectedSections[baseType] || 
+                    !existingCourse.selectedSections[baseType]) {
+                    existingSchedules = existingSchedules.concat(section.schedules);
+                }
+            }
+        } else {
+            // No selections, use all schedules
+            existingSchedules = existingCourse.schedules || [];
+        }
         
         // Check each schedule combination for conflicts
         for (const schedule1 of schedulesToCheck) {
@@ -1660,6 +1776,9 @@ function handleCourseSelection(checkbox, course) {
         
         // Update the timetable display
         updateTimetableDisplay(window.coursesData);
+        
+        // Refresh the course list to move the course to the appropriate section
+        populateCourseList(window.coursesData);
     });
 }
 

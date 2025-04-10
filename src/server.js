@@ -7,6 +7,8 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require('./routes/auth');
 const coursesRoutes = require('./routes/courses');
 const commentRoutes = require('./routes/commentRoute');
+const studyPlanRoute = require('./routes/studyPlanRoute');
+const timetableRoute = require('./routes/timetableRoute');
 const path = require('path');
 const { auth } = require('./middleware/auth');
 
@@ -58,6 +60,12 @@ app.get('/api/users', auth, async (req, res) => {
 // Comment routes
 app.use(commentRoutes);
 
+// Study Plan routes
+app.use(studyPlanRoute);
+
+// Timetable routes
+app.use('/api/timetable', timetableRoute);
+
 // Non-authenticated route to check users (FOR DEVELOPMENT ONLY - REMOVE IN PRODUCTION)
 app.get('/api/debug/users', async (req, res) => {
   try {
@@ -79,4 +87,4 @@ app.use((err, req, res, next) => {
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
-}); 
+});
