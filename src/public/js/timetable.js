@@ -372,6 +372,7 @@ function exportTimetableToCsv() {
             
             // Add each course schedule as a row
             selectedCourses.forEach(course => {
+                // console.log(course);
                 if (course.schedules && course.schedules.length > 0) {
                     course.schedules.forEach(schedule => {
                         // Extract simplified session type (lecture or tutorial only)
@@ -859,130 +860,7 @@ function loadDemoDataFromAPI() {
         })
         .catch(error => {
             console.error('Error loading demo data from API:', error);
-            // If even the demo API fails, fall back to hardcoded demo data
-            loadDemoData();
         });
-}
-
-/**
- * Fallback function with hardcoded demo data
- */
-function loadDemoData() {
-    console.log('Loading hardcoded demo data');
-    const courses = [
-        { 
-            id: 'CSCI 2100',
-            name: 'Data Structures',
-            schedules: [
-                // Lecture section A (meets twice a week)
-                { type: 'Lecture A-LEC (8001)', day: 'Tuesday', start: '10:30', end: '12:15', location: 'Y.C. Liang Hall 104' },
-                { type: 'Lecture A-LEC (8001)', day: 'Wednesday', start: '10:30', end: '11:15', location: 'Y.C. Liang Hall 104' },
-                
-                // Lecture section B (meets twice a week)
-                { type: 'Lecture B-LEC (8002)', day: 'Thursday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg 1004' },
-                { type: 'Lecture B-LEC (8002)', day: 'Wednesday', start: '12:30', end: '14:15', location: 'Science Centre L2' },
-                
-                // Tutorial section AT01 (once a week)
-                { type: 'Tutorial AT01-TUT (8101)', day: 'Thursday', start: '12:30', end: '13:15', location: 'William M W Mong Eng Bldg 702' },
-                
-                // Tutorial section AT02 (once a week)
-                { type: 'Tutorial AT02-TUT (8102)', day: 'Friday', start: '12:30', end: '13:15', location: 'Mong Man Wai Bldg 702' },
-                
-                // Tutorial section BT01 (once a week)
-                { type: 'Tutorial BT01-TUT (8103)', day: 'Thursday', start: '16:30', end: '17:15', location: 'William M W Mong Eng Bldg 1004' }
-            ],
-            color: '#fae3d9', // light peach
-            selected: true
-        },
-        { 
-            id: 'CSCI 3100',
-            name: 'Software Engineering',
-            schedules: [
-                { type: 'Lecture (8010)', day: 'Monday', start: '11:30', end: '12:15', location: 'T.Y.Wong Hall LT' },
-                { type: 'Lecture (8010)', day: 'Tuesday', start: '12:30', end: '14:15', location: 'Lee Shau Kee Building LT6' }
-            ],
-            color: '#c2e0c6', // light green
-            selected: true
-        },
-        { 
-            id: 'CSCI 3180',
-            name: 'Principles of Programming Languages',
-            schedules: [
-                { type: 'Interactive Tutorial (8105)', day: 'Thursday', start: '12:30', end: '13:15', location: 'Y.C. Liang Hall 104' },
-                { type: 'Lecture (8015)', day: 'Monday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' },
-                { type: 'Lecture (8015)', day: 'Tuesday', start: '15:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' }
-            ],
-            color: '#d0e0f0', // light blue
-            selected: true
-        },
-        { 
-            id: 'CSCI 3250',
-            name: 'Computers and Society',
-            schedules: [
-                { type: 'Lecture (8020)', day: 'Thursday', start: '13:30', end: '15:15', location: 'Lady Shaw Bldg LT1' }
-            ],
-            color: '#f0e0d0', // light orange
-            selected: true
-        },
-        { 
-            id: 'CSCI 3251',
-            name: 'Engineering Practicum',
-            schedules: [
-                { type: 'Practicum (8025)', day: 'Thursday', start: '15:30', end: '16:15', location: 'Lady Shaw Bldg LT1' }
-            ],
-            color: '#e0d0f0', // light purple
-            selected: true
-        },
-        { 
-            id: 'CSCI 4430',
-            name: 'Data Communication and Computer Networks',
-            schedules: [
-                { type: 'Lecture (8030)', day: 'Wednesday', start: '12:30', end: '13:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Interactive Tutorial (8130)', day: 'Wednesday', start: '13:30', end: '14:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Lecture (8030)', day: 'Monday', start: '16:30', end: '18:15', location: 'Y.C. Liang Hall 103' },
-                { type: 'Interactive Tutorial (8130)', day: 'Wednesday', start: '17:30', end: '18:15', location: 'Science Centre L3' }
-            ],
-            color: '#e0f0d0', // light yellow-green
-            selected: true
-        },
-        { 
-            id: 'GESC 1000',
-            name: 'College Assembly',
-            schedules: [
-                { type: 'Assembly (8050)', day: 'Friday', start: '11:30', end: '13:15', location: 'TBA' }
-            ],
-            color: '#f0d0e0', // light pink
-            selected: true
-        },
-        { 
-            id: 'STAT 2005',
-            name: 'Statistics',
-            schedules: [
-                { type: 'Lecture (8040)', day: 'Thursday', start: '16:30', end: '18:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Lecture (8040)', day: 'Tuesday', start: '17:30', end: '18:15', location: 'Y.C. Liang Hall 104' }
-            ],
-            color: '#d0f0e0', // light mint
-            selected: true
-        },
-        { 
-            id: 'AIST 1000',
-            name: 'Introduction to Artificial Intelligence and Machine Learning',
-            schedules: [
-                { type: 'Lecture --LEC (8137)', day: 'Tuesday', start: '10:30', end: '11:15', location: 'Mong Man Wai Bldg 707' },
-                { type: 'Lecture --LEC (8137)', day: 'Wednesday', start: '10:30', end: '11:15', location: 'Mong Man Wai Bldg 707' }
-            ],
-            color: '#b2dfdb', // light teal
-            selected: true
-        }
-    ];
-
-    // Store courses globally for filtering
-    window.coursesData = courses;
-    
-    populateCourseList(courses);
-    
-    // Display selected courses on the timetable
-    updateTimetableDisplay(courses);
 }
 
 /**
