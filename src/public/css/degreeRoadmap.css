@@ -535,3 +535,36 @@
     }
   }
   
+  .external-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  .external-btn {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    width: 250px;
+    justify-content: flex-start;
+  }
+  
+  .external-btn:hover {
+    background-color: #B8860B;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-icon {
+    margin-right: 10px;
+    font-size: 1.2em;
+  }
+  
