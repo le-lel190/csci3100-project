@@ -367,23 +367,13 @@ function exportTimetableToCsv() {
                 'Sunday': 0, 'Sun': 0
             };
 
-            // Get next Monday's date as a starting point for the academic week
-            const today = new Date();
-            const nextMonday = new Date();
-            nextMonday.setDate(today.getDate() + ((7 - today.getDay()) % 7) + 1);
+            // Get current year for date calculations
+            const currentYear = new Date().getFullYear();
             
             // Add each course schedule as a row
             selectedCourses.forEach(course => {
                 if (course.schedules && course.schedules.length > 0) {
                     course.schedules.forEach(schedule => {
-                        // Calculate the date for this class based on the day of week
-                        const classDate = new Date(nextMonday);
-                        const dayOffset = (dayMap[schedule.day] - 1 + 7) % 7;
-                        classDate.setDate(classDate.getDate() + dayOffset);
-                        
-                        // Format the date as MM/DD/YYYY for Google Calendar
-                        const formattedDate = `${(classDate.getMonth() + 1).toString().padStart(2, '0')}/${classDate.getDate().toString().padStart(2, '0')}/${classDate.getFullYear()}`;
-                        
                         // Extract simplified session type (lecture or tutorial only)
                         let sessionType = "";
                         if (schedule.type) {
@@ -396,23 +386,130 @@ function exportTimetableToCsv() {
                             }
                         }
                         
-                        // Format the time for display in description
-                        const timeDisplay = `${schedule.start} - ${schedule.end}`;
-                        
                         // Create description with course name and type only
                         const description = `${course.name}, ${sessionType}`;
                         
-                        const row = [
-                            `"${course.id}"`, // Subject = Course Code
-                            `"${formattedDate}"`, // Start Date
-                            `"${schedule.start}"`, // Start Time
-                            `"${formattedDate}"`, // End Date
-                            `"${schedule.end}"`, // End Time
-                            '"False"', // All Day
-                            `"${description}"`, // Description = Course name, type
-                            `"${schedule.location}"` // Location = Venue
-                        ];
-                        csvRows.push(row.join(','));
+                        if (schedule.meetingDates && schedule.meetingDates.length > 0) {
+                            // Create a separate calendar entry for each meeting date
+                            schedule.meetingDates.forEach(meetingDate => {
+                                // Check if the meeting date is in a date range format (like "02/09/2024 - 25/11/2024")
+                                if (meetingDate.includes('-') && meetingDate.includes('/')) {
+                                    // For now, skip date ranges as we'd need to generate all dates in between
+                                    return;
+                                }
+                                
+                                // Parse the date - format is "DD/MM" (European style)
+                                let parts = meetingDate.split('/').map(Number);
+                                let day, month, year;
+                                
+                                // Determine academic year based on semester name
+                                const activeSemester = document.querySelector('.semester-btn.active');
+                                let academicYear = currentYear;
+                                
+                                if (activeSemester) {
+                                    const semesterText = activeSemester.textContent || '';
+                                    // Extract year from term like "2024-25 Term 2"
+                                    const yearMatch = semesterText.match(/(\d{4})-(\d{2})/);
+                                    if (yearMatch) {
+                                        const termYear = parseInt(yearMatch[1]);
+                                        // For Term 2, dates are likely in the second year (2025 for "2024-25 Term 2")
+                                        if (semesterText.includes('Term 2')) {
+                                            academicYear = termYear + 1;
+                                        } else {
+                                            academicYear = termYear;
+                                        }
+                                    }
+                                }
+                                
+                                // For dates like "6/1", interpret as day=6, month=1 (January 6)
+                                if (parts.length === 2) {
+                                    // In our course data, the format seems to be "DD/MM"
+                                    day = parts[0];
+                                    month = parts[1];
+                                    year = academicYear;
+                                    
+                                    // Check if the date makes more sense as MM/DD (American style)
+                                    // If day > 12, it must be DD/MM
+                                    // If month > 12, it must be MM/DD
+                                    if (parts[0] > 12 && parts[1] <= 12) {
+                                        // It's DD/MM
+                                        day = parts[0];
+                                        month = parts[1];
+                                    } else if (parts[0] <= 12 && parts[1] > 12) {
+                                        // It's MM/DD
+                                        month = parts[0];
+                                        day = parts[1];
+                                    } else if (parts[0] <= 12 && parts[1] <= 12) {
+                                        // Both could be valid, guess based on the term
+                                        // For academic terms, typically Jan-Apr is Term 2, Sep-Dec is Term 1
+                                        // Assume dates are in chronological order, so early months (1-4) are likely Term 2
+                                        if (parts[1] >= 1 && parts[1] <= 4) {
+                                            // This is likely day=parts[0], month=parts[1] (January-April)
+                                            day = parts[0];
+                                            month = parts[1];
+                                        } else {
+                                            // For months 5-12, we need more context
+                                            // Let's assume it's still DD/MM format as it's more common in academic contexts
+                                            day = parts[0];
+                                            month = parts[1];
+                                        }
+                                    }
+                                }
+                                
+                                // Create a date object for this meeting
+                                // Note: month is 0-indexed in JavaScript Date
+                                const classDate = new Date(year, month - 1, day);
+                                
+                                // Format the date as MM/DD/YYYY for Google Calendar
+                                const formattedDate = `${(classDate.getMonth() + 1).toString().padStart(2, '0')}/${classDate.getDate().toString().padStart(2, '0')}/${classDate.getFullYear()}`;
+                                
+                                const row = [
+                                    `"${course.id}"`, // Subject = Course Code
+                                    `"${formattedDate}"`, // Start Date
+                                    `"${schedule.start}"`, // Start Time
+                                    `"${formattedDate}"`, // End Date
+                                    `"${schedule.end}"`, // End Time
+                                    '"False"', // All Day
+                                    `"${description}"`, // Description = Course name, type
+                                    `"${schedule.location}"` // Location = Venue
+                                ];
+                                csvRows.push(row.join(','));
+                            });
+                        } else {
+                            // Fallback to calculating dates based on day of week (for backward compatibility)
+                            // Get next Monday's date as a starting point for the academic week
+                            const today = new Date();
+                            const nextMonday = new Date();
+                            nextMonday.setDate(today.getDate() + ((7 - today.getDay()) % 7) + 1);
+                            
+                            // Calculate the date for this class based on the day of week
+                            const classDate = new Date(nextMonday);
+                            const dayOffset = (dayMap[schedule.day] - 1 + 7) % 7;
+                            classDate.setDate(classDate.getDate() + dayOffset);
+                            
+                            // Format the date as MM/DD/YYYY for Google Calendar
+                            const formattedDate = `${(classDate.getMonth() + 1).toString().padStart(2, '0')}/${classDate.getDate().toString().padStart(2, '0')}/${classDate.getFullYear()}`;
+                            
+                            // Create a semester's worth of events (14 weeks is common for academic semesters)
+                            for (let week = 0; week < 14; week++) {
+                                const weekDate = new Date(classDate);
+                                weekDate.setDate(classDate.getDate() + (week * 7));
+                                
+                                const weekFormattedDate = `${(weekDate.getMonth() + 1).toString().padStart(2, '0')}/${weekDate.getDate().toString().padStart(2, '0')}/${weekDate.getFullYear()}`;
+                                
+                                const row = [
+                                    `"${course.id}"`, // Subject = Course Code
+                                    `"${weekFormattedDate}"`, // Start Date
+                                    `"${schedule.start}"`, // Start Time
+                                    `"${weekFormattedDate}"`, // End Date
+                                    `"${schedule.end}"`, // End Time
+                                    '"False"', // All Day
+                                    `"${description}"`, // Description = Course name, type
+                                    `"${schedule.location}"` // Location = Venue
+                                ];
+                                csvRows.push(row.join(','));
+                            }
+                        }
                     });
                 }
             });
