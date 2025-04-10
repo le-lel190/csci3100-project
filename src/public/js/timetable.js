@@ -1598,8 +1598,28 @@ function schedulesConflict(schedule1, schedule2) {
 function findScheduleConflicts(courseToCheck, existingCourses) {
     const conflicts = [];
     
-    // Get the schedules for the course to check
-    const schedulesToCheck = courseToCheck.schedules || [];
+    // Get only the relevant schedules for the course to check (different sections for tut/lec)
+    let schedulesToCheck = [];
+    
+    // If we have section selections, use only those schedules
+    if (courseToCheck.selectedSections) {
+        const sections = groupSchedulesBySection(courseToCheck);
+        
+        // For each type, add only the schedules from the selected section
+        for (const [sectionKey, section] of Object.entries(sections)) {
+            const baseType = section.baseType;
+            const sectionId = section.sectionId;
+            
+            // If this is the selected section for this type, or if there's only one section of this type
+            if (sectionId === courseToCheck.selectedSections[baseType] || 
+                !courseToCheck.selectedSections[baseType]) {
+                schedulesToCheck = schedulesToCheck.concat(section.schedules);
+            }
+        }
+    } else {
+        // No selections, use all schedules
+        schedulesToCheck = courseToCheck.schedules || [];
+    }
     
     // Loop through existing courses
     for (const existingCourse of existingCourses) {
@@ -1608,7 +1628,28 @@ function findScheduleConflicts(courseToCheck, existingCourses) {
             continue;
         }
         
-        const existingSchedules = existingCourse.schedules || [];
+        // Get only the relevant schedules for the existing course
+        let existingSchedules = [];
+        
+        // If we have section selections, use only those schedules
+        if (existingCourse.selectedSections) {
+            const sections = groupSchedulesBySection(existingCourse);
+            
+            // For each type, add only the schedules from the selected section
+            for (const [sectionKey, section] of Object.entries(sections)) {
+                const baseType = section.baseType;
+                const sectionId = section.sectionId;
+                
+                // If this is the selected section for this type, or if there's only one section of this type
+                if (sectionId === existingCourse.selectedSections[baseType] || 
+                    !existingCourse.selectedSections[baseType]) {
+                    existingSchedules = existingSchedules.concat(section.schedules);
+                }
+            }
+        } else {
+            // No selections, use all schedules
+            existingSchedules = existingCourse.schedules || [];
+        }
         
         // Check each schedule combination for conflicts
         for (const schedule1 of schedulesToCheck) {

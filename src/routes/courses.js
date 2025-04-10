@@ -44,17 +44,17 @@ ensureDirectoriesExist();
 
 // Helper function to map day names to indices
 const dayNameToIndex = {
-    'Monday': 0,
-    'Tuesday': 1,
-    'Wednesday': 2,
-    'Thursday': 3,
-    'Friday': 4,
-    'Saturday': 5,
-    'Sunday': 6
+    'Monday': 1,
+    'Tuesday': 2,
+    'Wednesday': 3,
+    'Thursday': 4,
+    'Friday': 5,
+    'Saturday': 6,
+    'Sunday': 7
 };
 
 // Helper function to map numeric day indices to day names
-const dayIndexToName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const dayIndexToName = ['null_template', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 // Helper function to normalize time format to HH:MM
 function normalizeTimeFormat(timeStr) {
