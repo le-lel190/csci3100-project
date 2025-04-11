@@ -310,11 +310,16 @@ router.get('/:semester?', async (req, res) => {
                     const startTime = `${hour.toString().padStart(2, '0')}:00`;
                     const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
                     
+                        // Extract meeting dates
+
+                    //console.log('Debug 1: ', meetingDates);
+
                     const placeholderSchedule = {
                         type: 'TBA (Placeholder)', 
                         day: day, 
                         start: startTime, 
                         end: endTime, 
+                        meetingDates: 'TBA',
                         location: 'TBA - Schedule not yet available'
                     };
                     
@@ -391,14 +396,21 @@ router.get('/:semester?', async (req, res) => {
                                     instructor = sectionData.instructors[i];
                                 }
                                 
+                                let meetingDates = [];
+                                if (sectionData.meetingDates && Array.isArray(sectionData.meetingDates)) {
+                                    meetingDates = sectionData.meetingDates;
+                                }
+
                                 const detailedType = `${type} ${sectionName}`.trim();
-                                
+                                console.log('Debug 2: ', meetingDates);
+
                                 schedules.push({
                                     type: detailedType,
                                     day,
                                     start: startTime,
                                     end: endTime,
                                     location,
+                                    meetingDates,
                                     instructor,
                                     term: termName
                                 });
@@ -417,12 +429,14 @@ router.get('/:semester?', async (req, res) => {
                         const hour = 8 + (codeNum % 10);
                         const startTime = `${hour.toString().padStart(2, '0')}:00`;
                         const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
-                        
+                        // console.log('Debug 3: ', meetingDates);
+
                         const placeholderSchedule = {
                             type: 'TBA (Placeholder)', 
                             day: day, 
                             start: startTime, 
                             end: endTime, 
+                            meetingDates: 'TBA', 
                             location: 'TBA - Schedule not yet available'
                         };
                         
@@ -489,8 +503,22 @@ function getDemoCourses() {
             id: 'CSCI 3100',
             name: 'Software Engineering',
             schedules: [
-                { type: 'Lecture', day: 'Monday', start: '11:30', end: '12:15', location: 'T.Y.Wong Hall LT' },
-                { type: 'Lecture', day: 'Tuesday', start: '12:30', end: '14:15', location: 'Lee Shau Kee Building LT6' }
+                { 
+                    type: 'Lecture', 
+                    day: 'Monday', 
+                    start: '11:30', 
+                    end: '12:15', 
+                    location: 'T.Y.Wong Hall LT',
+                    meetingDates: ['05/09', '12/09', '19/09', '26/09', '03/10', '10/10', '17/10', '24/10', '31/10', '07/11', '14/11', '21/11', '28/11']
+                },
+                { 
+                    type: 'Lecture', 
+                    day: 'Tuesday', 
+                    start: '12:30', 
+                    end: '14:15', 
+                    location: 'Lee Shau Kee Building LT6',
+                    meetingDates: ['06/09', '13/09', '20/09', '27/09', '04/10', '11/10', '18/10', '25/10', '01/11', '08/11', '15/11', '22/11', '29/11']
+                }
             ],
             color: '#c2e0c6', // light green
             selected: true
@@ -499,9 +527,30 @@ function getDemoCourses() {
             id: 'CSCI 3180',
             name: 'Principles of Programming Languages',
             schedules: [
-                { type: 'Interactive Tutorial', day: 'Thursday', start: '12:30', end: '13:15', location: 'Y.C. Liang Hall 104' },
-                { type: 'Lecture', day: 'Monday', start: '14:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' },
-                { type: 'Lecture', day: 'Tuesday', start: '15:30', end: '16:15', location: 'William M W Mong Eng Bldg LT' }
+                { 
+                    type: 'Interactive Tutorial', 
+                    day: 'Thursday', 
+                    start: '12:30', 
+                    end: '13:15', 
+                    location: 'Y.C. Liang Hall 104',
+                    meetingDates: ['08/09', '15/09', '22/09', '29/09', '06/10', '13/10', '20/10', '27/10', '03/11', '10/11', '17/11', '24/11', '01/12']
+                },
+                { 
+                    type: 'Lecture', 
+                    day: 'Monday', 
+                    start: '14:30', 
+                    end: '16:15', 
+                    location: 'William M W Mong Eng Bldg LT',
+                    meetingDates: ['05/09', '12/09', '19/09', '26/09', '03/10', '10/10', '17/10', '24/10', '31/10', '07/11', '14/11', '21/11', '28/11']
+                },
+                { 
+                    type: 'Lecture', 
+                    day: 'Tuesday', 
+                    start: '15:30', 
+                    end: '16:15', 
+                    location: 'William M W Mong Eng Bldg LT',
+                    meetingDates: ['06/09', '13/09', '20/09', '27/09', '04/10', '11/10', '18/10', '25/10', '01/11', '08/11', '15/11', '22/11', '29/11']
+                }
             ],
             color: '#d0e0f0', // light blue
             selected: true
@@ -510,7 +559,14 @@ function getDemoCourses() {
             id: 'CSCI 3250',
             name: 'Computers and Society',
             schedules: [
-                { type: 'Lecture', day: 'Thursday', start: '13:30', end: '15:15', location: 'Lady Shaw Bldg LT1' }
+                { 
+                    type: 'Lecture', 
+                    day: 'Thursday', 
+                    start: '13:30', 
+                    end: '15:15', 
+                    location: 'Lady Shaw Bldg LT1',
+                    meetingDates: ['08/09', '15/09', '22/09', '29/09', '06/10', '13/10', '20/10', '27/10', '03/11', '10/11', '17/11', '24/11', '01/12']
+                }
             ],
             color: '#f0e0d0', // light orange
             selected: true
@@ -519,7 +575,14 @@ function getDemoCourses() {
             id: 'CSCI 3251',
             name: 'Engineering Practicum',
             schedules: [
-                { type: 'Practicum', day: 'Thursday', start: '15:30', end: '16:15', location: 'Lady Shaw Bldg LT1' }
+                { 
+                    type: 'Practicum', 
+                    day: 'Thursday', 
+                    start: '15:30', 
+                    end: '16:15', 
+                    location: 'Lady Shaw Bldg LT1',
+                    meetingDates: ['08/09', '15/09', '22/09', '29/09', '06/10', '13/10', '20/10', '27/10', '03/11', '10/11', '17/11', '24/11', '01/12']
+                }
             ],
             color: '#e0d0f0', // light purple
             selected: true
@@ -528,10 +591,38 @@ function getDemoCourses() {
             id: 'CSCI 4430',
             name: 'Data Communication and Computer Networks',
             schedules: [
-                { type: 'Lecture', day: 'Wednesday', start: '12:30', end: '13:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Interactive Tutorial', day: 'Wednesday', start: '13:30', end: '14:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Lecture', day: 'Monday', start: '16:30', end: '18:15', location: 'Y.C. Liang Hall 103' },
-                { type: 'Interactive Tutorial', day: 'Wednesday', start: '17:30', end: '18:15', location: 'Science Centre L3' }
+                { 
+                    type: 'Lecture', 
+                    day: 'Wednesday', 
+                    start: '12:30', 
+                    end: '13:15', 
+                    location: 'Lady Shaw Bldg LT2',
+                    meetingDates: ['07/09', '14/09', '21/09', '28/09', '05/10', '12/10', '19/10', '26/10', '02/11', '09/11', '16/11', '23/11', '30/11']
+                },
+                { 
+                    type: 'Interactive Tutorial', 
+                    day: 'Wednesday', 
+                    start: '13:30', 
+                    end: '14:15', 
+                    location: 'Lady Shaw Bldg LT2',
+                    meetingDates: ['07/09', '14/09', '21/09', '28/09', '05/10', '12/10', '19/10', '26/10', '02/11', '09/11', '16/11', '23/11', '30/11']
+                },
+                { 
+                    type: 'Lecture', 
+                    day: 'Monday', 
+                    start: '16:30', 
+                    end: '18:15', 
+                    location: 'Y.C. Liang Hall 103',
+                    meetingDates: ['05/09', '12/09', '19/09', '26/09', '03/10', '10/10', '17/10', '24/10', '31/10', '07/11', '14/11', '21/11', '28/11']
+                },
+                { 
+                    type: 'Interactive Tutorial', 
+                    day: 'Wednesday', 
+                    start: '17:30', 
+                    end: '18:15', 
+                    location: 'Science Centre L3',
+                    meetingDates: ['07/09', '14/09', '21/09', '28/09', '05/10', '12/10', '19/10', '26/10', '02/11', '09/11', '16/11', '23/11', '30/11']
+                }
             ],
             color: '#e0f0d0', // light yellow-green
             selected: true
@@ -540,7 +631,14 @@ function getDemoCourses() {
             id: 'GESC 1000',
             name: 'College Assembly',
             schedules: [
-                { type: 'Assembly', day: 'Friday', start: '11:30', end: '13:15', location: 'TBA' }
+                { 
+                    type: 'Assembly', 
+                    day: 'Friday', 
+                    start: '11:30', 
+                    end: '13:15', 
+                    location: 'TBA',
+                    meetingDates: ['09/09', '16/09', '23/09', '30/09', '07/10', '14/10', '21/10', '28/10', '04/11', '11/11', '18/11', '25/11', '02/12']
+                }
             ],
             color: '#f0d0e0', // light pink
             selected: true
@@ -549,8 +647,22 @@ function getDemoCourses() {
             id: 'STAT 2005',
             name: 'Statistics',
             schedules: [
-                { type: 'Lecture', day: 'Thursday', start: '16:30', end: '18:15', location: 'Lady Shaw Bldg LT2' },
-                { type: 'Lecture', day: 'Tuesday', start: '17:30', end: '18:15', location: 'Y.C. Liang Hall 104' }
+                { 
+                    type: 'Lecture', 
+                    day: 'Thursday', 
+                    start: '16:30', 
+                    end: '18:15', 
+                    location: 'Lady Shaw Bldg LT2',
+                    meetingDates: ['08/09', '15/09', '22/09', '29/09', '06/10', '13/10', '20/10', '27/10', '03/11', '10/11', '17/11', '24/11', '01/12']
+                },
+                { 
+                    type: 'Lecture', 
+                    day: 'Tuesday', 
+                    start: '17:30', 
+                    end: '18:15', 
+                    location: 'Y.C. Liang Hall 104',
+                    meetingDates: ['06/09', '13/09', '20/09', '27/09', '04/10', '11/10', '18/10', '25/10', '01/11', '08/11', '15/11', '22/11', '29/11']
+                }
             ],
             color: '#d0f0e0', // light mint
             selected: true
