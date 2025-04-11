@@ -183,6 +183,12 @@ function fetchComments(courseId) {
     const commentTextarea = document.getElementById('newComment');
     
     postButton.addEventListener('click', () => {
+      // Check if user is verified
+      if (!window.isEmailVerified) {
+        alert('Please verify your email before posting comments.');
+        return;
+      }
+      
       // Get input values
       const content = commentTextarea.value.trim();
       if (!content) {
@@ -406,6 +412,9 @@ function loadUserInfo() {
     .then(data => {
         if (data.user) {
             document.getElementById('userUsername').textContent = data.user.username;
+            // Store email verification status
+            window.isEmailVerified = data.user.isEmailVerified || false;
+            console.log(window.isEmailVerified);
         }
     })
     .catch(error => {
@@ -513,11 +522,5 @@ function handleCourseSelection(department, courseNumber, courseName) {
     if (!mainContent) return;
     
     // Create and display the comment section
-    mainContent.innerHTML = createCommentSectionHTML(currentCourse);
-    
-    // Load course details and comments
-    loadCourseDetails(department, courseNumber);
-    
-    // Setup the comment form
-    setupCommentForm();
+    displayCourseCode(department + ' ' + courseNumber, courseName);
 }
