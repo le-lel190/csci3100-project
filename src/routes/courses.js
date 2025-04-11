@@ -310,11 +310,16 @@ router.get('/:semester?', async (req, res) => {
                     const startTime = `${hour.toString().padStart(2, '0')}:00`;
                     const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
                     
+                        // Extract meeting dates
+
+                    //console.log('Debug 1: ', meetingDates);
+
                     const placeholderSchedule = {
                         type: 'TBA (Placeholder)', 
                         day: day, 
                         start: startTime, 
                         end: endTime, 
+                        meetingDates: 'TBA',
                         location: 'TBA - Schedule not yet available'
                     };
                     
@@ -391,14 +396,21 @@ router.get('/:semester?', async (req, res) => {
                                     instructor = sectionData.instructors[i];
                                 }
                                 
+                                let meetingDates = [];
+                                if (sectionData.meetingDates && Array.isArray(sectionData.meetingDates)) {
+                                    meetingDates = sectionData.meetingDates;
+                                }
+
                                 const detailedType = `${type} ${sectionName}`.trim();
-                                
+                                console.log('Debug 2: ', meetingDates);
+
                                 schedules.push({
                                     type: detailedType,
                                     day,
                                     start: startTime,
                                     end: endTime,
                                     location,
+                                    meetingDates,
                                     instructor,
                                     term: termName
                                 });
@@ -417,12 +429,14 @@ router.get('/:semester?', async (req, res) => {
                         const hour = 8 + (codeNum % 10);
                         const startTime = `${hour.toString().padStart(2, '0')}:00`;
                         const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
-                        
+                        // console.log('Debug 3: ', meetingDates);
+
                         const placeholderSchedule = {
                             type: 'TBA (Placeholder)', 
                             day: day, 
                             start: startTime, 
                             end: endTime, 
+                            meetingDates: 'TBA', 
                             location: 'TBA - Schedule not yet available'
                         };
                         
