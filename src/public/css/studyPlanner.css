@@ -244,6 +244,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    height: 800px;
 }
 
 .timetable-header {
@@ -308,6 +309,7 @@ body {
     background-color: var(--primary-light);
     color: var(--primary-color);
     min-height: 120px;
+    height: 33.33%;
 }
 
 /* Draggable Course Block - Adapted */
