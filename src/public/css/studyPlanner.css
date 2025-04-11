@@ -233,6 +233,8 @@ body {
 /* Main Content and Timetable Styles - Adapted for Study Plan */
 .main-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .timetable {
@@ -241,7 +243,6 @@ body {
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    height: 100%;
     overflow: hidden;
 }
 
@@ -252,6 +253,7 @@ body {
     padding: 0.5rem 1rem;
     background: var(--white);
     border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
 }
 
 .timetable-header h3 {
@@ -273,9 +275,6 @@ body {
     background-color: var(--white);
 }
 
-.timetable tbody {
-    height: calc(100% - 40px);
-}
 /* Center the semester labels in the first column of the table body */
 .timetable tbody tr td:first-child {
     text-align: center;
@@ -289,7 +288,9 @@ body {
     text-align: center;
     box-sizing: border-box;
     vertical-align: top; /* Align content to the top */
-    height: 33.33%; /* Distribute height equally among 3 semesters */
+    /*height: 33.33%;*/
+    height: auto;
+    min-height: 120px;
 }
 
 .timetable th {
@@ -306,28 +307,30 @@ body {
     font-weight: 600;
     background-color: var(--primary-light);
     color: var(--primary-color);
+    min-height: 120px;
 }
 
 /* Draggable Course Block - Adapted */
 .course-block {
     background-color: var(--primary-light);
     border-radius: 4px;
-    padding: 0.3rem 0.5rem;
+    padding: 0.2rem 0.4rem;
     display: block;
-    margin: 6px 0;
-    font-size: 0.85rem;
+    margin: 4px 0;
+    font-size: 0.8rem;
     cursor: move;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: inline-block; /* Display blocks inline to allow multiple courses per cell */
     width: calc(100% - 4px); /* Full width minus margins */
     box-sizing: border-box;
-    min-height: 28px;
+    min-height: 24px;
     text-align: center;
 }
 
 .course-title {
     font-weight: 600;
     text-align: center;
+    font-size: 0.8rem;
 }
 
 .course-block:hover {
