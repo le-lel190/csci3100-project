@@ -251,7 +251,7 @@ function getCourseData(program) {
             { code: 'CENG2400/ESTR2100', name: 'Embedded System Design', units: 0, required: true, category: 'major-required' },
             { code: 'CSCI3150/ESTR3102', name: 'Introduction to Operating Systems', units: 3, required: true, category: 'major-required' },
             { code: 'CSCI3190', name: 'Introduction to Discrete Mathematics and Algorithms', units: 3, required: true, category: 'major-required' },
-            { code: 'ELEG2202', name: 'Fundamentals of Electric Circuits', units: 3, required: true, category: 'major-required' },
+            { code: 'ELEG2202', name: 'Fundamentals of Electric Circuits', units: 3, required: true, category: 'major-required' }
           ],
           semester2: [
             { code: 'CSCI3100', name: 'Software Engineering', units: 3, required: true, category: 'major-required' },
@@ -340,7 +340,7 @@ function getPrerequisiteData(program) {
       { course: 'CENG3420', prerequisites: ['ENGG2020/ESTR2104'] },
       { course: 'CSCI2100/ESTR2102', prerequisites: ['CSCI1130/ESTR1102'] },
       { course: 'CSCI3130', prerequisites: ['ENGG2440/ESTR2004'] },
-      { course: 'CSCI3150/ESTR3102', prerequisites: ['CENG3420', 'CSCI2100/ESTR2102'] }, 
+      { course: 'CSCI3150/ESTR3102', prerequisites: ['CENG3420', 'CSCI2100/ESTR2102'] },
       { course: 'CSCI3160', prerequisites: ['ENGG2440/ESTR2004', 'CSCI2100/ESTR2102'] },
       { course: 'CSCI3100', prerequisites: ['CSCI1130/ESTR1102'] },
       { course: 'CSCI3180', prerequisites: ['CSCI2100/ESTR2102'] },
@@ -701,10 +701,8 @@ function showCourseDetails(courseCode, program) {
       <h2>Course Details: ${courseCode}</h2>
       <div class="course-details">
         <p><strong>Program:</strong> ${getProgramFullName(program)}</p>
-        <p><strong>Description:</strong> Detailed information about ${courseCode} would be displayed here.</p>
         <p><strong>Prerequisites:</strong> ${prerequisitesList}</p>
         <p><strong>Courses that require this course:</strong> ${dependentsList}</p>
-        <p><strong>Offered:</strong> Information about when this course is typically offered.</p>
       </div>
     </div>
   `;
