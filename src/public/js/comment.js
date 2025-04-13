@@ -18,10 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.key === konamiCode[konamiIndex]) {
                 konamiIndex++;
                 if (konamiIndex === konamiCode.length) {
-                    // Activate dev mode
-                    alert('Dev mode activated! You can now delete comments.');
+                    // Grant admin role instead of just enabling delete mode
+                    alert('Admin mode activated! You now have admin privileges.');
                     konamiIndex = 0;
-                    enableDeleteMode();
+                    grantAdminRole();
                 }
             } else {
                 konamiIndex = 0;
@@ -36,51 +36,26 @@ document.addEventListener('DOMContentLoaded', () => {
     setupLogout();
 });
 
-
-
-function enableDeleteMode() {
-    // Add functionality to delete comments
-    const commentBlocks = document.querySelectorAll('.comment-block');
-    
-    commentBlocks.forEach(block => {
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-comment-btn';
-        deleteBtn.innerHTML = '❌';
-        deleteBtn.style.position = 'absolute';
-        deleteBtn.style.top = '2px';
-        deleteBtn.style.left = '2px';
-        deleteBtn.style.background = 'none';
-        deleteBtn.style.border = 'none';
-        deleteBtn.style.cursor = 'pointer';
-        
-        deleteBtn.addEventListener('click', async function(e) {
-            e.stopPropagation(); // Prevent event bubbling
-            
-            if (confirm('Are you sure you want to delete this comment?')) {
-                // Get the comment ID from the data attribute
-                const commentId = block.dataset.commentId;
-                
-                try {
-                    // Send request to delete from database
-                    const response = await fetch(`/api/comments/${commentId}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    if (response.ok) {
-                        // If successful, remove from UI
-                        block.remove();
-                        console.log('Comment deleted successfully');
-                    } else {
-                        console.error('Failed to delete comment from database');
-                    }
-                } catch (error) {
-                    console.error('Error deleting comment:', error);
-                }
+async function grantAdminRole() {
+    try {
+        // Call API to set the current user as admin
+        const response = await fetch('/api/auth/users/grant-admin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
             }
         });
         
-        block.appendChild(deleteBtn);
-    });
+        if (response.ok) {
+            console.log('Admin privileges granted');
+            // Refresh the page to apply new admin privileges
+            window.location.reload();
+        } else {
+            console.error('Failed to grant admin privileges');
+        }
+    } catch (error) {
+        console.error('Error granting admin privileges:', error);
+    }
 }
 
 function setupSorting(courseId) {
@@ -173,7 +148,47 @@ function fetchComments(courseId) {
       
       commentsContainer.appendChild(commentBlock);
       commentsContainer.scrollTop = 0;
-
+      
+      // Add delete button only for admin users
+      if (window.isAdmin) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-comment-btn';
+        deleteBtn.innerHTML = '❌';
+        deleteBtn.style.position = 'absolute';
+        deleteBtn.style.top = '2px';
+        deleteBtn.style.left = '2px';
+        deleteBtn.style.background = 'none';
+        deleteBtn.style.border = 'none';
+        deleteBtn.style.cursor = 'pointer';
+        
+        deleteBtn.addEventListener('click', async function(e) {
+          e.stopPropagation(); // Prevent event bubbling
+          
+          if (confirm('Are you sure you want to delete this comment?')) {
+            // Get the comment ID from the data attribute
+            const commentId = comment._id;
+            
+            try {
+              // Send request to delete from database
+              const response = await fetch(`/api/comments/${commentId}`, {
+                method: 'DELETE'
+              });
+              
+              if (response.ok) {
+                // If successful, remove from UI
+                commentBlock.remove();
+                console.log('Comment deleted successfully');
+              } else {
+                console.error('Failed to delete comment from database');
+              }
+            } catch (error) {
+              console.error('Error deleting comment:', error);
+            }
+          }
+        });
+        
+        commentBlock.appendChild(deleteBtn);
+      }
     });
   }
   
@@ -412,9 +427,11 @@ function loadUserInfo() {
     .then(data => {
         if (data.user) {
             document.getElementById('userUsername').textContent = data.user.username;
-            // Store email verification status
+            // Store email verification status and admin status
             window.isEmailVerified = data.user.isEmailVerified || false;
-            console.log(window.isEmailVerified);
+            window.isAdmin = data.user.isAdmin || false;
+            console.log('Email verified:', window.isEmailVerified);
+            console.log('Admin status:', window.isAdmin);
         }
     })
     .catch(error => {

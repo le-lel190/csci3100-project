@@ -142,6 +142,7 @@ router.post('/login',
           id: user._id,
           username: user.username,
           email: user.email,
+          isAdmin: user.isAdmin,
           isEmailVerified: user.isEmailVerified
         }
       });
@@ -210,6 +211,35 @@ router.post('/resend-verification', auth, async (req, res) => {
       success: emailSent
     });
   } catch (error) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Grant admin role to the current user (activated by easter egg)
+router.post('/users/grant-admin', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Set user as admin
+    user.isAdmin = true;
+    await user.save();
+
+    res.status(200).json({ 
+      message: 'Admin privileges granted successfully',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        isEmailVerified: user.isEmailVerified
+      }
+    });
+  } catch (error) {
+    console.error('Error granting admin privileges:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Comment = require('../models/commentModel');
+const { auth, adminAuth } = require('../middleware/auth');
 
 // Get all comments for a specific course
 router.get('/api/comments/:courseId', async (req, res) => {
@@ -36,7 +37,7 @@ router.post('/api/comments', async (req, res) => {
   }
 });
 
-router.delete('/api/comments/:id', async (req, res) => {
+router.delete('/api/comments/:id', adminAuth, async (req, res) => {
   try {
     await Comment.findByIdAndDelete(req.params.id);
     res.status(200).send({ message: 'Comment deleted successfully' });
