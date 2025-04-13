@@ -972,3 +972,113 @@ body {
 .sort-btn:active {
     transform: translateY(2px); /* Button press effect */
 }
+
+
+/* Modal styles */
+.comment-modal {
+    display: none;
+    position: fixed;
+    z-index: 200;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+  }
+  
+  .modal-content {
+    background-color: var(--white);
+    margin: 10% auto;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-hover);
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    animation: modalFadeIn 0.3s;
+  }
+  
+  @keyframes modalFadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.5rem;
+    color: var(--text-light);
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  .close-modal:hover {
+    color: var(--primary-color);
+  }
+  
+  #editCommentForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  #editCommentText {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  
+  #editCommentText:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(44, 122, 79, 0.1);
+  }
+  
+  #saveEditBtn {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    align-self: flex-end;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  
+  #saveEditBtn:hover {
+    background-color: #236b42;
+    transform: translateY(-2px);
+  }
+  
+  .edit-comment-btn:hover {
+    color: var(--primary-color);
+    transform: scale(1.2);
+  }
+
+  #editCommentRating {
+    width: 150px;          /* Set the width of the dropdown */
+    padding: 8px 12px;     /* Increase padding for better appearance */
+    font-size: 1rem;     /* Match existing font size */
+    border: 1px solid var(--border-color);
+    border-radius: 6px;    /* Consistent with other form elements */
+    background-color: var(--white);
+    color: var(--text-color);
+    appearance: menulist;  /* Ensure dropdown appearance */
+    cursor: pointer;
+    margin-right: 40px;
+    margin-top: 20px;
+  }
+  
+  /* Add hover effect consistent with your design */
+  #editCommentRating:hover {
+    border-color: var(--primary-color);
+  }
+  

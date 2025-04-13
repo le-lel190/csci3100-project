@@ -171,11 +171,214 @@ function fetchComments(courseId) {
         </div>
       `;
       
+      // Add new button under the rating stars
+      const ratingBox = commentBlock.querySelector('.rating-box');
+      const editButton = document.createElement('button');
+      editButton.className = 'edit-comment-btn';
+      editButton.innerHTML = '✏️ Edit';
+      editButton.style.position = 'absolute';
+      editButton.style.top = '60%';
+      editButton.style.right = '10px';
+      editButton.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+      editButton.style.border = 'none';
+      editButton.style.borderRadius = '8px';
+      editButton.style.padding = '0.5rem 1rem';
+      editButton.style.cursor = 'pointer';
+      editButton.style.fontSize = '1rem';
+      editButton.style.color = 'white';
+      editButton.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.2)';
+  
+      editButton.addEventListener('click', function() {
+          openEditModal(comment);
+      });
+
+      commentBlock.appendChild(editButton);
+
+      if (comment.lastEdited) {
+        const dateElement = commentBlock.querySelector('.comment-date');
+        const editedIndicator = document.createElement('span');
+        editedIndicator.className = 'edited-indicator';
+        editedIndicator.textContent = ' (edited)';
+        editedIndicator.style.fontSize = '0.8rem';
+        editedIndicator.style.fontStyle = 'italic';
+        editedIndicator.style.color = 'var(--text-light)';
+        dateElement.appendChild(editedIndicator);
+      }
+
       commentsContainer.appendChild(commentBlock);
       commentsContainer.scrollTop = 0;
 
     });
   }
+
+  // Function to open the edit modal
+function openEditModal(comment) {
+    // Check if modal already exists
+    let modal = document.getElementById('editCommentModal');
+    
+    if (!modal) {
+      // Create modal if it doesn't exist
+      modal = document.createElement('div');
+      modal.id = 'editCommentModal';
+      modal.className = 'comment-modal';
+      
+      modal.innerHTML = `
+        <div class="modal-content">
+          <span class="close-modal">&times;</span>
+          <h3>Edit Your Comment</h3>
+          <form id="editCommentForm">
+            <input type="hidden" id="editCommentId">
+            <textarea id="editCommentText" required></textarea>
+            
+            <div class="rating-box">
+              <label for="editCommentRating">Rating:</label>
+              <select id="editCommentRating" required>
+                <option value="1">⭐</option>
+                <option value="2">⭐⭐</option>
+                <option value="3">⭐⭐⭐</option>
+                <option value="4">⭐⭐⭐⭐</option>
+                <option value="5">⭐⭐⭐⭐⭐</option>
+              </select>
+            </div>
+            
+            <button type="submit" id="saveEditBtn">Save Changes</button>
+          </form>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+      setupModalHandlers();
+    }
+    
+    // Populate form with comment data
+    document.getElementById('editCommentText').value = comment.content;
+    document.getElementById('editCommentRating').value = comment.rating;
+    document.getElementById('editCommentId').value = comment._id;
+    
+    // Show the modal
+    modal.style.display = 'block';
+  }
+
+function setupModalHandlers() {
+    const modal = document.getElementById('editCommentModal');
+    const form = document.getElementById('editCommentForm');
+    const closeBtn = modal.querySelector('.close-modal');
+    
+    // Form submission handler - THIS IS THE KEY PART FOR DATABASE INTERACTION
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const commentId = document.getElementById('editCommentId').value;
+      const content = document.getElementById('editCommentText').value;
+      const rating = document.getElementById('editCommentRating').value;
+
+    try {
+        // Send update request to server
+        const response = await fetch(`/api/comments/${commentId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content, rating })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Server returned an error');
+        }
+
+        // Successfully updated
+        modal.style.display = 'none';
+
+        // Update the comment in the UI immediately
+        const commentBlock = document.querySelector(`.comment-block[data-comment-id='${commentId}']`);
+        if (commentBlock) {
+            // Update the content
+            const contentElement = commentBlock.querySelector('.comment-content p');
+            if (contentElement) {
+                contentElement.textContent = content;
+            }
+
+            // Update the rating stars
+            const ratingBox = commentBlock.querySelector('.rating-box .rating-stars');
+            if (ratingBox) {
+                ratingBox.textContent = '⭐'.repeat(rating);
+            }
+
+            // Remove all rating classes
+            commentBlock.classList.remove('low-rating', 'neutral-rating', 'high-rating');
+            
+            // Add the appropriate rating class based on the new rating
+            if (rating <= 2) {
+                commentBlock.classList.add('low-rating');
+            } else if (rating == 3) {
+                commentBlock.classList.add('neutral-rating');
+            } else if (rating >= 4) {
+                commentBlock.classList.add('high-rating');
+            }
+
+            // Add or update the "edited" indicator
+            const dateElement = commentBlock.querySelector('.comment-date');
+            let editedIndicator = dateElement.querySelector('.edited-indicator');
+            if (!editedIndicator) {
+                editedIndicator = document.createElement('span');
+                editedIndicator.className = 'edited-indicator';
+                editedIndicator.style.fontSize = '0.8rem';
+                editedIndicator.style.fontStyle = 'italic';
+                editedIndicator.style.color = 'var(--text-light)';
+                dateElement.appendChild(editedIndicator);
+            }
+            editedIndicator.textContent = ' (edited)';
+        }
+    } catch (error) {
+        console.error('Error updating comment:', error);
+        alert('Unable to update comment: ' + error.message);
+    }
+      
+    });
+    
+    // Close button handler
+    closeBtn.addEventListener('click', function() {
+      modal.style.display = 'none';
+    });
+    
+    // Close when clicking outside the modal
+    window.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  }
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
   // Handle comment form submission
   function setupCommentForm(courseId, courseName) {
@@ -183,6 +386,12 @@ function fetchComments(courseId) {
     const commentTextarea = document.getElementById('newComment');
     
     postButton.addEventListener('click', () => {
+      // Check if user is verified
+      if (!window.isEmailVerified) {
+        alert('Please verify your email before posting comments.');
+        return;
+      }
+      
       // Get input values
       const content = commentTextarea.value.trim();
       if (!content) {
@@ -406,6 +615,9 @@ function loadUserInfo() {
     .then(data => {
         if (data.user) {
             document.getElementById('userUsername').textContent = data.user.username;
+            // Store email verification status
+            window.isEmailVerified = data.user.isEmailVerified || false;
+            console.log(window.isEmailVerified);
         }
     })
     .catch(error => {
@@ -513,11 +725,5 @@ function handleCourseSelection(department, courseNumber, courseName) {
     if (!mainContent) return;
     
     // Create and display the comment section
-    mainContent.innerHTML = createCommentSectionHTML(currentCourse);
-    
-    // Load course details and comments
-    loadCourseDetails(department, courseNumber);
-    
-    // Setup the comment form
-    setupCommentForm();
+    displayCourseCode(department + ' ' + courseNumber, courseName);
 }
