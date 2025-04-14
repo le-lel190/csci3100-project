@@ -201,8 +201,10 @@ body {
     background-color: #ffffff;
     border: 1px solid #dcdde1;
     border-radius: 4px;
-    cursor: pointer;
-    display: block; /* Ensure consistent display */
+    cursor: move;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
 .course-item:hover,

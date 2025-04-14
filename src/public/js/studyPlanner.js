@@ -71,47 +71,47 @@ function loadDemoDataFromAPI() {
 function loadDemoData() {
     // Define demo courses with name, type, and credits (units)
     const courses = [
-        { id: 'CSCI 3100', name: 'Software Engineering', units: 3, color: '#d0e0f0', selected: true, type: 'Major' },
-        { id: 'CSCI 3180', name: 'Principles of Programming Lang', units: 3, color: '#f0e0d0', selected: true, type: 'Major' },
-        { id: 'CSCI 3250', name: 'Computers and Society', units: 2, color: '#e0d0f0', selected: true, type: 'Major' },
-        { id: 'CSCI 3251', name: 'Engineering Practicum', units: 1, color: '#e0f0d0', selected: true, type: 'Major' },
-        { id: 'CSCI 3320', name: 'Fund. of Machine Learning', units: 3, color: '#f0d0e0', selected: true, type: 'Major' },
-        { id: 'ELTU 3014', name: 'English for ERG Studs II', units: 2, color: '#c2e0c6', selected: true, type: 'UG Core' },
-        { id: 'STAT 2005', name: 'Programming Lang for Stat', units: 3, color: '#f0e0d0', selected: true, type: 'Major' },
-        { id: 'UGCP 1001', name: 'Understanding China', units: 1, color: '#e0d0f0', selected: true, type: 'UG Core' },
-        { id: 'CSCI 3130', name: 'Formal Lang & Automata Theory', units: 3, color: '#e0f0d0', selected: true, type: 'Major' },
-        { id: 'CSCI 3150', name: 'Intro to Operating Systems', units: 3, color: '#f0d0e0', selected: true, type: 'Major' },
-        { id: 'CSCI 3160', name: 'Design & Analysis of Algo', units: 3, color: '#d0f0e0', selected: true, type: 'Major' },
-        { id: 'CSCI 3230', name: 'Fundamentals of AI', units: 3, color: '#f0d0d0', selected: true, type: 'Major' },
-        { id: 'GECC 3230', name: 'Service-Learning Programme', units: 3, color: '#c2e0c6', selected: true, type: 'College' },
-        { id: 'UGEC 1511', name: 'Perspectives in Economics', units: 3, color: '#d0e0f0', selected: true, type: 'UG Core' },
-        { id: 'CENG 3420', name: 'Computer Organization & Design', units: 3, color: '#f0e0d0', selected: true, type: 'Major' },
-        { id: 'CSCI 2100', name: 'Data Structures', units: 3, color: '#e0d0f0', selected: true, type: 'Major' },
-        { id: 'ELTU 2014', name: 'English for ERG Studs I', units: 3, color: '#e0f0d0', selected: true, type: 'UG Core' },    
-        { id: 'ENGG 2780', name: 'Statistics for Engineers', units: 2, color: '#c2e0c6', selected: true, type: 'Major' },
-        { id: 'UGED 1111', name: 'Logic', units: 2, color: '#d0e0f0', selected: true, type: 'UG Core' },
-        { id: 'CHLT 1002', name: 'University Chinese II', units: 2, color: '#f0e0d0', selected: true, type: 'UG Core' },
-        { id: 'CSCI 1130', name: 'Intro to Computing Using Java', units: 3, color: '#e0d0f0', selected: true, type: 'Major' },
-        { id: 'ENGG 2440', name: 'Discrete Math for Engineers', units: 3, color: '#e0f0d0', selected: true, type: 'Major' },
-        { id: 'ENGG 2760', name: 'Probability for Engineers', units: 2, color: '#f0d0e0', selected: true, type: 'Major' },
-        { id: 'UGEA 2100', name: 'Outline of Chinese Culture', units: 2, color: '#d0f0e0', selected: true, type: 'UG Core' },
-        { id: 'UGFH 1000', name: 'In Dialogue with Humanity', units: 3, color: '#e0d0f0', selected: true, type: 'UG Core' },
-        { id: 'UGCP 1002', name: 'HK-Wider Constitutional Order', units: 1, color: '#f0d0e0', selected: true, type: 'UG Core' },
-        { id: 'UGFN 1000', name: 'In Dialogue With Nature', units: 3, color: '#f0d0d0', selected: true, type: 'UG Core' },
-        { id: 'ELTU 1001', name: 'Foundation Eng for Uni Studies', units: 3, color: '#d0e0f0', selected: true, type: 'UG Core' },
-        { id: 'ENGG 1120', name: 'Linear Algebra for Engineers', units: 3, color: '#c2e0c6', selected: true, type: 'Major' },
-        { id: 'ENGG 1130', name: 'Multivariable Calculus for Eng', units: 3, color: '#c2e0c6', selected: true, type: 'Major' },
-        { id: 'ENGG 2020', name: 'Digital Logic and Systems', units: 3, color: '#d0e0f0', selected: true, type: 'Major' },
-        { id: 'MAEG 1020', name: 'Comput\'nal Design & Fabric\'n', units: 3, color: '#e0d0f0', selected: true, type: 'Free' },
-        { id: 'PHED 1031', name: 'Tennis (Men)', units: 1, color: '#e0f0d0', selected: true, type: 'UG Core' },
-        { id: 'CHLT 1001', name: 'University Chinese I', units: 3, color: '#f0d0e0', selected: true, type: 'UG Core' },
-        { id: 'ENGG 1003', name: 'Digit. Lit. & Comp. Thinking—P', units: 3, color: '#d0f0e0', selected: true, type: 'Major' },
-        { id: 'ENGG 1110', name: 'Problem Solving By Programming', units: 3, color: '#f0d0d0', selected: true, type: 'Major' },
-        { id: 'GECC 1130', name: 'Idea of a University', units: 2, color: '#d0f0e0', selected: true, type: 'College' },
-        { id: 'GECC 1131', name: 'Idea of a University: STOT', units: 1, color: '#e0d0f0', selected: true, type: 'College' },
-        { id: 'MATH 1510', name: 'Calculus for Engineers', units: 3, color: '#e0f0d0', selected: true, type: 'Major' },
-        { id: 'PHED 1180', name: 'Badminton', units: 1, color: '#f0d0e0', selected: true, type: 'UG Core' },
-        { id: 'PHYS 1110', name: 'Engineering Phy: Mech & Thermo', units: 3, color: '#d0f0e0', selected: true, type: 'Major' }
+        { id: 'CSCI 3100', name: 'Software Engineering', units: 3, color: '#d0e0f0', type: 'Major' },
+        { id: 'CSCI 3180', name: 'Principles of Programming Lang', units: 3, color: '#f0e0d0', type: 'Major' },
+        { id: 'CSCI 3250', name: 'Computers and Society', units: 2, color: '#e0d0f0', type: 'Major' },
+        { id: 'CSCI 3251', name: 'Engineering Practicum', units: 1, color: '#e0f0d0', type: 'Major' },
+        { id: 'CSCI 3320', name: 'Fund. of Machine Learning', units: 3, color: '#f0d0e0', type: 'Major' },
+        { id: 'ELTU 3014', name: 'English for ERG Studs II', units: 2, color: '#c2e0c6', type: 'UG Core' },
+        { id: 'STAT 2005', name: 'Programming Lang for Stat', units: 3, color: '#f0e0d0', type: 'Major' },
+        { id: 'UGCP 1001', name: 'Understanding China', units: 1, color: '#e0d0f0', type: 'UG Core' },
+        { id: 'CSCI 3130', name: 'Formal Lang & Automata Theory', units: 3, color: '#e0f0d0', type: 'Major' },
+        { id: 'CSCI 3150', name: 'Intro to Operating Systems', units: 3, color: '#f0d0e0', type: 'Major' },
+        { id: 'CSCI 3160', name: 'Design & Analysis of Algo', units: 3, color: '#d0f0e0', type: 'Major' },
+        { id: 'CSCI 3230', name: 'Fundamentals of AI', units: 3, color: '#f0d0d0', type: 'Major' },
+        { id: 'GECC 3230', name: 'Service-Learning Programme', units: 3, color: '#c2e0c6', type: 'College' },
+        { id: 'UGEC 1511', name: 'Perspectives in Economics', units: 3, color: '#d0e0f0', type: 'UG Core' },
+        { id: 'CENG 3420', name: 'Computer Organization & Design', units: 3, color: '#f0e0d0', type: 'Major' },
+        { id: 'CSCI 2100', name: 'Data Structures', units: 3, color: '#e0d0f0', type: 'Major' },
+        { id: 'ELTU 2014', name: 'English for ERG Studs I', units: 3, color: '#e0f0d0', type: 'UG Core' },
+        { id: 'ENGG 2780', name: 'Statistics for Engineers', units: 2, color: '#c2e0c6', type: 'Major' },
+        { id: 'UGED 1111', name: 'Logic', units: 2, color: '#d0e0f0', type: 'UG Core' },
+        { id: 'CHLT 1002', name: 'University Chinese II', units: 2, color: '#f0e0d0', type: 'UG Core' },
+        { id: 'CSCI 1130', name: 'Intro to Computing Using Java', units: 3, color: '#e0d0f0', type: 'Major' },
+        { id: 'ENGG 2440', name: 'Discrete Math for Engineers', units: 3, color: '#e0f0d0', type: 'Major' },
+        { id: 'ENGG 2760', name: 'Probability for Engineers', units: 2, color: '#f0d0e0', type: 'Major' },
+        { id: 'UGEA 2100', name: 'Outline of Chinese Culture', units: 2, color: '#d0f0e0', type: 'UG Core' },
+        { id: 'UGFH 1000', name: 'In Dialogue with Humanity', units: 3, color: '#e0d0f0', type: 'UG Core' },
+        { id: 'UGCP 1002', name: 'HK-Wider Constitutional Order', units: 1, color: '#f0d0e0', type: 'UG Core' },
+        { id: 'UGFN 1000', name: 'In Dialogue With Nature', units: 3, color: '#f0d0d0', type: 'UG Core' },
+        { id: 'ELTU 1001', name: 'Foundation Eng for Uni Studies', units: 3, color: '#d0e0f0', type: 'UG Core' },
+        { id: 'ENGG 1120', name: 'Linear Algebra for Engineers', units: 3, color: '#c2e0c6', type: 'Major' },
+        { id: 'ENGG 1130', name: 'Multivariable Calculus for Eng', units: 3, color: '#c2e0c6', type: 'Major' },
+        { id: 'ENGG 2020', name: 'Digital Logic and Systems', units: 3, color: '#d0e0f0', type: 'Major' },
+        { id: 'MAEG 1020', name: 'Comput\'nal Design & Fabric\'n', units: 3, color: '#e0d0f0', type: 'Free' },
+        { id: 'PHED 1031', name: 'Tennis (Men)', units: 1, color: '#e0f0d0', type: 'UG Core' },
+        { id: 'CHLT 1001', name: 'University Chinese I', units: 3, color: '#f0d0e0', type: 'UG Core' },
+        { id: 'ENGG 1003', name: 'Digit. Lit. & Comp. Thinking—P', units: 3, color: '#d0f0e0', type: 'Major' },
+        { id: 'ENGG 1110', name: 'Problem Solving By Programming', units: 3, color: '#f0d0d0', type: 'Major' },
+        { id: 'GECC 1130', name: 'Idea of a University', units: 2, color: '#d0f0e0', type: 'College' },
+        { id: 'GECC 1131', name: 'Idea of a University: STOT', units: 1, color: '#e0d0f0', type: 'College' },
+        { id: 'MATH 1510', name: 'Calculus for Engineers', units: 3, color: '#e0f0d0', type: 'Major' },
+        { id: 'PHED 1180', name: 'Badminton', units: 1, color: '#f0d0e0', type: 'UG Core' },
+        { id: 'PHYS 1110', name: 'Engineering Phy: Mech & Thermo', units: 3, color: '#d0f0e0', type: 'Major' }
     ];
 
     // Store the courses in the global variable
@@ -214,21 +214,14 @@ function populateCourseList(courses) {
         const courseItem = document.createElement('div');
         courseItem.className = 'course-item';
         courseItem.innerHTML = `
-            <input type="checkbox" id="${course.id}" ${course.selected ? 'checked' : ''}>
-            <label for="${course.id}">
-                ${course.id}
-                <div class="course-name">${course.name}</div>
-            </label>
+            <div class="course-id">${course.id}</div>
+            <div class="course-name">${course.name}</div>
         `;
         courseItem.draggable = true;
         courseItem.dataset.courseId = course.id;
 
         courseItem.addEventListener('dragstart', (e) => {
             e.dataTransfer.setData('text/plain', course.id);
-        });
-
-        courseItem.querySelector('input').addEventListener('change', (e) => {
-            course.selected = e.target.checked;
         });
 
         courseItems.appendChild(courseItem);
