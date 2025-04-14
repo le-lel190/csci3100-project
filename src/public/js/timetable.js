@@ -1918,11 +1918,45 @@ function showTentativeEditPopup(course, schedule, courseEvent) {
     }
     
     // Validate times when selection changes
-    startTimeSelect.addEventListener('change', validateTimes);
+    startTimeSelect.addEventListener('change', () => {
+        validateTimes();
+        updateEndTimeOptions();
+    });
     endTimeSelect.addEventListener('change', validateTimes);
     
     // Initial validation
     validateTimes();
+    updateEndTimeOptions();
+    
+    // Function to update end time options based on start time
+    function updateEndTimeOptions() {
+        const startTime = startTimeSelect.value;
+        const startMinutes = timeToMinutes(startTime);
+        
+        // Grey out end time options that are earlier than or equal to the start time
+        Array.from(endTimeSelect.options).forEach(option => {
+            const optionMinutes = timeToMinutes(option.value);
+            if (optionMinutes <= startMinutes) {
+                option.disabled = true;
+                option.style.color = '#999';
+                option.style.backgroundColor = '#f0f0f0';
+            } else {
+                option.disabled = false;
+                option.style.color = '';
+                option.style.backgroundColor = '';
+            }
+        });
+        
+        // If current selected end time is now invalid, select the first valid option
+        if (timeToMinutes(endTimeSelect.value) <= startMinutes) {
+            for (const option of endTimeSelect.options) {
+                if (!option.disabled) {
+                    endTimeSelect.value = option.value;
+                    break;
+                }
+            }
+        }
+    }
     
     function validateTimes() {
         const startTime = startTimeSelect.value;
@@ -1932,6 +1966,45 @@ function showTentativeEditPopup(course, schedule, courseEvent) {
         
         if (endMinutes <= startMinutes) {
             validationError.textContent = 'End time must be after start time';
+            saveBtn.disabled = true;
+            return false;
+        }
+        
+        // Check for conflicts with existing courses
+        const day = document.getElementById('day-select').value;
+        const newSchedule = {
+            day,
+            start: startTime,
+            end: endTime
+        };
+        
+        // Get all selected courses except the current one being edited
+        const selectedCourses = window.coursesData.filter(c => 
+            c.selected && c.id !== course.id
+        );
+        
+        let hasConflict = false;
+        let conflictCourse = null;
+        
+        // Check each selected course for conflicts
+        for (const existingCourse of selectedCourses) {
+            // Get schedules for the existing course
+            const existingSchedules = existingCourse.schedules || [];
+            
+            // Check each schedule combination for conflicts
+            for (const existingSchedule of existingSchedules) {
+                if (schedulesConflict(newSchedule, existingSchedule)) {
+                    hasConflict = true;
+                    conflictCourse = existingCourse;
+                    break;
+                }
+            }
+            
+            if (hasConflict) break;
+        }
+        
+        if (hasConflict) {
+            validationError.textContent = `Time conflict with ${conflictCourse.id}`;
             saveBtn.disabled = true;
             return false;
         } else {
