@@ -350,36 +350,6 @@ function setupModalHandlers() {
     });
   }
   
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
   // Handle comment form submission
   function setupCommentForm(courseId, courseName) {
     const postButton = document.getElementById('postComment');
