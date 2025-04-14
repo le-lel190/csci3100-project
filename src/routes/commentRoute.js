@@ -46,4 +46,32 @@ router.delete('/api/comments/:id', adminAuth, async (req, res) => {
   }
 });
 
+// Edit an existing comment
+router.put('/api/comments/:id', async (req, res) => {
+  try {
+    const { content, rating } = req.body;
+    
+    // Find and update the comment
+    const updatedComment = await Comment.findByIdAndUpdate(
+      req.params.id,
+      { 
+        content,
+        rating,
+        // Add a lastEdited field to track modification time
+        lastEdited: new Date()
+      },
+      { new: true } // Return the updated document
+    );
+    
+    if (!updatedComment) {
+      return res.status(404).json({ message: 'Comment not found' });
+    }
+    
+    res.status(200).json(updatedComment);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+
 module.exports = router;
