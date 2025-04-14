@@ -66,7 +66,10 @@ router.post('/register',
       const emailSent = await sendVerificationEmail(email, username, emailVerificationToken);
 
       // Generate token
-      const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+      const token = jwt.sign({ 
+        userId: user._id,
+        lastActivity: Date.now()
+      }, JWT_SECRET, {
         expiresIn: '24h'
       });
 
@@ -126,7 +129,10 @@ router.post('/login',
       }
 
       // Generate token
-      const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+      const token = jwt.sign({ 
+        userId: user._id,
+        lastActivity: Date.now()
+      }, JWT_SECRET, {
         expiresIn: '24h'
       });
 

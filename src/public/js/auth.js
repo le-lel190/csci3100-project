@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (urlParams.get('verified') === 'true') {
         showMessage('Your email has been verified successfully. You can now log in.', 'success');
     }
+    
+    // Check for session timeout parameter
+    if (urlParams.get('timeout') === 'true') {
+        showMessage('Your session has timed out. Please login again.', 'warning');
+    }
 
     // Check if user is already logged in
     checkAuthStatus();
