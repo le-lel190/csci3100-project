@@ -6,31 +6,24 @@ const fs = require('fs').promises;
 // Fix path resolution with absolute path
 // Base path to course data directory
 const courseDataPath = path.resolve(process.cwd(), 'course-data');
-console.log('Course data path:', courseDataPath);
 
 // Helper function to ensure required directories exist
 async function ensureDirectoriesExist() {
     try {
-        console.log('Ensuring course data directories exist...');
-        
         // First, ensure the main course-data directory exists
         await fs.mkdir(courseDataPath, { recursive: true });
-        console.log(`Ensured ${courseDataPath} exists`);
         
         // Ensure courses directory exists
         const coursesDir = path.join(courseDataPath, 'courses');
         await fs.mkdir(coursesDir, { recursive: true });
-        console.log(`Ensured ${coursesDir} exists`);
         
         // Ensure derived directory exists
         const derivedDir = path.join(courseDataPath, 'derived');
         await fs.mkdir(derivedDir, { recursive: true });
-        console.log(`Ensured ${derivedDir} exists`);
         
         // Ensure resources directory exists
         const resourcesDir = path.join(courseDataPath, 'resources');
         await fs.mkdir(resourcesDir, { recursive: true });
-        console.log(`Ensured ${resourcesDir} exists`);
         
         return true;
     } catch (error) {
@@ -116,12 +109,10 @@ router.get('/demo', (req, res) => {
 router.get('/:semester?', async (req, res) => {
     try {
         const semester = req.params.semester || 'current';
-        console.log(`Loading courses for semester: ${semester}`);
         
         // Check if course-data directory exists
         try {
             await fs.access(courseDataPath);
-            console.log('Course data directory exists');
         } catch (error) {
             console.error('Course data directory not found:', error.message);
             return res.status(404).json({
@@ -134,7 +125,6 @@ router.get('/:semester?', async (req, res) => {
         const derivedPath = path.join(courseDataPath, 'derived');
         try {
             await fs.access(derivedPath);
-            console.log('Derived data directory exists');
         } catch (error) {
             console.error('Derived data directory not found:', error.message);
             return res.status(404).json({
@@ -152,7 +142,6 @@ router.get('/:semester?', async (req, res) => {
         try {
             const subjectCoursesData = await fs.readFile(subjectCoursesPath, 'utf8');
             subjectsWithCourses = JSON.parse(subjectCoursesData);
-            console.log('Successfully loaded subject course names');
         } catch (error) {
             console.error('Error loading subject course names:', error);
             return res.status(500).json({
@@ -168,7 +157,6 @@ router.get('/:semester?', async (req, res) => {
         try {
             const courseListContent = await fs.readFile(courseListPath, 'utf8');
             courseListData = JSON.parse(courseListContent);
-            console.log('Successfully loaded course list');
         } catch (error) {
             console.error('Error loading course list:', error);
             return res.status(500).json({
@@ -201,7 +189,6 @@ router.get('/:semester?', async (req, res) => {
                 .filter(file => file.endsWith('.json'))
                 .map(file => path.basename(file, '.json'));
             
-            console.log('Available subject files:', availableSubjects);
         } catch (error) {
             console.error('Error reading courses directory:', error);
             return res.status(500).json({
@@ -218,26 +205,20 @@ router.get('/:semester?', async (req, res) => {
                 availableSubjects.filter(subject => !prioritySubjects.includes(subject))
             );
         
-        console.log('Processing subjects:', subjectsToInclude);
-        
         let colorIndex = 0;
         
         // Process each subject's courses
         for (const subject of subjectsToInclude) {
             if (!subjectsWithCourses[subject]) {
-                console.log(`Skipping ${subject} - not found in subject course names`);
                 continue;
             }
-            
-            console.log(`Processing ${subject} courses`);
-            
+                     
             // Get the individual course data file
             const subjectFilePath = path.join(courseDataPath, `courses/${subject}.json`);
             let subjectFileContent;
             
             try {
                 subjectFileContent = await fs.readFile(subjectFilePath, 'utf8');
-                console.log(`Successfully read ${subject} course file`);
             } catch (error) {
                 console.warn(`Could not read ${subject} course file:`, error.message);
                 continue;
@@ -246,20 +227,6 @@ router.get('/:semester?', async (req, res) => {
             let courseData;
             try {
                 courseData = JSON.parse(subjectFileContent);
-                console.log(`Successfully parsed ${subject} course data with ${courseData.length} courses`);
-                
-                // Improved debug logging to understand course structure
-                if (courseData.length > 0) {
-                    const sampleCourse = courseData[0];
-                    console.log(`Sample course structure for ${subject}:`, 
-                                JSON.stringify(sampleCourse).substring(0, 300) + '...');
-                    
-                    // Log meeting pattern structure to better understand how to parse it
-                    if (sampleCourse.meeting_patterns && sampleCourse.meeting_patterns.length > 0) {
-                        console.log('Sample meeting pattern structure:',
-                                  JSON.stringify(sampleCourse.meeting_patterns[0], null, 2));
-                    }
-                }
             } catch (error) {
                 console.error(`Error parsing ${subject} course data:`, error.message);
                 continue;
@@ -282,24 +249,12 @@ router.get('/:semester?', async (req, res) => {
                 const courseCode = courseInfo.code;
                 const courseName = courseTitles[courseCode] || courseInfo.title || 'Unknown Course';
                 
-                console.log(`Processing course ${subject} ${courseCode}: "${courseName}"`);
-                
                 // Check if terms exist and contain valid data
                 const hasTerms = courseInfo.terms && 
-                            Object.keys(courseInfo.terms).length > 0;
-                
-                console.log(`${subject} ${courseCode} has terms: ${hasTerms}`);
-                
-                if (hasTerms) {
-                    // Debug the first term
-                    const firstTermKey = Object.keys(courseInfo.terms)[0];
-                    console.log(`First term for ${subject} ${courseCode}: ${firstTermKey}`);
-                }
+                            Object.keys(courseInfo.terms).length > 0;                
                 
                 // If no terms, create a placeholder
                 if (!hasTerms) {
-                    console.log(`No terms for ${subject} ${courseCode}, creating placeholder`);
-                    
                     // Create a more diverse placeholder schedule based on course code
                     const codeNum = parseInt(courseCode.replace(/\D/g, '')) || 0;
                     
@@ -309,10 +264,6 @@ router.get('/:semester?', async (req, res) => {
                     const hour = 8 + (codeNum % 10);
                     const startTime = `${hour.toString().padStart(2, '0')}:00`;
                     const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
-                    
-                        // Extract meeting dates
-
-                    //console.log('Debug 1: ', meetingDates);
 
                     const placeholderSchedule = {
                         type: 'TBA (Placeholder)', 
@@ -340,11 +291,7 @@ router.get('/:semester?', async (req, res) => {
                     const schedules = [];
                     
                     for (const [termName, termData] of Object.entries(courseInfo.terms)) {
-                        console.log(`Processing term ${termName} for ${subject} ${courseCode}`);
-                        
                         for (const [sectionName, sectionData] of Object.entries(termData)) {
-                            console.log(`Processing section ${sectionName} for ${subject} ${courseCode}`);
-                            
                             let type = 'Class';
                             if (sectionName.includes('LEC')) {
                                 type = 'Lecture';
@@ -357,12 +304,10 @@ router.get('/:semester?', async (req, res) => {
                             if (!sectionData.days || !sectionData.startTimes || !sectionData.endTimes ||
                                 !Array.isArray(sectionData.days) || !Array.isArray(sectionData.startTimes) || 
                                 !Array.isArray(sectionData.endTimes)) {
-                                console.log(`Missing days/times for ${subject} ${courseCode} section ${sectionName}`);
                                 continue;
                             }
                             
                             if (sectionData.days.length === 0 || sectionData.startTimes.length === 0 || sectionData.endTimes.length === 0) {
-                                console.log(`Empty days/times arrays for ${subject} ${courseCode} section ${sectionName}`);
                                 continue;
                             }
                             
@@ -374,7 +319,6 @@ router.get('/:semester?', async (req, res) => {
                                 }
                                 
                                 if (dayIndex < 0 || dayIndex > 6) {
-                                    console.log(`Invalid day index ${dayIndex} for ${subject} ${courseCode}`);
                                     continue;
                                 }
                                 
@@ -402,7 +346,6 @@ router.get('/:semester?', async (req, res) => {
                                 }
 
                                 const detailedType = `${type} ${sectionName}`.trim();
-                                console.log('Debug 2: ', meetingDates);
 
                                 schedules.push({
                                     type: detailedType,
@@ -419,8 +362,6 @@ router.get('/:semester?', async (req, res) => {
                     }
                     
                     if (schedules.length === 0) {
-                        console.log(`No valid schedules created for ${subject} ${courseCode}, adding placeholder`);
-                        
                         const codeNum = parseInt(courseCode.replace(/\D/g, '')) || 0;
                         
                         const dayIndex = codeNum % 7;
@@ -429,7 +370,6 @@ router.get('/:semester?', async (req, res) => {
                         const hour = 8 + (codeNum % 10);
                         const startTime = `${hour.toString().padStart(2, '0')}:00`;
                         const endTime = `${(hour + 1).toString().padStart(2, '0')}:00`;
-                        // console.log('Debug 3: ', meetingDates);
 
                         const placeholderSchedule = {
                             type: 'TBA (Placeholder)', 
@@ -473,18 +413,13 @@ router.get('/:semester?', async (req, res) => {
         // Sort courses by subject and code
         courses.sort((a, b) => a.id.localeCompare(b.id));
         
-        console.log(`Found ${courses.length} courses for ${semester} semester`);
-        
-        // MODIFIED: Always return at least some courses
         // If there are no courses, return demo data for demonstration
         if (courses.length === 0) {
-            console.log('No courses found, returning demo data instead of error');
             return res.json(getDemoCourses());
         }
         
         // Limit to first 200 courses to avoid overwhelming the UI but show more than before
         courses = courses.slice(0, 200);
-        console.log(`Returning ${courses.length} courses`);
         
         res.json(courses);
     } catch (error) {

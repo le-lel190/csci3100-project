@@ -31,22 +31,22 @@ router.post('/api/studyplan', auth, async (req, res) => {
 
 // Get the user's study plan
 router.get('/api/studyplan', auth, async (req, res) => {
-  console.log('GET /api/studyplan called');
-  console.log('User ID from auth middleware:', req.userId);
+  // console.log('GET /api/studyplan called');
+  // console.log('User ID from auth middleware:', req.userId);
   try {
       const userId = req.userId;
-      console.log('Finding user with ID:', userId);
+      // console.log('Finding user with ID:', userId);
       const user = await User.findById(userId);
 
       if (!user) {
-          console.log('User not found for ID:', userId);
+          // console.log('User not found for ID:', userId);
           return res.status(404).json({ error: 'User not found' });
       }
 
-      console.log('User study plan:', user.studyPlan || []);
+      // console.log('User study plan:', user.studyPlan || []);
       res.status(200).json(user.studyPlan || []);
   } catch (error) {
-      console.error('Error in GET /api/studyplan:', error);
+      // console.error('Error in GET /api/studyplan:', error);
       res.status(500).json({ error: error.message });
   }
 });
