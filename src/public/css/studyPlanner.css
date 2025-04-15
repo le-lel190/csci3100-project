@@ -115,28 +115,6 @@ body {
     margin-bottom: 0.5rem;
 }
 
-.semester-buttons {
-    display: flex;
-    gap: 0.5rem;
-    margin-top: 0.5rem;
-}
-
-.semester-btn {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid var(--border-color);
-    background: var(--white);
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.semester-btn.active {
-    background: var(--primary-color);
-    color: var(--white);
-    border-color: var(--primary-color);
-}
-
 .demo-button-container {
     margin-top: 1rem;
     text-align: center;
@@ -166,9 +144,11 @@ body {
     transform: translateY(0);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 .search-box {
     margin-bottom: 20px;
 }
+
 .search-box input {
     width: 100%;
     padding: 8px;

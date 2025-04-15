@@ -1,10 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => { 
     loadUserInfo();
     setupLogout();
-    initializeSemesterButtons();
     initializeSearch();
     setupDemoButton();
-    loadCourseData();
+    loadCourseData('current');
     setupDragAndDrop();
     setupAddYearButton();
     updateProgressBars();
@@ -12,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSaveButton();
     
     // Chain loadCourseData and loadUserStudyPlan
-    loadCourseData()
+    loadCourseData('current')
         .then(() => {
             console.log('Course data loaded successfully, now loading user study plan...');
             loadUserStudyPlan();
@@ -300,18 +299,6 @@ function populateCourseList(courses) {
         });
 
         courseItems.appendChild(courseItem);
-    });
-}
-
-function initializeSemesterButtons() {
-    const buttons = document.querySelectorAll('.semester-btn');
-    buttons.forEach(button => {
-        button.addEventListener('click', () => {
-            buttons.forEach(b => b.classList.remove('active'));
-            button.classList.add('active');
-            const semester = button.dataset.semester || 'current';
-            loadCourseData(semester);
-        });
     });
 }
 
