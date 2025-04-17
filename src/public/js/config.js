@@ -6,13 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
     loadSavedSettings();
     setupSettingsSaving();
     setupDataManagement();
+    setupEmailVerification();
 });
 
 /**
  * Load and display user information
  */
 function loadUserInfo() {
-    const usernameElement = document.getElementById('username');
+    const usernameElement = document.getElementById('userUsername');
     
     fetch('/api/auth/login', {
         method: 'GET',
@@ -25,15 +26,18 @@ function loadUserInfo() {
         return response.json();
     })
     .then(data => {
-        if (data && data.username) {
-            usernameElement.textContent = data.username;
+        if (data && data.user && data.user.username && usernameElement) {
+            usernameElement.textContent = data.user.username;
             
             // Load user profile information if available
-            if (data.email) {
-                document.getElementById('profile-email').value = data.email;
+            const profileEmailEl = document.getElementById('profile-email');
+            const profileNameEl = document.getElementById('profile-name');
+            
+            if (data.user.email && profileEmailEl) {
+                profileEmailEl.value = data.user.email;
             }
-            if (data.fullName) {
-                document.getElementById('profile-name').value = data.fullName;
+            if (data.user.fullName && profileNameEl) {
+                profileNameEl.value = data.user.fullName;
             }
         }
     })
@@ -48,7 +52,7 @@ function loadUserInfo() {
  * Set up the logout functionality
  */
 function setupLogout() {
-    const logoutButton = document.getElementById('logout-btn');
+    const logoutButton = document.getElementById('logoutBtn');
     
     if (logoutButton) {
         logoutButton.addEventListener('click', () => {
@@ -105,47 +109,65 @@ function setupTabNavigation() {
 function loadSavedSettings() {
     // General Settings
     const defaultView = localStorage.getItem('defaultView');
-    if (defaultView) {
-        document.getElementById('default-view').value = defaultView;
+    const defaultViewEl = document.getElementById('default-view');
+    if (defaultView && defaultViewEl) {
+        defaultViewEl.value = defaultView;
     }
     
     const use24Hour = localStorage.getItem('use24Hour') === 'true';
-    document.getElementById('24h-time').checked = use24Hour;
+    const use24HourEl = document.getElementById('24h-time');
+    if (use24HourEl) {
+        use24HourEl.checked = use24Hour;
+    }
     
     const enableAlerts = localStorage.getItem('enableAlerts') === 'true';
-    document.getElementById('enable-alerts').checked = enableAlerts;
+    const enableAlertsEl = document.getElementById('enable-alerts');
+    if (enableAlertsEl) {
+        enableAlertsEl.checked = enableAlerts;
+    }
     
     // Appearance Settings
     const theme = localStorage.getItem('theme');
-    if (theme) {
-        document.getElementById('theme-select').value = theme;
+    const themeSelectEl = document.getElementById('theme-select');
+    if (theme && themeSelectEl) {
+        themeSelectEl.value = theme;
     }
     
     const fontSize = localStorage.getItem('fontSize');
-    if (fontSize) {
-        document.getElementById('font-size').value = fontSize;
+    const fontSizeEl = document.getElementById('font-size');
+    if (fontSize && fontSizeEl) {
+        fontSizeEl.value = fontSize;
     }
     
     const showCodes = localStorage.getItem('showCodes') === 'true';
-    document.getElementById('show-codes').checked = showCodes;
+    const showCodesEl = document.getElementById('show-codes');
+    if (showCodesEl) {
+        showCodesEl.checked = showCodes;
+    }
     
     const compactMode = localStorage.getItem('compactMode') === 'true';
-    document.getElementById('compact-mode').checked = compactMode;
+    const compactModeEl = document.getElementById('compact-mode');
+    if (compactModeEl) {
+        compactModeEl.checked = compactMode;
+    }
     
     // Academic Settings
     const studyProgram = localStorage.getItem('studyProgram');
-    if (studyProgram) {
-        document.getElementById('study-program').value = studyProgram;
+    const studyProgramEl = document.getElementById('study-program');
+    if (studyProgram && studyProgramEl) {
+        studyProgramEl.value = studyProgram;
     }
     
     const academicYear = localStorage.getItem('academicYear');
-    if (academicYear) {
-        document.getElementById('academic-year').value = academicYear;
+    const academicYearEl = document.getElementById('academic-year');
+    if (academicYear && academicYearEl) {
+        academicYearEl.value = academicYear;
     }
     
     const expectedGraduation = localStorage.getItem('expectedGraduation');
-    if (expectedGraduation) {
-        document.getElementById('expected-graduation').value = expectedGraduation;
+    const expectedGradEl = document.getElementById('expected-graduation');
+    if (expectedGraduation && expectedGradEl) {
+        expectedGradEl.value = expectedGraduation;
     }
 }
 
@@ -154,84 +176,112 @@ function loadSavedSettings() {
  */
 function setupSettingsSaving() {
     // General Settings
-    document.getElementById('save-general').addEventListener('click', () => {
-        const defaultView = document.getElementById('default-view').value;
-        const use24Hour = document.getElementById('24h-time').checked;
-        const enableAlerts = document.getElementById('enable-alerts').checked;
-        
-        localStorage.setItem('defaultView', defaultView);
-        localStorage.setItem('use24Hour', use24Hour);
-        localStorage.setItem('enableAlerts', enableAlerts);
-        
-        showSaveConfirmation('general-settings');
-    });
+    const saveGeneralBtn = document.getElementById('save-general');
+    if (saveGeneralBtn) {
+        saveGeneralBtn.addEventListener('click', () => {
+            const defaultViewEl = document.getElementById('default-view');
+            const use24HourEl = document.getElementById('24h-time');
+            const enableAlertsEl = document.getElementById('enable-alerts');
+            
+            const defaultView = defaultViewEl ? defaultViewEl.value : '';
+            const use24Hour = use24HourEl ? use24HourEl.checked : false;
+            const enableAlerts = enableAlertsEl ? enableAlertsEl.checked : false;
+            
+            localStorage.setItem('defaultView', defaultView);
+            localStorage.setItem('use24Hour', use24Hour);
+            localStorage.setItem('enableAlerts', enableAlerts);
+            
+            showSaveConfirmation('general-settings');
+        });
+    }
     
     // Appearance Settings
-    document.getElementById('save-appearance').addEventListener('click', () => {
-        const theme = document.getElementById('theme-select').value;
-        const fontSize = document.getElementById('font-size').value;
-        const showCodes = document.getElementById('show-codes').checked;
-        const compactMode = document.getElementById('compact-mode').checked;
-        
-        localStorage.setItem('theme', theme);
-        localStorage.setItem('fontSize', fontSize);
-        localStorage.setItem('showCodes', showCodes);
-        localStorage.setItem('compactMode', compactMode);
-        
-        // Apply theme immediately
-        applyTheme(theme);
-        
-        showSaveConfirmation('appearance-settings');
-    });
+    const saveAppearanceBtn = document.getElementById('save-appearance');
+    if (saveAppearanceBtn) {
+        saveAppearanceBtn.addEventListener('click', () => {
+            const themeSelectEl = document.getElementById('theme-select');
+            const fontSizeEl = document.getElementById('font-size');
+            const showCodesEl = document.getElementById('show-codes');
+            const compactModeEl = document.getElementById('compact-mode');
+            
+            const theme = themeSelectEl ? themeSelectEl.value : 'light';
+            const fontSize = fontSizeEl ? fontSizeEl.value : 'medium';
+            const showCodes = showCodesEl ? showCodesEl.checked : false;
+            const compactMode = compactModeEl ? compactModeEl.checked : false;
+            
+            localStorage.setItem('theme', theme);
+            localStorage.setItem('fontSize', fontSize);
+            localStorage.setItem('showCodes', showCodes);
+            localStorage.setItem('compactMode', compactMode);
+            
+            // Apply theme immediately
+            applyTheme(theme);
+            
+            showSaveConfirmation('appearance-settings');
+        });
+    }
     
     // Profile Settings
-    document.getElementById('save-profile').addEventListener('click', () => {
-        const email = document.getElementById('profile-email').value;
-        const name = document.getElementById('profile-name').value;
-        
-        // Save to localStorage as backup
-        localStorage.setItem('userEmail', email);
-        localStorage.setItem('userName', name);
-        
-        // Send to server (if API available)
-        fetch('/api/user/profile', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: email,
-                fullName: name
-            }),
-            credentials: 'include'
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Failed to update profile');
-            }
-            return response.json();
-        })
-        .then(data => {
-            showSaveConfirmation('profile-settings');
-        })
-        .catch(error => {
-            console.error('Error updating profile:', error);
-            showSaveConfirmation('profile-settings', false);
+    const saveProfileBtn = document.getElementById('save-profile');
+    if (saveProfileBtn) {
+        saveProfileBtn.addEventListener('click', () => {
+            const emailEl = document.getElementById('profile-email');
+            const nameEl = document.getElementById('profile-name');
+            
+            const email = emailEl ? emailEl.value : '';
+            const name = nameEl ? nameEl.value : '';
+            
+            // Save to localStorage as backup
+            localStorage.setItem('userEmail', email);
+            localStorage.setItem('userName', name);
+            
+            // Send to server (if API available)
+            fetch('/api/user/profile', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    fullName: name
+                }),
+                credentials: 'include'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update profile');
+                }
+                return response.json();
+            })
+            .then(data => {
+                showSaveConfirmation('profile-settings');
+            })
+            .catch(error => {
+                console.error('Error updating profile:', error);
+                showSaveConfirmation('profile-settings', false);
+            });
         });
-    });
+    }
     
     // Academic Settings
-    document.getElementById('save-academic').addEventListener('click', () => {
-        const studyProgram = document.getElementById('study-program').value;
-        const academicYear = document.getElementById('academic-year').value;
-        const expectedGraduation = document.getElementById('expected-graduation').value;
-        
-        localStorage.setItem('studyProgram', studyProgram);
-        localStorage.setItem('academicYear', academicYear);
-        localStorage.setItem('expectedGraduation', expectedGraduation);
-        
-        showSaveConfirmation('academic-settings');
-    });
+    const saveAcademicBtn = document.getElementById('save-academic');
+    if (saveAcademicBtn) {
+        saveAcademicBtn.addEventListener('click', () => {
+            const studyProgramEl = document.getElementById('study-program');
+            const academicYearEl = document.getElementById('academic-year');
+            const expectedGradEl = document.getElementById('expected-graduation');
+            
+            const studyProgram = studyProgramEl ? studyProgramEl.value : '';
+            const academicYear = academicYearEl ? academicYearEl.value : '';
+            const expectedGraduation = expectedGradEl ? expectedGradEl.value : '';
+            
+            localStorage.setItem('studyProgram', studyProgram);
+            localStorage.setItem('academicYear', academicYear);
+            localStorage.setItem('expectedGraduation', expectedGraduation);
+            
+            showSaveConfirmation('academic-settings');
+        });
+    }
 }
 
 /**
@@ -290,71 +340,80 @@ function showSaveConfirmation(containerId, isSuccess = true) {
  */
 function setupDataManagement() {
     // Export data
-    document.getElementById('export-data').addEventListener('click', () => {
-        // Collect all data from localStorage
-        const data = {};
-        
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            data[key] = localStorage.getItem(key);
-        }
-        
-        // Create a JSON file for download
-        const dataStr = JSON.stringify(data, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        
-        // Create download link
-        const downloadLink = document.createElement('a');
-        downloadLink.href = URL.createObjectURL(dataBlob);
-        downloadLink.download = `course-planner-settings-${new Date().toISOString().slice(0, 10)}.json`;
-        
-        // Trigger download
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-    });
+    const exportDataBtn = document.getElementById('export-data');
+    if (exportDataBtn) {
+        exportDataBtn.addEventListener('click', () => {
+            // Collect all data from localStorage
+            const data = {};
+            
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                data[key] = localStorage.getItem(key);
+            }
+            
+            // Create a JSON file for download
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            // Create download link
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(dataBlob);
+            downloadLink.download = `course-planner-settings-${new Date().toISOString().slice(0, 10)}.json`;
+            
+            // Trigger download
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        });
+    }
     
     // Import data
-    document.getElementById('import-file').addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        
-        if (file) {
-            const reader = new FileReader();
+    const importFileEl = document.getElementById('import-file');
+    if (importFileEl) {
+        importFileEl.addEventListener('change', (event) => {
+            const file = event.target.files[0];
             
-            reader.onload = function(e) {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    
-                    // Import all settings to localStorage
-                    for (const key in data) {
-                        if (data.hasOwnProperty(key)) {
-                            localStorage.setItem(key, data[key]);
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        // Import all settings to localStorage
+                        for (const key in data) {
+                            if (data.hasOwnProperty(key)) {
+                                localStorage.setItem(key, data[key]);
+                            }
                         }
+                        
+                        // Reload settings to apply changes
+                        loadSavedSettings();
+                        
+                        // Show success message
+                        alert('Settings imported successfully! Reload the page to see all changes.');
+                    } catch (error) {
+                        console.error('Error importing settings:', error);
+                        alert('Failed to import settings. Please make sure the file is valid.');
                     }
-                    
-                    // Reload settings to apply changes
-                    loadSavedSettings();
-                    
-                    // Show success message
-                    alert('Settings imported successfully! Reload the page to see all changes.');
-                } catch (error) {
-                    console.error('Error importing settings:', error);
-                    alert('Failed to import settings. Please make sure the file is valid.');
-                }
-            };
-            
-            reader.readAsText(file);
-        }
-    });
+                };
+                
+                reader.readAsText(file);
+            }
+        });
+    }
     
     // Clear all data
-    document.getElementById('clear-data').addEventListener('click', () => {
-        if (confirm('Are you sure you want to clear all saved data? This action cannot be undone.')) {
-            localStorage.clear();
-            alert('All data has been cleared. The page will now reload.');
-            window.location.reload();
-        }
-    });
+    const clearDataBtn = document.getElementById('clear-data');
+    if (clearDataBtn) {
+        clearDataBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all saved data? This action cannot be undone.')) {
+                localStorage.clear();
+                alert('All data has been cleared. The page will now reload.');
+                window.location.reload();
+            }
+        });
+    }
 }
 
 /**
@@ -381,5 +440,127 @@ function setupNotifications() {
         }
         
         showSaveConfirmation('notification-settings');
+    });
+}
+
+/**
+ * Set up email verification functionality
+ */
+function setupEmailVerification() {
+    const verifyTokenBtn = document.getElementById('verify-token-btn');
+    const resendVerificationBtn = document.getElementById('resend-verification-btn');
+    const verificationToken = document.getElementById('verification-token');
+    const statusMessageDiv = document.getElementById('verification-status-message');
+    const verificationSection = document.getElementById('emailVerificationSection');
+    
+    // Check if user's email is already verified
+    fetch('/api/auth/login', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Not authenticated');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.user && data.user.isEmailVerified) {
+            // Email is already verified, hide or update section
+            statusMessageDiv.textContent = 'Your email has already been verified!';
+            statusMessageDiv.className = 'verification-status-success';
+            verificationToken.disabled = true;
+            verifyTokenBtn.disabled = true;
+            resendVerificationBtn.disabled = true;
+        } else {
+            // Email needs verification
+            statusMessageDiv.textContent = 'Please verify your email address to access all features.';
+            statusMessageDiv.className = 'verification-status-warning';
+        }
+    })
+    .catch(error => {
+        console.error('Error checking verification status:', error);
+    });
+    
+    // Handle token verification
+    verifyTokenBtn.addEventListener('click', () => {
+        const token = verificationToken.value.trim();
+        
+        if (!token) {
+            statusMessageDiv.textContent = 'Please enter a verification token';
+            statusMessageDiv.className = 'verification-status-error';
+            return;
+        }
+        
+        // Show processing state
+        verifyTokenBtn.disabled = true;
+        verifyTokenBtn.textContent = 'Verifying...';
+        
+        // Make API request to verify token
+        fetch(`/api/auth/verify-email/${token}`, {
+            method: 'GET',
+            credentials: 'include'
+        })
+        .then(response => {
+            verifyTokenBtn.disabled = false;
+            verifyTokenBtn.textContent = 'Verify Token';
+            
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Failed to verify token');
+                });
+            }
+            
+            // Success
+            statusMessageDiv.textContent = 'Email verified successfully!';
+            statusMessageDiv.className = 'verification-status-success';
+            verificationToken.disabled = true;
+            verifyTokenBtn.disabled = true;
+            resendVerificationBtn.disabled = true;
+            
+            // After success, reload user info to update verification status
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        })
+        .catch(error => {
+            statusMessageDiv.textContent = error.message || 'Failed to verify your email. Please try again.';
+            statusMessageDiv.className = 'verification-status-error';
+            console.error('Verification error:', error);
+        });
+    });
+    
+    // Handle resend verification
+    resendVerificationBtn.addEventListener('click', () => {
+        // Show processing state
+        resendVerificationBtn.disabled = true;
+        resendVerificationBtn.textContent = 'Sending...';
+        
+        // Make API request to resend verification email
+        fetch('/api/auth/resend-verification', {
+            method: 'POST',
+            credentials: 'include'
+        })
+        .then(response => {
+            resendVerificationBtn.disabled = false;
+            resendVerificationBtn.textContent = 'Resend Verification Email';
+            
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.message || 'Failed to resend verification email');
+                });
+            }
+            
+            return response.json();
+        })
+        .then(data => {
+            statusMessageDiv.textContent = 'Verification email sent! Please check your inbox.';
+            statusMessageDiv.className = 'verification-status-success';
+        })
+        .catch(error => {
+            statusMessageDiv.textContent = error.message || 'Failed to send verification email. Please try again.';
+            statusMessageDiv.className = 'verification-status-error';
+            console.error('Resend verification error:', error);
+        });
     });
 }
