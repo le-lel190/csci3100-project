@@ -1,1 +1,4 @@
 .DS_Store
+*.sh
+.cursorignore
+node_modules
