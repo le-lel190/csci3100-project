@@ -10,14 +10,14 @@
 //
 //
 // -- This is a parent command --
-Cypress.Commands.add('loginUser', (email, password) => {
-  cy.visit('/login');
-  cy.get('[data-testid=email-input]').type(email);
-  cy.get('[data-testid=password-input]').type(password);
-  cy.get('[data-testid=login-button]').click();
+Cypress.Commands.add('loginUser', (identifier = 'test', password = 'test123') => {
+  cy.visit('/');
+  cy.get('#loginIdentifier').type(identifier);
+  cy.get('#loginPassword').type(password);
+  cy.get('#loginForm .submit-btn').click();
   
   // Wait for login to complete and redirect
-  cy.url().should('include', '/dashboard');
+  cy.url().should('include', '/timetable');
 });
 
 // Custom command for adding a course to study plan
