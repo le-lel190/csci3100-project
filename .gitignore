@@ -2,4 +2,4 @@
 *.sh
 .cursorignore
 node_modules
-cypress/e2e/screenshots
+cypress/screenshots
