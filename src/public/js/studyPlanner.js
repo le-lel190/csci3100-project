@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupDemoButton();
     loadCourseData('current');
     setupDragAndDrop();
-    setupAddYearButton();
+    setupYearButtons();
     updateProgressBars();
     setupImageExport();
     setupSaveButton();
@@ -408,21 +408,25 @@ function setupDragAndDrop() {
     });
 }
 
-function setupAddYearButton() {
+function setupYearButtons() {
     const addYearBtn = document.getElementById('addYearBtn');
-    let yearCount = 4; // Starting with 4 years
+    const removeYearBtn = document.getElementById('removeYearBtn');
+    const thead = document.querySelector('.timetable thead tr');
+    let yearCount = thead.querySelectorAll('th').length; // Start with current number of years (4)
     const MAX_YEARS = 8; // Maximum number of years allowed
-    
-    // Update button state on initialization
+    const MIN_YEARS = 3; // Minimum number of years allowed
+
+    // Update button states on initialization
     updateAddYearButtonState();
-    
+    updateRemoveYearButtonState();
+
+    // Setup Add Year Button
     addYearBtn.addEventListener('click', () => {
         if (yearCount >= MAX_YEARS) {
             return; // Don't add more years if maximum is reached
         }
-        
+
         yearCount++;
-        const thead = document.querySelector('.timetable thead tr');
         const th = document.createElement('th');
         th.textContent = `Year ${yearCount}`;
         thead.appendChild(th);
@@ -434,7 +438,7 @@ function setupAddYearButton() {
             td.dataset.semester = row.cells[0].textContent.split(' ')[1] || '1';
             td.dataset.maxCourses = row.cells[1].dataset.maxCourses; // Copy max courses from existing cell
             row.appendChild(td);
-            
+
             td.addEventListener('dragover', (e) => {
                 e.preventDefault();
                 if (td.querySelectorAll('.course-block').length < parseInt(td.dataset.maxCourses || Infinity)) {
@@ -455,7 +459,7 @@ function setupAddYearButton() {
                     const courseBlock = document.createElement('div');
                     courseBlock.className = 'course-block';
                     courseBlock.dataset.courseId = course.id;
-                    courseBlock.style.backgroundColor = course.color || '#f0e6ff'; // Update to use purple theme
+                    courseBlock.style.backgroundColor = course.color || '#f0e6ff';
                     courseBlock.innerHTML = `
                         <div class="course-title">${course.id}</div>
                     `;
@@ -472,12 +476,49 @@ function setupAddYearButton() {
                 }
             });
         });
-        
-        // Update button state after adding a year
+
+        // Update both button states after adding a year
         updateAddYearButtonState();
+        updateRemoveYearButtonState();
     });
-    
-    // Function to update the button state based on current year count
+
+    // Setup Remove Year Button
+    removeYearBtn.addEventListener('click', () => {
+        if (yearCount <= MIN_YEARS) {
+            return; // Don't remove years if minimum is reached
+        }
+
+        // Check if the last year has any courses
+        const lastYearCells = document.querySelectorAll(`.timetable td[data-year="${yearCount}"]`);
+        let hasCourses = false;
+        lastYearCells.forEach(cell => {
+            if (cell.querySelectorAll('.course-block').length > 0) {
+                hasCourses = true;
+            }
+        });
+
+        if (hasCourses) {
+            alert('Cannot remove year with assigned courses. Please remove all courses from Year ' + yearCount + ' first.');
+            return;
+        }
+
+        // Remove the last year
+        thead.lastChild.remove();
+
+        const tbody = document.querySelector('.timetable tbody');
+        tbody.querySelectorAll('tr').forEach(row => {
+            row.lastChild.remove();
+        });
+
+        yearCount--;
+
+        // Update both button states after removing a year
+        updateAddYearButtonState();
+        updateRemoveYearButtonState();
+        updateProgressBars();
+    });
+
+    // Function to update the add year button state
     function updateAddYearButtonState() {
         if (yearCount >= MAX_YEARS) {
             addYearBtn.disabled = true;
@@ -487,6 +528,20 @@ function setupAddYearButton() {
             addYearBtn.disabled = false;
             addYearBtn.classList.remove('disabled');
             addYearBtn.title = 'Add another year to your study plan';
+        }
+    }
+
+    // Function to update the remove year button state
+    function updateRemoveYearButtonState() {
+        const currentYears = thead.querySelectorAll('th').length;
+        if (currentYears <= MIN_YEARS) {
+            removeYearBtn.disabled = true;
+            removeYearBtn.classList.add('disabled');
+            removeYearBtn.title = 'Minimum of 3 years required';
+        } else {
+            removeYearBtn.disabled = false;
+            removeYearBtn.classList.remove('disabled');
+            removeYearBtn.title = 'Remove the last year from your study plan';
         }
     }
 }
