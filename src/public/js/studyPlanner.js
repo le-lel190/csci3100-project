@@ -24,6 +24,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 });
 
+let yearCount; //global variable to keep track of the number of years
+
 function setupDemoButton() {
     const demoButton = document.getElementById('loadDemoButton');
     if (demoButton) {
@@ -414,19 +416,17 @@ function setupYearButtons() {
     const thead = document.querySelector('.timetable thead tr');
     
     const yearHeaders = Array.from(thead.querySelectorAll('th')).filter(th => th.textContent.includes('Year'));
-    let yearCount = yearHeaders.length;
+    yearCount = yearHeaders.length; // Initialize global yearCount
 
-    const MAX_YEARS = 8; // Maximum number of years allowed
-    const MIN_YEARS = 4; // Minimum number of years allowed
+    const MAX_YEARS = 8;
+    const MIN_YEARS = 4;
 
-    // Update button states on initialization
     updateAddYearButtonState();
     updateRemoveYearButtonState();
 
-    // Setup Add Year Button
     addYearBtn.addEventListener('click', () => {
         if (yearCount >= MAX_YEARS) {
-            return; // Don't add more years if maximum is reached
+            return;
         }
 
         yearCount++;
@@ -439,7 +439,7 @@ function setupYearButtons() {
             const td = document.createElement('td');
             td.dataset.year = yearCount;
             td.dataset.semester = row.cells[0].textContent.split(' ')[1] || '1';
-            td.dataset.maxCourses = row.cells[1].dataset.maxCourses; // Copy max courses from existing cell
+            td.dataset.maxCourses = row.cells[1].dataset.maxCourses;
             row.appendChild(td);
 
             td.addEventListener('dragover', (e) => {
@@ -459,10 +459,8 @@ function setupYearButtons() {
                 const courseId = e.dataTransfer.getData('text/plain');
                 const course = window.coursesData.find(c => c.id === courseId);
                 if (course) {
-                    // Check if the course is already in another cell in the planner
                     const existingCourseBlock = document.querySelector(`.course-block[data-course-id="${courseId}"]`);
                     if (existingCourseBlock) {
-                        // Remove the course from its original cell
                         existingCourseBlock.remove();
                     }
 
@@ -470,9 +468,7 @@ function setupYearButtons() {
                     courseBlock.className = 'course-block';
                     courseBlock.dataset.courseId = course.id;
                     courseBlock.style.backgroundColor = course.color || '#f0e6ff';
-                    courseBlock.innerHTML = `
-                        <div class="course-title">${course.id}</div>
-                    `;
+                    courseBlock.innerHTML = `<div class="course-title">${course.id}</div>`;
                     courseBlock.draggable = true;
                     courseBlock.addEventListener('dragstart', (e) => {
                         e.dataTransfer.setData('text/plain', course.id);
@@ -487,18 +483,15 @@ function setupYearButtons() {
             });
         });
 
-        // Update both button states after adding a year
         updateAddYearButtonState();
         updateRemoveYearButtonState();
     });
 
-    // Setup Remove Year Button
     removeYearBtn.addEventListener('click', () => {
         if (yearCount <= MIN_YEARS) {
-            return; // Don't remove years if minimum is reached
+            return;
         }
 
-        // Check if the last year has any courses
         const lastYearCells = document.querySelectorAll(`.timetable td[data-year="${yearCount}"]`);
         let hasCourses = false;
         lastYearCells.forEach(cell => {
@@ -512,9 +505,7 @@ function setupYearButtons() {
             return;
         }
 
-        // Remove the last year
         thead.lastChild.remove();
-
         const tbody = document.querySelector('.timetable tbody');
         tbody.querySelectorAll('tr').forEach(row => {
             row.lastChild.remove();
@@ -522,13 +513,11 @@ function setupYearButtons() {
 
         yearCount--;
 
-        // Update both button states after removing a year
         updateAddYearButtonState();
         updateRemoveYearButtonState();
         updateProgressBars();
     });
 
-    // Function to update the add year button state
     function updateAddYearButtonState() {
         if (yearCount >= MAX_YEARS) {
             addYearBtn.disabled = true;
@@ -541,12 +530,11 @@ function setupYearButtons() {
         }
     }
 
-    // Function to update the remove year button state
     function updateRemoveYearButtonState() {
         if (yearCount <= MIN_YEARS) {
             removeYearBtn.disabled = true;
             removeYearBtn.classList.add('disabled');
-            removeYearBtn.title = 'Minimum of 3 years required';
+            removeYearBtn.title = 'Minimum of 4 years required';
         } else {
             removeYearBtn.disabled = false;
             removeYearBtn.classList.remove('disabled');
@@ -896,34 +884,28 @@ function loadUserStudyPlan() {
     })
     .then(studyPlan => {
         console.log('Loaded study plan:', studyPlan);
-        // Clear the timetable
         const timetableCells = document.querySelectorAll('.timetable td:not(:first-child)');
         timetableCells.forEach(cell => {
             cell.innerHTML = '';
         });
 
-        // If studyPlan is empty or null, just leave the timetable empty
         if (!studyPlan || studyPlan.length === 0) {
             console.log('No saved study plan found. Displaying empty timetable.');
-            updateProgressBars(); // Update progress bars (will show 0 credits)
+            updateProgressBars();
             return;
         }
 
-        // Check if window.coursesData is defined
         if (!window.coursesData) {
             console.error('Course data not loaded. Cannot populate study plan.');
-            updateProgressBars(); // Update progress bars (will show 0 credits)
+            updateProgressBars();
             return;
         }
 
-        // Determine the maximum year from the saved study plan
-        const maxSavedYear = Math.max(...studyPlan.map(placement => placement.year), 4); // Default to 4 if no higher year
+        const maxSavedYear = Math.max(...studyPlan.map(placement => placement.year), 4);
         const thead = document.querySelector('.timetable thead tr');
-        let yearCount = Array.from(thead.querySelectorAll('th')).filter(th => th.textContent.includes('Year')).length;
 
-        // Add years if the saved plan requires more than the current yearCount (up to MAX_YEARS)
-        const MAX_YEARS = 8;
-        while (yearCount < maxSavedYear && yearCount < MAX_YEARS) {
+        // Use the global yearCount, which is initialized in setupYearButtons
+        while (yearCount < maxSavedYear && yearCount < 8) {
             yearCount++;
             const th = document.createElement('th');
             th.textContent = `Year ${yearCount}`;
@@ -934,7 +916,7 @@ function loadUserStudyPlan() {
                 const td = document.createElement('td');
                 td.dataset.year = yearCount;
                 td.dataset.semester = row.cells[0].textContent.split(' ')[1] || '1';
-                td.dataset.maxCourses = row.cells[1].dataset.maxCourses; // Copy max courses from existing cell
+                td.dataset.maxCourses = row.cells[1].dataset.maxCourses;
                 row.appendChild(td);
 
                 td.addEventListener('dragover', (e) => {
@@ -978,7 +960,6 @@ function loadUserStudyPlan() {
             });
         }
 
-        // Populate the timetable with the saved study plan
         studyPlan.forEach(placement => {
             const { courseId, year, semester } = placement;
             const course = window.coursesData.find(c => c.id === courseId);
@@ -1033,7 +1014,6 @@ function loadUserStudyPlan() {
         }, 3000);
     });
 }
-
 // function to set up the Save button
 function setupSaveButton() {
     const saveBtn = document.getElementById('saveBtn');
