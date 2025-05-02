@@ -916,6 +916,68 @@ function loadUserStudyPlan() {
             return;
         }
 
+        // Determine the maximum year from the saved study plan
+        const maxSavedYear = Math.max(...studyPlan.map(placement => placement.year), 4); // Default to 4 if no higher year
+        const thead = document.querySelector('.timetable thead tr');
+        let yearCount = Array.from(thead.querySelectorAll('th')).filter(th => th.textContent.includes('Year')).length;
+
+        // Add years if the saved plan requires more than the current yearCount (up to MAX_YEARS)
+        const MAX_YEARS = 8;
+        while (yearCount < maxSavedYear && yearCount < MAX_YEARS) {
+            yearCount++;
+            const th = document.createElement('th');
+            th.textContent = `Year ${yearCount}`;
+            thead.appendChild(th);
+
+            const tbody = document.querySelector('.timetable tbody');
+            tbody.querySelectorAll('tr').forEach(row => {
+                const td = document.createElement('td');
+                td.dataset.year = yearCount;
+                td.dataset.semester = row.cells[0].textContent.split(' ')[1] || '1';
+                td.dataset.maxCourses = row.cells[1].dataset.maxCourses; // Copy max courses from existing cell
+                row.appendChild(td);
+
+                td.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (td.querySelectorAll('.course-block').length < parseInt(td.dataset.maxCourses || Infinity)) {
+                        td.classList.add('drag-over');
+                    }
+                });
+                td.addEventListener('dragleave', () => {
+                    td.classList.remove('drag-over');
+                });
+                td.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    td.classList.remove('drag-over');
+                    if (td.querySelectorAll('.course-block').length >= parseInt(td.dataset.maxCourses || Infinity)) return;
+
+                    const courseId = e.dataTransfer.getData('text/plain');
+                    const course = window.coursesData.find(c => c.id === courseId);
+                    if (course) {
+                        const existingCourseBlock = document.querySelector(`.course-block[data-course-id="${courseId}"]`);
+                        if (existingCourseBlock) {
+                            existingCourseBlock.remove();
+                        }
+                        const courseBlock = document.createElement('div');
+                        courseBlock.className = 'course-block';
+                        courseBlock.dataset.courseId = course.id;
+                        courseBlock.style.backgroundColor = course.color || '#f0e6ff';
+                        courseBlock.innerHTML = `<div class="course-title">${course.id}</div>`;
+                        courseBlock.draggable = true;
+                        courseBlock.addEventListener('dragstart', (e) => {
+                            e.dataTransfer.setData('text/plain', course.id);
+                            e.target.classList.add('dragging');
+                        });
+                        courseBlock.addEventListener('dragend', (e) => {
+                            e.target.classList.remove('dragging');
+                        });
+                        td.appendChild(courseBlock);
+                        updateProgressBars();
+                    }
+                });
+            });
+        }
+
         // Populate the timetable with the saved study plan
         studyPlan.forEach(placement => {
             const { courseId, year, semester } = placement;
@@ -927,9 +989,7 @@ function loadUserStudyPlan() {
                     courseBlock.className = 'course-block';
                     courseBlock.dataset.courseId = course.id;
                     courseBlock.style.backgroundColor = course.color || '#f0e6ff';
-                    courseBlock.innerHTML = `
-                        <div class="course-title">${course.id}</div>
-                    `;
+                    courseBlock.innerHTML = `<div class="course-title">${course.id}</div>`;
                     courseBlock.draggable = true;
                     courseBlock.addEventListener('dragstart', (e) => {
                         e.dataTransfer.setData('text/plain', course.id);
@@ -949,14 +1009,12 @@ function loadUserStudyPlan() {
     })
     .catch(error => {
         console.error('Error loading study plan:', error);
-        // Clear the timetable
         const timetableCells = document.querySelectorAll('.timetable td:not(:first-child)');
         timetableCells.forEach(cell => {
             cell.innerHTML = '';
         });
-        updateProgressBars(); // Update progress bars (will show 0 credits)
+        updateProgressBars();
 
-        // Show an error message
         const errorMessage = document.createElement('div');
         errorMessage.style.position = 'fixed';
         errorMessage.style.top = '20px';
@@ -970,7 +1028,6 @@ function loadUserStudyPlan() {
         errorMessage.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
         errorMessage.textContent = 'Failed to load your study plan. Please try again.';
         document.body.appendChild(errorMessage);
-
         setTimeout(() => {
             document.body.removeChild(errorMessage);
         }, 3000);
