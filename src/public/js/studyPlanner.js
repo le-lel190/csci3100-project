@@ -412,9 +412,12 @@ function setupYearButtons() {
     const addYearBtn = document.getElementById('addYearBtn');
     const removeYearBtn = document.getElementById('removeYearBtn');
     const thead = document.querySelector('.timetable thead tr');
-    let yearCount = thead.querySelectorAll('th').length; // Start with current number of years (4)
+    
+    const yearHeaders = Array.from(thead.querySelectorAll('th')).filter(th => th.textContent.includes('Year'));
+    let yearCount = yearHeaders.length;
+
     const MAX_YEARS = 8; // Maximum number of years allowed
-    const MIN_YEARS = 3; // Minimum number of years allowed
+    const MIN_YEARS = 4; // Minimum number of years allowed
 
     // Update button states on initialization
     updateAddYearButtonState();
@@ -540,8 +543,7 @@ function setupYearButtons() {
 
     // Function to update the remove year button state
     function updateRemoveYearButtonState() {
-        const currentYears = thead.querySelectorAll('th').length;
-        if (currentYears <= MIN_YEARS) {
+        if (yearCount <= MIN_YEARS) {
             removeYearBtn.disabled = true;
             removeYearBtn.classList.add('disabled');
             removeYearBtn.title = 'Minimum of 3 years required';
