@@ -1,6 +1,18 @@
+/**
+ * Email utility module that provides functions for sending emails
+ * @module utils/email
+ */
 const nodemailer = require('nodemailer');
 
-// Configure mail transporter
+/**
+ * Email transporter configuration
+ * Uses environment variables with fallbacks:
+ * - EMAIL_HOST: SMTP server host (default: smtp.example.com)
+ * - EMAIL_PORT: SMTP server port (default: 587)
+ * - EMAIL_SECURE: Whether to use TLS (default: false)
+ * - EMAIL_USER: SMTP authentication username
+ * - EMAIL_PASS: SMTP authentication password
+ */
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST || 'smtp.example.com',
   port: process.env.EMAIL_PORT || 587,
@@ -16,7 +28,7 @@ const transporter = nodemailer.createTransport({
  * @param {string} to - Recipient email
  * @param {string} username - User's username
  * @param {string} token - Verification token
- * @returns {Promise<boolean>} - Success status
+ * @returns {Promise<boolean>} - Returns true if email was sent successfully, false otherwise
  */
 const sendVerificationEmail = async (to, username, token) => {
   try {
@@ -50,6 +62,10 @@ const sendVerificationEmail = async (to, username, token) => {
   }
 };
 
+/**
+ * @exports
+ * @property {Function} sendVerificationEmail - Function to send verification emails to users
+ */
 module.exports = {
   sendVerificationEmail
 }; 

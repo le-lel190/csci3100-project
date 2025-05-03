@@ -1,3 +1,13 @@
+/**
+ * Authentication Routes
+ * 
+ * This module provides Express routes for user authentication including:
+ * - Registration
+ * - Login
+ * - Email verification
+ * - Session management
+ * - Admin role assignment
+ */
 const express = require('express');
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
@@ -8,7 +18,15 @@ const { sendVerificationEmail } = require('../utils/email');
 
 const router = express.Router();
 
-// Check auth status
+/**
+ * Check authentication status
+ * 
+ * @route GET /login
+ * @middleware auth - Verifies the user is authenticated
+ * @returns {Object} User data (without password) if authenticated
+ * @throws {Error} 404 - If user not found
+ * @throws {Error} 500 - Server error
+ */
 router.get('/login', auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId).select('-password');
@@ -21,7 +39,17 @@ router.get('/login', auth, async (req, res) => {
   }
 });
 
-// Registration
+/**
+ * User registration
+ * 
+ * @route POST /register
+ * @param {string} username - Min length 3 characters
+ * @param {string} email - Valid email address
+ * @param {string} password - Min length 6 characters
+ * @returns {Object} User data and JWT token in cookie
+ * @throws {Error} 400 - Validation errors or user already exists
+ * @throws {Error} 500 - Server error
+ */
 router.post('/register',
   [
     body('username').trim().isLength({ min: 3 }),
@@ -95,7 +123,17 @@ router.post('/register',
   }
 );
 
-// Login
+/**
+ * User login
+ * 
+ * @route POST /login
+ * @param {string} identifier - Username or email
+ * @param {string} password - User password
+ * @returns {Object} User data and JWT token in cookie
+ * @throws {Error} 400 - Validation errors
+ * @throws {Error} 401 - Invalid credentials
+ * @throws {Error} 500 - Server error
+ */
 router.post('/login',
   [
     body('identifier').trim().notEmpty(),
@@ -158,7 +196,15 @@ router.post('/login',
   }
 );
 
-// Email verification
+/**
+ * Email verification
+ * 
+ * @route GET /verify-email/:token
+ * @param {string} token - Email verification token
+ * @returns {Redirect} Redirects to homepage with verified flag
+ * @throws {Error} 400 - Invalid or expired token
+ * @throws {Error} 500 - Server error
+ */
 router.get('/verify-email/:token', async (req, res) => {
   try {
     const { token } = req.params;
@@ -187,7 +233,16 @@ router.get('/verify-email/:token', async (req, res) => {
   }
 });
 
-// Resend verification email
+/**
+ * Resend verification email
+ * 
+ * @route POST /resend-verification
+ * @middleware auth - Verifies the user is authenticated
+ * @returns {Object} Success message
+ * @throws {Error} 400 - Email already verified
+ * @throws {Error} 404 - User not found
+ * @throws {Error} 500 - Server error
+ */
 router.post('/resend-verification', auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
@@ -221,7 +276,16 @@ router.post('/resend-verification', auth, async (req, res) => {
   }
 });
 
-// Grant admin role to the current user (activated by easter egg)
+/**
+ * Grant admin role to current user
+ * Activated by an easter egg in the application
+ * 
+ * @route POST /users/grant-admin
+ * @middleware auth - Verifies the user is authenticated
+ * @returns {Object} Updated user data with admin privileges
+ * @throws {Error} 404 - User not found
+ * @throws {Error} 500 - Server error
+ */
 router.post('/users/grant-admin', auth, async (req, res) => {
   try {
     const user = await User.findById(req.userId);
@@ -250,7 +314,12 @@ router.post('/users/grant-admin', auth, async (req, res) => {
   }
 });
 
-// Logout
+/**
+ * Logout user
+ * 
+ * @route POST /logout
+ * @returns {Object} Success message
+ */
 router.post('/logout', (req, res) => {
   res.cookie('token', '', {
     httpOnly: true,

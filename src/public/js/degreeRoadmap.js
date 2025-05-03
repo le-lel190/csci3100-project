@@ -1,3 +1,9 @@
+/**
+ * Degree Roadmap - Interactive visualization tool for academic programs
+ * This script handles the interactive degree roadmap visualization, including user
+ * authentication, degree selection, and course relationship visualization.
+ */
+
 document.addEventListener('DOMContentLoaded', function() {
   loadUserInfo();
   setupLogout();
@@ -5,6 +11,10 @@ document.addEventListener('DOMContentLoaded', function() {
   setupInteractiveDiagramFeature();
 });
 
+/**
+ * Loads and displays the current user's information
+ * Fetches user data from the API and updates the UI with username
+ */
 function loadUserInfo() {
   fetch('/api/auth/login', {
     method: 'GET',
@@ -24,6 +34,10 @@ function loadUserInfo() {
   });
 }
 
+/**
+ * Sets up the logout button functionality
+ * Adds event listener to handle user logout and redirect to home page
+ */
 function setupLogout() {
   document.getElementById('logoutBtn').addEventListener('click', function() {
     fetch('/api/auth/logout', {
@@ -41,6 +55,10 @@ function setupLogout() {
   });
 }
 
+/**
+ * Sets up the degree selection UI and functionality
+ * Configures modal dialog, degree selection buttons, and PDF view options
+ */
 function setupDegreeSelection() {
   const modal = document.getElementById('roadmapModal');
   const modalImg = document.getElementById('roadmapImage');
@@ -108,6 +126,10 @@ function setupDegreeSelection() {
   });
 }
 
+/**
+ * Sets up the interactive diagram feature button
+ * Adds event listener to the interactive diagram button
+ */
 function setupInteractiveDiagramFeature() {
   // Get the button and add click event (keep existing functionality)
   const viewDiagramBtn = document.getElementById('viewInteractiveDiagramBtn');
@@ -118,6 +140,10 @@ function setupInteractiveDiagramFeature() {
   }
 }
 
+/**
+ * Displays a modal dialog to select which program to view
+ * Creates a modal with program selection buttons
+ */
 function showInteractiveDiagramSelector() {
   // Create a modal to select which program to display
   const modal = document.createElement('div');
@@ -159,6 +185,11 @@ function showInteractiveDiagramSelector() {
   });
 }
 
+/**
+ * Retrieves course data for a specific program
+ * @param {string} program - Program code (CSCI, CENG, AIST, or CDAS)
+ * @returns {Object|null} - Structured course data for the program or null if not available
+ */
 function getCourseData(program) {
   // This function provides course data for each program
   if (program === 'CSCI') {
@@ -330,7 +361,11 @@ function getCourseData(program) {
     return null;
 }
 
-// Define prerequisite relationships for courses
+/**
+ * Retrieves prerequisite relationships for a specific program
+ * @param {string} program - Program code (CSCI, CENG, AIST, or CDAS)
+ * @returns {Array} - Array of prerequisite relationship objects
+ */
 function getPrerequisiteData(program) {
   // Define prerequisite relationships for each program
   if (program === 'CSCI') {
@@ -384,7 +419,12 @@ function getPrerequisiteData(program) {
   return [];
 }
 
-// Get courses that depend on a given course
+/**
+ * Gets courses that depend on a given course
+ * @param {string} courseCode - Code of the course to check
+ * @param {string} program - Program code (CSCI, CENG, AIST, or CDAS)
+ * @returns {Array} - Array of course codes that depend on the specified course
+ */
 function getDependentCourses(courseCode, program) {
   const prerequisites = getPrerequisiteData(program);
   const dependentCourses = [];
@@ -398,7 +438,12 @@ function getDependentCourses(courseCode, program) {
   return dependentCourses;
 }
 
-// Get prerequisite courses for a given course
+/**
+ * Gets prerequisite courses for a given course
+ * @param {string} courseCode - Code of the course to check
+ * @param {string} program - Program code (CSCI, CENG, AIST, or CDAS)
+ * @returns {Array} - Array of course codes that are prerequisites for the specified course
+ */
 function getPrerequisiteCourses(courseCode, program) {
   const prerequisites = getPrerequisiteData(program);
   
@@ -411,6 +456,11 @@ function getPrerequisiteCourses(courseCode, program) {
   return [];
 }
 
+/**
+ * Renders the interactive curriculum diagram for a specific program
+ * Creates a visual representation of the curriculum with interactive elements
+ * @param {string} program - Program code (CSCI, CENG, AIST, or CDAS)
+ */
 function renderInteractiveDiagram(program) {
   // Show loading state
   const emptyState = document.querySelector('.empty-state');
@@ -583,7 +633,11 @@ function renderInteractiveDiagram(program) {
   }
 }
 
-// Function to show all prerequisites
+/**
+ * Shows all prerequisite relationships in the diagram
+ * Highlights all courses and their prerequisites
+ * @param {string} program - Program code (CSCI, CENG, AIST, or CDAS)
+ */
 function showAllPrerequisites(program) {
   // Remove any existing highlights
   removeAllHighlights();
@@ -606,7 +660,11 @@ function showAllPrerequisites(program) {
   });
 }
 
-// Function to show all dependent courses
+/**
+ * Shows all dependent course relationships in the diagram
+ * Highlights all courses that have dependencies
+ * @param {string} program - Program code (CSCI, CENG, AIST, or CDAS)
+ */
 function showAllDependentCourses(program) {
   // Remove any existing highlights
   removeAllHighlights();
@@ -624,7 +682,12 @@ function showAllDependentCourses(program) {
   });
 }
 
-// Highlight related courses
+/**
+ * Highlights courses related to the selected course
+ * Shows prerequisites and dependent courses with different highlight styles
+ * @param {string} courseCode - Code of the selected course
+ * @param {string} program - Program code (CSCI, CENG, AIST, or CDAS)
+ */
 function highlightRelatedCourses(courseCode, program) {
   // Remove any existing highlights
   removeAllHighlights();
@@ -655,6 +718,10 @@ function highlightRelatedCourses(courseCode, program) {
   });
 }
 
+/**
+ * Removes all highlighting from course boxes
+ * Resets the visual state of all course elements
+ */
 function removeAllHighlights() {
   // Reset all course boxes to their original style
   document.querySelectorAll('.course-box').forEach(box => {
@@ -665,6 +732,11 @@ function removeAllHighlights() {
   });
 }
 
+/**
+ * Converts a program code to its full name
+ * @param {string} programCode - Short program code (CSCI, CENG, AIST, or CDAS)
+ * @returns {string} - Full program name
+ */
 function getProgramFullName(programCode) {
   const programNames = {
     'CENG': 'Computer Engineering',
@@ -676,6 +748,12 @@ function getProgramFullName(programCode) {
   return programNames[programCode] || programCode;
 }
 
+/**
+ * Displays detailed information about a specific course
+ * Creates a modal with course details, prerequisites, and dependent courses
+ * @param {string} courseCode - Code of the course to display
+ * @param {string} program - Program code (CSCI, CENG, AIST, or CDAS)
+ */
 function showCourseDetails(courseCode, program) {
   // Show detailed information about a specific course
   const modal = document.createElement('div');

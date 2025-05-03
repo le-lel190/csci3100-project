@@ -1,3 +1,10 @@
+/**
+ * Main Server Application
+ * 
+ * This file is the entry point for the Course Planner application.
+ * It sets up Express server, connects to MongoDB, and configures all routes.
+ */
+
 // Load environment variables
 require('dotenv').config();
 
@@ -15,13 +22,22 @@ const { auth } = require('./middleware/auth');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+/**
+ * Middleware Configuration
+ * - JSON parsing for request bodies
+ * - URL-encoded data parsing
+ * - Cookie parsing for authentication
+ * - Static file serving from public directory
+ */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// MongoDB connection
+/**
+ * MongoDB Connection
+ * Uses environment variables for connection string
+ */
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -29,23 +45,30 @@ mongoose.connect(process.env.MONGODB_URI, {
 .then(() => console.log('MongoDB connected successfully'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-// Routes
+/**
+ * Route Definitions
+ */
+
+// Serve main application frontend
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Protected timetable route
+// Protected timetable route - requires authentication
 app.get('/timetable', auth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'timetable.html'));
 });
 
-// Auth routes
+// Authentication routes for login, signup, etc.
 app.use('/api/auth', authRoutes);
 
-// Courses API routes
+// Course information API endpoints
 app.use('/api/courses', coursesRoutes);
 
-// API route to check registered users (for admin/debug purposes only)
+/**
+ * Admin route to fetch registered users
+ * Protected by authentication middleware
+ */
 app.get('/api/users', auth, async (req, res) => {
   try {
     const User = require('./models/User');
@@ -57,16 +80,19 @@ app.get('/api/users', auth, async (req, res) => {
   }
 });
 
-// Comment routes
+// Course comment routes for reviews and feedback
 app.use(commentRoutes);
 
-// Study Plan routes
+// Study plan creation and management routes
 app.use(studyPlanRoute);
 
-// Timetable routes
+// Timetable generation and management routes
 app.use('/api/timetable', timetableRoute);
 
-// Non-authenticated route to check users (FOR DEVELOPMENT ONLY - REMOVE IN PRODUCTION)
+/**
+ * Development-only route for debugging
+ * WARNING: This should be removed in production
+ */
 app.get('/api/debug/users', async (req, res) => {
   try {
     const User = require('./models/User');
@@ -78,13 +104,19 @@ app.get('/api/debug/users', async (req, res) => {
   }
 });
 
-// Error handling middleware
+/**
+ * Global error handling middleware
+ * Catches any errors thrown during request processing
+ */
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something broke!' });
 });
 
-// Start server
+/**
+ * Server Initialization
+ * Listens on all interfaces on the specified port
+ */
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
 });

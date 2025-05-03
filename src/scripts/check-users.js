@@ -1,3 +1,16 @@
+/**
+ * User Verification Utility
+ * 
+ * This script connects to MongoDB and retrieves all registered users in the system.
+ * It displays basic user information (username, email, creation date) to the console.
+ * Useful for administrative verification and debugging purposes.
+ * 
+ * Usage: 
+ *   node src/scripts/check-users.js
+ * 
+ * Environment variables:
+ *   MONGODB_URI - MongoDB connection string
+ */
 const mongoose = require('mongoose');
 const User = require('../models/User');
 require('dotenv').config();

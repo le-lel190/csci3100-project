@@ -1,9 +1,21 @@
+/**
+ * Timetable routes for managing user course selections
+ * Provides endpoints to save and retrieve semester timetables
+ */
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
 
-// Save the user's timetable
+/**
+ * Save a user's timetable for a specific semester
+ * 
+ * @route POST /timetable
+ * @auth Required
+ * @body {string} semester - The semester identifier (e.g., "Fall2023")
+ * @body {Array} selectedCourses - Array of course objects the user has selected
+ * @returns {Object} Success message or error
+ */
 router.post('/', auth, async (req, res) => {
   try {
     const userId = req.userId;
@@ -30,7 +42,14 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// Get the user's timetable
+/**
+ * Retrieve a user's timetable for a specific semester
+ * 
+ * @route GET /timetable/:semester
+ * @auth Required
+ * @param {string} semester - The semester identifier to retrieve
+ * @returns {Array} The selected courses for the specified semester
+ */
 router.get('/:semester', auth, async (req, res) => {
   try {
     const userId = req.userId;

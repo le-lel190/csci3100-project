@@ -1,5 +1,14 @@
+/**
+ * comment.js - Main file for handling course comments functionality
+ * Manages comment loading, creation, editing, deletion and display
+ * Also handles course selection and user authentication integration
+ */
 document.addEventListener('DOMContentLoaded', () => {
 
+    /**
+     * Konami code implementation for activating admin mode when dev mode is enabled
+     * The sequence is: ↑↑↓↓←→←→ba
+     */
     const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
     let konamiIndex = 0;
     let devModeEnabled = false;
@@ -28,6 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+    
+    /**
+     * Initialize all main components on page load
+     */
     initializeSemesterButtons();
     initializeCourseSelection();
     initializeSearch();
@@ -36,6 +49,10 @@ document.addEventListener('DOMContentLoaded', () => {
     setupLogout();
 });
 
+/**
+ * Grants admin role to the current user via API call
+ * Triggered when the Konami code is successfully entered
+ */
 async function grantAdminRole() {
     try {
         // Call API to set the current user as admin
@@ -58,6 +75,11 @@ async function grantAdminRole() {
     }
 }
 
+/**
+ * Sets up the comment sorting functionality
+ * Allows sorting by time (newest first) or rating (highest first)
+ * @param {string} courseId - The ID of the course to fetch comments for
+ */
 function setupSorting(courseId) {
     const sortByTimeBtn = document.getElementById('sortByTime');
     const sortByRatingBtn = document.getElementById('sortByRating');
@@ -85,7 +107,10 @@ function setupSorting(courseId) {
     });
 }
 
-
+/**
+ * Fetches comments for a specific course from the API
+ * @param {string} courseId - The ID of the course to fetch comments for
+ */
 function fetchComments(courseId) {
     fetch(`/api/comments/${courseId}`)
       .then(response => response.json())
@@ -98,8 +123,13 @@ function fetchComments(courseId) {
       });
   }
   
-  // Display comments in the container
-  function displayComments(comments, courseId) {
+/**
+ * Displays comments in the comments container
+ * Handles different styling based on rating and adds edit/delete buttons
+ * @param {Array} comments - Array of comment objects to display
+ * @param {string} courseId - The ID of the course the comments belong to
+ */
+function displayComments(comments, courseId) {
     const commentsContainer = document.getElementById('commentsContainer');
     
     // Clear existing comments
@@ -226,7 +256,11 @@ function fetchComments(courseId) {
     });
   }
 
-  // Function to open the edit modal
+/**
+ * Opens a modal dialog to edit an existing comment
+ * Creates the modal if it doesn't exist and populates it with comment data
+ * @param {Object} comment - The comment object to edit
+ */
 function openEditModal(comment) {
     // Check if modal already exists
     let modal = document.getElementById('editCommentModal');
@@ -274,6 +308,10 @@ function openEditModal(comment) {
     modal.style.display = 'block';
   }
 
+/**
+ * Sets up event handlers for the edit comment modal
+ * Handles form submission, close button and outside click actions
+ */
 function setupModalHandlers() {
     const modal = document.getElementById('editCommentModal');
     const form = document.getElementById('editCommentForm');
@@ -365,8 +403,13 @@ function setupModalHandlers() {
     });
   }
   
-  // Handle comment form submission
-  function setupCommentForm(courseId, courseName) {
+/**
+ * Sets up the comment form for posting new comments
+ * Handles validation, submission, and error handling
+ * @param {string} courseId - The ID of the course to post comment for
+ * @param {string} courseName - The name of the course
+ */
+function setupCommentForm(courseId, courseName) {
     const postButton = document.getElementById('postComment');
     const commentTextarea = document.getElementById('newComment');
     
@@ -427,6 +470,10 @@ function setupModalHandlers() {
     });
   }
 
+/**
+ * Initializes the semester buttons and sets up event listeners
+ * When clicked, loads courses for the selected semester
+ */
 function initializeSemesterButtons() {
     const buttons = document.querySelectorAll('.semester-btn');
     buttons.forEach(button => {
@@ -440,6 +487,12 @@ function initializeSemesterButtons() {
         });
     });
 }
+
+/**
+ * Loads course data for a specific semester
+ * Populates the course list with the fetched data
+ * @param {string} semester - The semester to load courses for (defaults to 'current')
+ */
 function loadCourseData(semester = 'current') {
     const courseItems = document.querySelector('.course-items');
     courseItems.innerHTML = '<div class="loading-indicator">Loading courses...</div>';
@@ -460,6 +513,11 @@ function loadCourseData(semester = 'current') {
         });
 }
 
+/**
+ * Populates the course list with course data
+ * Creates DOM elements for each course and sets up interaction handlers
+ * @param {Array} courses - Array of course objects to display
+ */
 function populateCourseList(courses) {
     const courseItems = document.querySelector('.course-items');
     courseItems.innerHTML = '';
@@ -508,7 +566,12 @@ function populateCourseList(courses) {
     });
 }
 
-
+/**
+ * Displays the comment section for a selected course
+ * Creates the UI elements for viewing and interacting with course comments
+ * @param {string} courseId - The ID of the selected course
+ * @param {string} courseName - The name of the selected course
+ */
 function displayCourseCode(courseId, courseName) {
     const commentForm = document.querySelector('.main-content');
     if (commentForm) {
@@ -558,6 +621,10 @@ function displayCourseCode(courseId, courseName) {
     }
 }
 
+/**
+ * Clears the main content area
+ * Used when deselecting a course
+ */
 function clearCourseCode() {
     const mainContent = document.querySelector('.main-content');
     if (mainContent) {
@@ -565,6 +632,11 @@ function clearCourseCode() {
     }
 }
 
+/**
+ * Initializes the semester buttons and sets up event listeners
+ * When clicked, loads courses for the selected semester
+ * Note: This is a duplicate function and could be removed
+ */
 function initializeSemesterButtons() {
     const buttons = document.querySelectorAll('.semester-btn');
     buttons.forEach(button => {
@@ -577,6 +649,10 @@ function initializeSemesterButtons() {
     });
 }
 
+/**
+ * Initializes the search functionality
+ * Filters course items based on user input
+ */
 function initializeSearch() {
     const searchInput = document.getElementById('courseSearch');
     searchInput.addEventListener('input', (e) => {
@@ -589,8 +665,10 @@ function initializeSearch() {
     });
 }
 
-
-
+/**
+ * Loads and displays the current user's information
+ * Sets global flags for email verification and admin status
+ */
 function loadUserInfo() {
     fetch('/api/auth/login', {
         method: 'GET',
@@ -613,6 +691,10 @@ function loadUserInfo() {
     });
 }
 
+/**
+ * Sets up the logout button functionality
+ * Handles API call and redirect on successful logout
+ */
 function setupLogout() {
     const logoutBtn = document.getElementById('logoutBtn');
     logoutBtn.addEventListener('click', async () => {
@@ -630,7 +712,10 @@ function setupLogout() {
     });
 }
 
-// Load all course data from JSON files
+/**
+ * Loads all course data from JSON files for each department
+ * Used to initialize the course selection component
+ */
 async function loadAllCourseData() {
     try {
         // Load course list
@@ -671,7 +756,10 @@ async function loadAllCourseData() {
     }
 }
 
-// Initialize course selection event listeners
+/**
+ * Initializes the course selection event listeners
+ * Sets up click handling for course item selection
+ */
 function initializeCourseSelection() {
     // Add click event listeners to course items
     document.addEventListener('click', (event) => {
@@ -698,7 +786,13 @@ function initializeCourseSelection() {
     });
 }
 
-// Handle course selection
+/**
+ * Handles the selection of a course
+ * Sets the current course and displays its comment section
+ * @param {string} department - The department code (e.g., "CSCI")
+ * @param {string} courseNumber - The course number (e.g., "101")
+ * @param {string} courseName - The name of the course
+ */
 function handleCourseSelection(department, courseNumber, courseName) {
     // Set current course
     currentCourse = {

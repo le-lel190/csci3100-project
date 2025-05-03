@@ -1,9 +1,19 @@
+/**
+ * Study Plan Router
+ * Handles API endpoints for managing user study plans
+ */
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const { auth } = require('../middleware/auth'); // Import the auth middleware
 
-// Save the user's study plan
+/**
+ * @route POST /api/studyplan
+ * @desc Save a user's study plan
+ * @access Private - requires authentication
+ * @param {Array} req.body.studyPlan - The study plan data to save
+ * @returns {Object} - Success message or error
+ */
 router.post('/api/studyplan', auth, async (req, res) => {
   try {
     const userId = req.userId; // Use req.userId set by the auth middleware
@@ -29,7 +39,12 @@ router.post('/api/studyplan', auth, async (req, res) => {
   }
 });
 
-// Get the user's study plan
+/**
+ * @route GET /api/studyplan
+ * @desc Retrieve a user's study plan
+ * @access Private - requires authentication
+ * @returns {Array} - The user's study plan or empty array if none exists
+ */
 router.get('/api/studyplan', auth, async (req, res) => {
   // console.log('GET /api/studyplan called');
   // console.log('User ID from auth middleware:', req.userId);

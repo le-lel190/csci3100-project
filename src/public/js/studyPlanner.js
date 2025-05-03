@@ -1,3 +1,24 @@
+/*
+ * studyPlanner.js
+ *
+ * This script provides the main client-side logic for the interactive study planner web application.
+ *
+ * Features:
+ * - Loads user and course data from the backend and/or demo data.
+ * - Allows users to drag and drop courses into a multi-year, multi-semester timetable.
+ * - Supports searching, filtering, and visualizing courses.
+ * - Enables users to add or remove academic years, and tracks credit progress by category (Major, UG Core, Free, College).
+ * - Provides functionality to save and load personalized study plans to/from the backend.
+ * - Allows exporting the study plan as an image (A4 size) for printing or sharing.
+ * - Handles user authentication and logout.
+ *
+ * All DOM manipulation and event handling for the study planner UI is managed here.
+ */
+
+/**
+ * Event listener that initializes the application when the DOM is fully loaded.
+ * Calls multiple setup functions and loads necessary data to set up the study planner.
+ */
 document.addEventListener('DOMContentLoaded', () => { 
     loadUserInfo();
     setupLogout();
@@ -24,8 +45,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 });
 
-let yearCount; //global variable to keep track of the number of years
+/**
+ * Global variable to track the number of years in the study plan.
+ * Used throughout the application to manage adding/removing academic years.
+ * @type {number}
+ */
+let yearCount;
 
+/**
+ * Sets up the demo button functionality.
+ * When clicked, the demo button loads a predefined set of courses and placements.
+ */
 function setupDemoButton() {
     const demoButton = document.getElementById('loadDemoButton');
     if (demoButton) {
@@ -46,6 +76,11 @@ function setupDemoButton() {
     }
 }
 
+/**
+ * Loads course data from the server for a specific semester.
+ * @param {string} semester - The semester to load courses for (default is 'current')
+ * @returns {Promise} A promise that resolves when courses are loaded and populated
+ */
 function loadCourseData(semester = 'current') {
     return new Promise((resolve, reject) => {
         const courseItems = document.querySelector('.course-items');
@@ -86,25 +121,12 @@ function loadCourseData(semester = 'current') {
             });
     });
 }
-/* remove this*/
-/*
-function loadDemoDataFromAPI() {
-    return fetch('/api/courses/demo')
-        .then(response => {
-            if (!response.ok) throw new Error('Failed to load demo data');
-            return response.json();
-        })
-        .then(courses => {
-            window.coursesData = courses;
-            populateCourseList(courses);
-        })
-        .catch(error => {
-            console.error('Error loading demo data:', error);
-            loadDemoData();
-        });
-}
-*/
-// Define demo courses as a constant at the top of studyPlanner.js
+
+/**
+ * Predefined demo courses with all necessary properties.
+ * Used for populating the application with sample data.
+ * @const {Array<Object>}
+ */
 const DEMO_COURSES = [
     { id: 'CSCI 3100', name: 'Software Engineering', units: 3, color: '#d0e0f0', selected: true, type: 'Major' },
     { id: 'CSCI 3180', name: 'Principles of Programming Lang', units: 3, color: '#f0e0d0', selected: true, type: 'Major' },
@@ -148,6 +170,11 @@ const DEMO_COURSES = [
     { id: 'PHED 1180', name: 'Badminton', units: 1, color: '#f0d0e0', selected: true, type: 'UG Core' },
     { id: 'PHYS 1110', name: 'Engineering Phy: Mech & Thermo', units: 3, color: '#d0f0e0', selected: true, type: 'Major' }
 ];
+
+/**
+ * Loads demo data into the study planner.
+ * Populates the course list with predefined courses and places them in the timetable.
+ */
 function loadDemoData() {
     // Define demo courses with name, type, and credits (units)
     const courses = [
@@ -280,6 +307,12 @@ function loadDemoData() {
     updateProgressBars();
 }
 
+/**
+ * Populates the course list sidebar with provided courses.
+ * Creates draggable course items for each course.
+ * 
+ * @param {Array<Object>} courses - Array of course objects to display
+ */
 function populateCourseList(courses) {
     const courseItems = document.querySelector('.course-items');
     courseItems.innerHTML = '';
@@ -304,6 +337,10 @@ function populateCourseList(courses) {
     });
 }
 
+/**
+ * Initializes the search functionality for filtering courses.
+ * Handles standard text search and special case for course codes.
+ */
 function initializeSearch() {
     const searchInput = document.getElementById('courseSearch');
     searchInput.addEventListener('input', (e) => {
@@ -336,6 +373,11 @@ function initializeSearch() {
     });
 }
 
+/**
+ * Sets up drag and drop functionality throughout the application.
+ * Configures table cells as drop targets and courses as draggable items.
+ * Handles course movement between cells and removal when dropped back to the sidebar.
+ */
 function setupDragAndDrop() {
     const cells = document.querySelectorAll('.timetable td:not(:first-child)');
     cells.forEach(cell => {
@@ -385,6 +427,7 @@ function setupDragAndDrop() {
             }
         });
     });
+    
     // Set up the search panel as a drop target
     const courseItems = document.querySelector('.course-items');
     courseItems.addEventListener('dragover', (e) => {
@@ -410,6 +453,11 @@ function setupDragAndDrop() {
     });
 }
 
+/**
+ * Sets up the add/remove year buttons and their functionality.
+ * Manages the timetable expansion and contraction when years are added or removed.
+ * Enforces limits on minimum and maximum years.
+ */
 function setupYearButtons() {
     const addYearBtn = document.getElementById('addYearBtn');
     const removeYearBtn = document.getElementById('removeYearBtn');
@@ -518,6 +566,10 @@ function setupYearButtons() {
         updateProgressBars();
     });
 
+    /**
+     * Updates the add year button state based on the current year count.
+     * Disables the button if maximum years is reached.
+     */
     function updateAddYearButtonState() {
         if (yearCount >= MAX_YEARS) {
             addYearBtn.disabled = true;
@@ -530,6 +582,10 @@ function setupYearButtons() {
         }
     }
 
+    /**
+     * Updates the remove year button state based on the current year count.
+     * Disables the button if minimum years is reached.
+     */
     function updateRemoveYearButtonState() {
         if (yearCount <= MIN_YEARS) {
             removeYearBtn.disabled = true;
@@ -543,6 +599,11 @@ function setupYearButtons() {
     }
 }
 
+/**
+ * Updates the progress bars displaying credit completion for different course types.
+ * Calculates total credits for Major, UG Core, Free, and College courses.
+ * Updates the width of progress bars and displays credit counts.
+ */
 function updateProgressBars() {
     const courseBlocks = document.querySelectorAll('.timetable .course-block');
     let majorCredits = 0, ugCoreCredits = 0, freeCredits = 0, CollegeCredits = 0;
@@ -588,6 +649,11 @@ function updateProgressBars() {
     document.getElementById('totalProgress').style.width = `${Math.min((totalCompleted / totalCredits) * 100, 100)}%`;
 }
 
+/**
+ * Loads and displays the user information from the server.
+ * Fetches the current user's data from the authentication API.
+ * Redirects to the home page if the user is not logged in.
+ */
 function loadUserInfo() {
     fetch('/api/auth/login', {
         method: 'GET',
@@ -605,6 +671,10 @@ function loadUserInfo() {
     });
 }
 
+/**
+ * Sets up the logout button functionality.
+ * Sends a logout request to the server and redirects to the home page on success.
+ */
 function setupLogout() {
     const logoutBtn = document.getElementById('logoutBtn');
     logoutBtn.addEventListener('click', async () => {
@@ -622,6 +692,10 @@ function setupLogout() {
     });
 }
 
+/**
+ * Sets up the image export button to capture and save the study plan.
+ * Attaches the click event listener to the save image button.
+ */
 function setupImageExport() {
     const saveImageBtn = document.getElementById('saveImageBtn');
     if (saveImageBtn) {
@@ -629,6 +703,11 @@ function setupImageExport() {
     }
 }
 
+/**
+ * Captures the current study plan as an image and prepares it for download.
+ * Creates an A4-sized image of the study plan with appropriate styling.
+ * Shows loading and success/error messages during the process.
+ */
 function captureAndSaveStudyPlan() {
     // Show loading indicator
     const loadingMessage = document.createElement('div');
@@ -865,7 +944,11 @@ function captureAndSaveStudyPlan() {
     });
 }
 
-// function to load the user's saved study plan
+/**
+ * Loads the user's saved study plan from the server.
+ * Fetches and populates the timetable with previously saved course placements.
+ * Handles errors and empty study plans appropriately.
+ */
 function loadUserStudyPlan() {
     console.log('Fetching user study plan...');
     fetch('/api/studyplan', {
@@ -1014,7 +1097,11 @@ function loadUserStudyPlan() {
         }, 3000);
     });
 }
-// function to set up the Save button
+
+/**
+ * Sets up the save button functionality.
+ * Attaches a click event listener to the save button.
+ */
 function setupSaveButton() {
     const saveBtn = document.getElementById('saveBtn');
     if (saveBtn) {
@@ -1022,7 +1109,11 @@ function setupSaveButton() {
     }
 }
 
-// New function to save the study plan
+/**
+ * Saves the current study plan to the server.
+ * Collects course placements from the timetable and sends them to the API.
+ * Displays success or error messages to the user.
+ */
 function saveStudyPlan() {
     // Collect the current study plan from the timetable
     const studyPlan = [];

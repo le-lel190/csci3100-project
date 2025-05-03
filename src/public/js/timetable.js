@@ -1,3 +1,16 @@
+/**
+ * Timetable.js
+ *
+ * This script manages the interactive timetable UI for the course planner web application.
+ * It handles:
+ *   - Rendering the timetable grid and populating it with course events
+ *   - Loading, saving, and exporting user timetables (including Google Calendar CSV export)
+ *   - Course selection, conflict detection, and section management (lectures, tutorials, etc.)
+ *   - Tentative (placeholder) schedule editing and persistence
+ *   - User authentication, demo data loading, and logout functionality
+ *   - Dynamic search/filtering of courses and responsive UI updates
+ *
+ */
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize timetable
     createTimetableGrid();
@@ -826,6 +839,11 @@ function loadSemesterData(semester) {
 
 /**
  * Load demo data from the API
+ * 
+ * Fetches sample course data from the server API endpoint and processes it for display.
+ * Used when regular course data isn't available or when the user clicks the demo button.
+ * 
+ * @returns {Promise} A promise that resolves when the data is loaded and displayed
  */
 function loadDemoDataFromAPI() {
     console.log('Loading demo data from API');
@@ -865,6 +883,12 @@ function loadDemoDataFromAPI() {
 
 /**
  * Populate the course list sidebar with course items
+ * 
+ * Creates the UI elements for course selection in the sidebar, separating
+ * courses into selected and unselected sections. Adds event listeners for
+ * course selection, hover effects, and section selectors where applicable.
+ * 
+ * @param {Array} courses - Array of course objects to display in the sidebar
  */
 function populateCourseList(courses) {
     const courseItems = document.querySelector('.course-items');
@@ -1006,6 +1030,13 @@ function populateCourseList(courses) {
 
 /**
  * Check if a course has multiple sections for the same type (lecture, tutorial, etc.)
+ * 
+ * Analyzes a course's schedules to determine if it has multiple sections of the same type
+ * (e.g., multiple lecture sections or multiple tutorial sections). This is used to decide
+ * whether to display section selectors in the UI.
+ * 
+ * @param {Object} course - Course object to check for multiple sections
+ * @returns {Boolean} - True if the course has multiple sections of the same type
  */
 function checkForMultipleSections(course) {
     // Normalize section types to group lectures and tutorials
@@ -1036,6 +1067,12 @@ function checkForMultipleSections(course) {
 
 /**
  * Normalize session type to basic categories (Lecture, Tutorial)
+ * 
+ * Converts various section type formats to standardized categories for easier comparison.
+ * This helps handle different naming conventions for the same type of class section.
+ * 
+ * @param {String} type - The original section type string from the course data
+ * @returns {String} - Normalized type string ('Lecture', 'Tutorial', or the original if not recognized)
  */
 function normalizeSessionType(type) {
     if (type.toLowerCase().includes('lec')) {
@@ -1048,6 +1085,12 @@ function normalizeSessionType(type) {
 
 /**
  * Extract section identifier from type string
+ * 
+ * Parses the section type string to extract the section identifier (like A, B, AT01, BT01).
+ * Handles various formats used in different course data structures.
+ * 
+ * @param {String} type - The section type string to parse
+ * @returns {String|null} - The extracted section identifier, or null if no match found
  */
 function extractSectionId(type) {
     // Extract section identifier like A, B, AT01, BT01
@@ -1066,6 +1109,13 @@ function extractSectionId(type) {
 
 /**
  * Group schedules by section
+ * 
+ * Organizes a course's schedules into logical sections based on type and section ID.
+ * This allows the UI to display and manage related schedules (like multiple sessions
+ * of the same tutorial group) together.
+ * 
+ * @param {Object} course - Course object containing schedules to group
+ * @returns {Object} - An object with section keys mapping to groups of related schedules
  */
 function groupSchedulesBySection(course) {
     // First, normalize all schedules by section
@@ -1101,6 +1151,13 @@ function groupSchedulesBySection(course) {
 
 /**
  * Generate HTML for section selection dropdowns
+ * 
+ * Creates the HTML for section selection dropdowns when a course has multiple
+ * sections of the same type (e.g., multiple lectures or tutorials).
+ * These dropdowns allow users to select which specific section they want to take.
+ * 
+ * @param {Object} course - Course object to generate section selectors for
+ * @returns {String} - HTML string for section selector dropdown elements
  */
 function generateSectionSelectors(course) {
     // Group schedules by section
@@ -1165,6 +1222,12 @@ function generateSectionSelectors(course) {
 
 /**
  * Add event listeners for section selector dropdowns
+ * 
+ * Attaches change event listeners to section selector dropdowns to update
+ * course section selections when the user changes a dropdown value.
+ * 
+ * @param {HTMLElement} courseItem - The course item DOM element containing the selectors
+ * @param {Object} course - The course object associated with this item
  */
 function addSectionSelectorEventListeners(courseItem, course) {
     const selectors = courseItem.querySelectorAll('.section-dropdown');
@@ -1191,6 +1254,12 @@ function addSectionSelectorEventListeners(courseItem, course) {
 
 /**
  * Update timetable display with selected courses
+ * 
+ * Refreshes the timetable grid to show only the currently selected courses.
+ * This is called whenever course selection changes, sections are updated,
+ * or when switching between semesters.
+ * 
+ * @param {Array} courses - Array of all course objects (selected and unselected)
  */
 function updateTimetableDisplay(courses) {
     // Store courses globally for filtering
@@ -1206,6 +1275,9 @@ function updateTimetableDisplay(courses) {
 
 /**
  * Clear all course events from the timetable
+ * 
+ * Removes all course event elements from the timetable grid to prepare
+ * for rerendering the timetable with updated course selections.
  */
 function clearTimetable() {
     const courseEvents = document.querySelectorAll('.course-event');
@@ -1214,6 +1286,12 @@ function clearTimetable() {
 
 /**
  * Display courses on the timetable
+ * 
+ * Renders course events on the timetable grid by creating DOM elements
+ * for each course schedule. Handles section selection, positioning based on
+ * time, and styling based on course properties (selected, preview, placeholder).
+ * 
+ * @param {Array} courses - Array of course objects to display on the timetable
  */
 function displayCoursesOnTimetable(courses) {
     const timetableGrid = document.getElementById('timetable-grid');
@@ -1383,6 +1461,13 @@ function displayCoursesOnTimetable(courses) {
 
 /**
  * Generate a random color based on course ID for consistent coloring
+ * 
+ * Creates a deterministic color based on the course ID to ensure the same
+ * course always gets the same color. Uses a simple hashing algorithm to 
+ * generate HSL color values with appropriate saturation and lightness.
+ * 
+ * @param {String} courseId - The course identifier to generate a color for
+ * @returns {String} - CSS HSL color string
  */
 function getRandomColor(courseId) {
     // Simple hash function to generate a consistent color for a course ID
@@ -1791,8 +1876,13 @@ function handleCourseSelection(checkbox, course) {
 
 /**
  * Convert time string to minutes
+ * 
+ * Converts a time string in the format "HH:MM" to minutes since midnight.
+ * Used for time calculations and comparisons, such as determining schedule conflicts
+ * and positioning events on the timetable.
+ * 
  * @param {String} timeStr - Time string in format "HH:MM"
- * @returns {Number} - Total minutes
+ * @returns {Number} - Total minutes since midnight
  */
 function timeToMinutes(timeStr) {
     const [hours, minutes] = timeStr.split(':').map(Number);
@@ -1801,6 +1891,14 @@ function timeToMinutes(timeStr) {
 
 /**
  * Shows a popup to edit tentative course schedule
+ * 
+ * Creates and displays a popup dialog that allows users to edit the details
+ * of a tentative (placeholder) course schedule. Provides time selection,
+ * location input, and validation for conflicts.
+ * 
+ * @param {Object} course - The course object being edited
+ * @param {Object} schedule - The specific schedule being edited
+ * @param {HTMLElement} courseEvent - The DOM element of the course event to position the popup near
  */
 function showTentativeEditPopup(course, schedule, courseEvent) {
     // Remove any existing popups
@@ -2066,6 +2164,14 @@ function showTentativeEditPopup(course, schedule, courseEvent) {
 
 /**
  * Find the closest time in a list of valid times
+ * 
+ * Searches through a list of valid time strings to find the one that is
+ * closest to the target time. Used when a user-entered time doesn't exactly
+ * match any of the predefined time slots.
+ * 
+ * @param {String} targetTime - Time string to find the closest match for
+ * @param {Array} validTimes - Array of valid time strings to search through
+ * @returns {String|null} - The closest matching time string, or null if inputs are invalid
  */
 function findClosestTime(targetTime, validTimes) {
     if (!targetTime || !validTimes || validTimes.length === 0) return null;
@@ -2089,6 +2195,12 @@ function findClosestTime(targetTime, validTimes) {
 
 /**
  * Position the popup near the course event
+ * 
+ * Calculates and sets the position of a popup element relative to a course event
+ * on the timetable. Ensures the popup is fully visible within the viewport.
+ * 
+ * @param {HTMLElement} popup - The popup DOM element to position
+ * @param {HTMLElement} courseEvent - The course event DOM element to position near
  */
 function positionPopup(popup, courseEvent) {
     const rect = courseEvent.getBoundingClientRect();

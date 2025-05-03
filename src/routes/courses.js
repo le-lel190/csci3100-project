@@ -3,11 +3,29 @@ const router = express.Router();
 const path = require('path');
 const fs = require('fs').promises;
 
+/**
+ * @file courses.js
+ * @description Express router for handling course-related API endpoints. This module provides endpoints to:
+ *   - Check the existence of the course data directory
+ *   - Load demo course data
+ *   - Retrieve all courses or courses for a specific semester
+ *   - Normalize and process course schedule data from JSON files
+ *
+ * The router expects a specific directory structure under 'course-data' with subdirectories for 'courses', 'derived', and 'resources'.
+ *
+ * Helper functions are provided for directory setup, time normalization, and demo data generation.
+ */
+
 // Fix path resolution with absolute path
 // Base path to course data directory
 const courseDataPath = path.resolve(process.cwd(), 'course-data');
 
 // Helper function to ensure required directories exist
+/**
+ * Ensures that the main course-data directory and its subdirectories (courses, derived, resources) exist.
+ * Creates them recursively if they do not exist.
+ * @returns {Promise<boolean>} True if directories exist or are created successfully, false otherwise.
+ */
 async function ensureDirectoriesExist() {
     try {
         // First, ensure the main course-data directory exists
@@ -36,6 +54,10 @@ async function ensureDirectoriesExist() {
 ensureDirectoriesExist();
 
 // Helper function to map day names to indices
+/**
+ * Maps English day names to their corresponding numeric indices (Monday=1, ..., Sunday=7).
+ * Used for schedule normalization.
+ */
 const dayNameToIndex = {
     'Monday': 1,
     'Tuesday': 2,
@@ -47,9 +69,19 @@ const dayNameToIndex = {
 };
 
 // Helper function to map numeric day indices to day names
+/**
+ * Array mapping numeric day indices to English day names.
+ * Index 0 is a placeholder and not used.
+ */
 const dayIndexToName = ['null_template', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 // Helper function to normalize time format to HH:MM
+/**
+ * Normalizes various time string formats to the standard 'HH:MM' format.
+ * Accepts formats like 'HH:MM', 'H:MM', 'HHMM', 'HH.MM', etc.
+ * @param {string} timeStr - The input time string.
+ * @returns {string|null} The normalized time string or null if invalid.
+ */
 function normalizeTimeFormat(timeStr) {
     if (!timeStr || typeof timeStr !== 'string') {
         return null;
@@ -81,6 +113,11 @@ function normalizeTimeFormat(timeStr) {
 }
 
 // Check if the course-data directory exists
+/**
+ * GET /check
+ * Checks if the course-data directory exists and lists its contents.
+ * Responds with a JSON object containing existence status, path, and directory contents.
+ */
 router.get('/check', async (req, res) => {
     try {
         const exists = await fs.access(courseDataPath).then(() => true).catch(() => false);
@@ -100,12 +137,24 @@ router.get('/check', async (req, res) => {
 });
 
 // Load demo data directly
+/**
+ * GET /demo
+ * Returns a set of hardcoded demo course data for UI demonstration purposes.
+ */
 router.get('/demo', (req, res) => {
     // Return demo course data using our helper function
     res.json(getDemoCourses());
 });
 
 // Get all courses or courses for a specific semester
+/**
+ * GET /:semester?
+ * Retrieves all courses or courses for a specific semester from the course-data directory.
+ * Processes and normalizes course schedule data, including placeholder schedules for missing data.
+ * Responds with a JSON array of course objects, each containing id, name, schedules, color, and other metadata.
+ *
+ * If no courses are found, returns demo data.
+ */
 router.get('/:semester?', async (req, res) => {
     try {
         const semester = req.params.semester || 'current';
@@ -432,6 +481,11 @@ router.get('/:semester?', async (req, res) => {
 });
 
 // Helper function to get consistent demo courses
+/**
+ * Returns a static array of demo course objects for demonstration or fallback purposes.
+ * Each object contains id, name, schedules, color, and selection status.
+ * @returns {Array<Object>} Array of demo course objects.
+ */
 function getDemoCourses() {
     return [
         { 

@@ -1,3 +1,14 @@
+/**
+ * Configuration Page JavaScript
+ * 
+ * This file handles all functionality for the user configuration page including:
+ * - User authentication and profile management
+ * - Settings management (loading, saving, importing, exporting)
+ * - UI theme customization
+ * - Email verification
+ * - Navigation between configuration tabs
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize the configuration page
     loadUserInfo();
@@ -10,7 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Load and display user information
+ * Load and display user information from the server
+ * 
+ * Fetches authenticated user data and populates the UI with username,
+ * email and profile information. Redirects to login page if not authenticated.
  */
 function loadUserInfo() {
     const usernameElement = document.getElementById('userUsername');
@@ -26,6 +40,7 @@ function loadUserInfo() {
         return response.json();
     })
     .then(data => {
+        // Check if we have user data and the username element exists
         if (data && data.user && data.user.username && usernameElement) {
             usernameElement.textContent = data.user.username;
             
@@ -50,6 +65,9 @@ function loadUserInfo() {
 
 /**
  * Set up the logout functionality
+ * 
+ * Adds event listener to logout button that calls the logout API
+ * and redirects to the home page on success.
  */
 function setupLogout() {
     const logoutButton = document.getElementById('logoutBtn');
@@ -77,6 +95,9 @@ function setupLogout() {
 
 /**
  * Set up the tab navigation for the sidebar
+ * 
+ * Implements the tab switching functionality that shows/hides
+ * different configuration sections when sidebar links are clicked.
  */
 function setupTabNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
@@ -105,6 +126,9 @@ function setupTabNavigation() {
 
 /**
  * Load saved settings from localStorage
+ * 
+ * Retrieves user preferences from localStorage and populates
+ * the corresponding form elements with those values.
  */
 function loadSavedSettings() {
     // General Settings
@@ -173,24 +197,31 @@ function loadSavedSettings() {
 
 /**
  * Set up event listeners for saving settings
+ * 
+ * Attaches click handlers to various save buttons that store user
+ * preferences in localStorage and/or send them to the server.
  */
 function setupSettingsSaving() {
     // General Settings
     const saveGeneralBtn = document.getElementById('save-general');
     if (saveGeneralBtn) {
         saveGeneralBtn.addEventListener('click', () => {
+            // Get form elements
             const defaultViewEl = document.getElementById('default-view');
             const use24HourEl = document.getElementById('24h-time');
             const enableAlertsEl = document.getElementById('enable-alerts');
             
+            // Extract values
             const defaultView = defaultViewEl ? defaultViewEl.value : '';
             const use24Hour = use24HourEl ? use24HourEl.checked : false;
             const enableAlerts = enableAlertsEl ? enableAlertsEl.checked : false;
             
+            // Save to localStorage
             localStorage.setItem('defaultView', defaultView);
             localStorage.setItem('use24Hour', use24Hour);
             localStorage.setItem('enableAlerts', enableAlerts);
             
+            // Show confirmation message
             showSaveConfirmation('general-settings');
         });
     }
@@ -199,16 +230,19 @@ function setupSettingsSaving() {
     const saveAppearanceBtn = document.getElementById('save-appearance');
     if (saveAppearanceBtn) {
         saveAppearanceBtn.addEventListener('click', () => {
+            // Get form elements
             const themeSelectEl = document.getElementById('theme-select');
             const fontSizeEl = document.getElementById('font-size');
             const showCodesEl = document.getElementById('show-codes');
             const compactModeEl = document.getElementById('compact-mode');
             
+            // Extract values
             const theme = themeSelectEl ? themeSelectEl.value : 'light';
             const fontSize = fontSizeEl ? fontSizeEl.value : 'medium';
             const showCodes = showCodesEl ? showCodesEl.checked : false;
             const compactMode = compactModeEl ? compactModeEl.checked : false;
             
+            // Save to localStorage
             localStorage.setItem('theme', theme);
             localStorage.setItem('fontSize', fontSize);
             localStorage.setItem('showCodes', showCodes);
@@ -217,6 +251,7 @@ function setupSettingsSaving() {
             // Apply theme immediately
             applyTheme(theme);
             
+            // Show confirmation message
             showSaveConfirmation('appearance-settings');
         });
     }
@@ -225,9 +260,11 @@ function setupSettingsSaving() {
     const saveProfileBtn = document.getElementById('save-profile');
     if (saveProfileBtn) {
         saveProfileBtn.addEventListener('click', () => {
+            // Get form elements
             const emailEl = document.getElementById('profile-email');
             const nameEl = document.getElementById('profile-name');
             
+            // Extract values
             const email = emailEl ? emailEl.value : '';
             const name = nameEl ? nameEl.value : '';
             
@@ -267,18 +304,22 @@ function setupSettingsSaving() {
     const saveAcademicBtn = document.getElementById('save-academic');
     if (saveAcademicBtn) {
         saveAcademicBtn.addEventListener('click', () => {
+            // Get form elements
             const studyProgramEl = document.getElementById('study-program');
             const academicYearEl = document.getElementById('academic-year');
             const expectedGradEl = document.getElementById('expected-graduation');
             
+            // Extract values
             const studyProgram = studyProgramEl ? studyProgramEl.value : '';
             const academicYear = academicYearEl ? academicYearEl.value : '';
             const expectedGraduation = expectedGradEl ? expectedGradEl.value : '';
             
+            // Save to localStorage
             localStorage.setItem('studyProgram', studyProgram);
             localStorage.setItem('academicYear', academicYear);
             localStorage.setItem('expectedGraduation', expectedGraduation);
             
+            // Show confirmation message
             showSaveConfirmation('academic-settings');
         });
     }
@@ -286,6 +327,8 @@ function setupSettingsSaving() {
 
 /**
  * Apply the selected theme to the page
+ * 
+ * @param {string} theme - The theme name to apply ('light', 'dark', or 'contrast')
  */
 function applyTheme(theme) {
     // Remove any existing theme classes
@@ -304,6 +347,9 @@ function applyTheme(theme) {
 
 /**
  * Show a confirmation message after saving settings
+ * 
+ * @param {string} containerId - The ID of the container element where the message should appear
+ * @param {boolean} isSuccess - Whether the operation was successful (true) or failed (false)
  */
 function showSaveConfirmation(containerId, isSuccess = true) {
     const container = document.getElementById(containerId);
@@ -337,6 +383,8 @@ function showSaveConfirmation(containerId, isSuccess = true) {
 
 /**
  * Set up data management functions (import/export)
+ * 
+ * Configures handlers for exporting, importing, and clearing user data
  */
 function setupDataManagement() {
     // Export data
@@ -346,6 +394,7 @@ function setupDataManagement() {
             // Collect all data from localStorage
             const data = {};
             
+            // Iterate through all localStorage keys
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 data[key] = localStorage.getItem(key);
@@ -378,6 +427,7 @@ function setupDataManagement() {
                 
                 reader.onload = function(e) {
                     try {
+                        // Parse the JSON data from the file
                         const data = JSON.parse(e.target.result);
                         
                         // Import all settings to localStorage
@@ -406,6 +456,7 @@ function setupDataManagement() {
     // Clear all data
     const clearDataBtn = document.getElementById('clear-data');
     if (clearDataBtn) {
+        // Confirm before clearing data
         clearDataBtn.addEventListener('click', () => {
             if (confirm('Are you sure you want to clear all saved data? This action cannot be undone.')) {
                 localStorage.clear();
@@ -418,8 +469,11 @@ function setupDataManagement() {
 
 /**
  * Set up notification preferences
+ * 
+ * Handles enabling/disabling email and browser notifications
  */
 function setupNotifications() {
+    // Load notification settings from localStorage
     const emailNotifs = localStorage.getItem('emailNotifications') === 'true';
     document.getElementById('email-notifications').checked = emailNotifs;
     
@@ -428,9 +482,11 @@ function setupNotifications() {
     
     // Save notification settings
     document.getElementById('save-notifications').addEventListener('click', () => {
+        // Get current settings from form
         const emailNotifications = document.getElementById('email-notifications').checked;
         const browserNotifications = document.getElementById('browser-notifications').checked;
         
+        // Save to localStorage
         localStorage.setItem('emailNotifications', emailNotifications);
         localStorage.setItem('browserNotifications', browserNotifications);
         
@@ -439,12 +495,16 @@ function setupNotifications() {
             Notification.requestPermission();
         }
         
+        // Show confirmation message
         showSaveConfirmation('notification-settings');
     });
 }
 
 /**
  * Set up email verification functionality
+ * 
+ * Handles verification token submission, checking verification status,
+ * and resending verification emails
  */
 function setupEmailVerification() {
     const verifyTokenBtn = document.getElementById('verify-token-btn');
@@ -486,6 +546,7 @@ function setupEmailVerification() {
     verifyTokenBtn.addEventListener('click', () => {
         const token = verificationToken.value.trim();
         
+        // Validate token input
         if (!token) {
             statusMessageDiv.textContent = 'Please enter a verification token';
             statusMessageDiv.className = 'verification-status-error';
@@ -502,6 +563,7 @@ function setupEmailVerification() {
             credentials: 'include'
         })
         .then(response => {
+            // Reset button state
             verifyTokenBtn.disabled = false;
             verifyTokenBtn.textContent = 'Verify Token';
             
@@ -542,6 +604,7 @@ function setupEmailVerification() {
             credentials: 'include'
         })
         .then(response => {
+            // Reset button state
             resendVerificationBtn.disabled = false;
             resendVerificationBtn.textContent = 'Resend Verification Email';
             
