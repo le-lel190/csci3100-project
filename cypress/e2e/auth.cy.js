@@ -1,10 +1,29 @@
+/**
+ * User Authentication E2E Tests
+ * 
+ * These tests verify the authentication flow including:
+ * - User registration
+ * - Login with valid and invalid credentials
+ * - Logout functionality
+ * 
+ * Tests use direct API calls rather than UI interaction to verify the auth endpoints.
+ */
 describe('User Authentication', () => {
+  /**
+   * Test user data with unique values generated for each test run
+   * to prevent conflicts in the database
+   */
   const testUser = {
     email: `test-${Date.now()}@example.com`,
     password: 'TestPassword123!',
     username: `testuser-${Date.now()}`
   };
 
+  /**
+   * Test case: User registration
+   * - Makes a POST request to the registration endpoint
+   * - Verifies successful user creation with 201 status
+   */
   it('should register a new user', () => {
     cy.request({
       method: 'POST',
@@ -20,6 +39,11 @@ describe('User Authentication', () => {
     });
   });
 
+  /**
+   * Test case: Successful login
+   * - Attempts to log in with valid credentials
+   * - Verifies 200 status and correct user data in response
+   */
   it('should log in with valid credentials', () => {
     cy.request({
       method: 'POST',
@@ -35,6 +59,12 @@ describe('User Authentication', () => {
     });
   });
 
+  /**
+   * Test case: Failed login
+   * - Attempts to log in with invalid credentials
+   * - Verifies 401 status and appropriate error message
+   * - Uses failOnStatusCode: false to prevent Cypress from failing on non-2xx status
+   */
   it('should not log in with invalid credentials', () => {
     cy.request({
       method: 'POST',
@@ -50,6 +80,12 @@ describe('User Authentication', () => {
     });
   });
 
+  /**
+   * Test case: User logout
+   * - First logs in to create an authenticated session
+   * - Then makes a request to the logout endpoint
+   * - Verifies successful logout with 200 status
+   */
   it('should log out the user', () => {
     cy.request({
       method: 'POST',

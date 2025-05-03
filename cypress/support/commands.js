@@ -7,9 +7,14 @@
 // commands please read more here:
 // https://on.cypress.io/custom-commands
 // ***********************************************
-//
-//
-// -- This is a parent command --
+
+/**
+ * Custom command to log in a user
+ * @param {string} identifier - The username or email to log in with (defaults to 'test')
+ * @param {string} password - The password to use (defaults to 'test123')
+ * @example cy.loginUser()
+ * @example cy.loginUser('admin', 'password123')
+ */
 Cypress.Commands.add('loginUser', (identifier = 'test', password = 'test123') => {
   cy.visit('/');
   cy.get('#loginIdentifier').type(identifier);
@@ -23,14 +28,26 @@ Cypress.Commands.add('loginUser', (identifier = 'test', password = 'test123') =>
   // cy.url().should('include', '/dashboard'); 
 });
 
-// Custom command for adding a course to study plan
+/**
+ * Custom command to add a course to the study plan
+ * @param {string} courseName - The name of the course to add
+ * @example cy.addCourseToStudyPlan('Introduction to Computer Science')
+ */
 Cypress.Commands.add('addCourseToStudyPlan', (courseName) => {
   cy.visit('/studyPlanner.html');
   cy.get('input[placeholder="Search Courses..."]').type(courseName);
   cy.contains(courseName).click();
 });
 
-// Custom command for drag and drop (simplified)
+/**
+ * Custom command for drag and drop functionality
+ * @param {Element} subject - The element to be dragged (automatically provided)
+ * @param {string} targetSelector - The CSS selector for the target element
+ * @param {Object} options - Additional options for the drag operation
+ * @param {number} [options.index=0] - Index of the target element if selector matches multiple elements
+ * @example cy.get('.draggable-course').drag('.semester-container')
+ * @example cy.get('.draggable-course').drag('.semester-container', { index: 2 })
+ */
 Cypress.Commands.add('drag', { prevSubject: 'element' }, (subject, targetSelector, options = {}) => {
   const { index = 0 } = options;
   
