@@ -20,6 +20,8 @@
             <a href="./studyPlanner.html" class="active">Study Planner</a>
             <a href="./degreeRoadmap.html">Degree Roadmap</a>
             <a href="./config.html">Config</a>
+            <a href="./comment.html">Comment</a>
+
         </div>
         <div class="nav-user">
             <span id="userUsername"></span>
@@ -32,12 +34,6 @@
     <div class="container">
         <div class="sidebar">
             <div class="semester-selector">
-                <h3>Semester</h3>
-                <div class="semester-buttons">
-                    <button class="semester-btn active" data-semester="fall">Fall 2023</button>
-                    <button class="semester-btn" data-semester="spring">Spring 2024</button>
-                    <button class="semester-btn" data-semester="summer">Summer 2024</button>
-                </div>
                 <div class="demo-button-container">
                     <button id="loadDemoButton" class="demo-btn">Load Demo Data</button>
                 </div>
@@ -61,7 +57,10 @@
             <div class="timetable">
                 <div class="timetable-header">
                     <h3>Your Study Plan</h3>
-                    <button id="addYearBtn" class="submit-btn">Add Year</button>
+                    <div class="button-group">
+                        <button id="addYearBtn" class="submit-btn">Add Year</button>
+                        <button id="removeYearBtn" class="submit-btn">Remove Year</button>
+                    </div>
                 </div>
                 <table>
                     <thead>
@@ -74,28 +73,30 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Semester 1 with 8 rows -->
-                        <tr><td>Semester 1</td><td data-year="1" data-semester="1" data-max-courses="8"></td><td data-year="2" data-semester="1" data-max-courses="8"></td><td data-year="3" data-semester="1" data-max-courses="8"></td><td data-year="4" data-semester="1" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="1" data-max-courses="8"></td><td data-year="2" data-semester="1" data-max-courses="8"></td><td data-year="3" data-semester="1" data-max-courses="8"></td><td data-year="4" data-semester="1" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="1" data-max-courses="8"></td><td data-year="2" data-semester="1" data-max-courses="8"></td><td data-year="3" data-semester="1" data-max-courses="8"></td><td data-year="4" data-semester="1" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="1" data-max-courses="8"></td><td data-year="2" data-semester="1" data-max-courses="8"></td><td data-year="3" data-semester="1" data-max-courses="8"></td><td data-year="4" data-semester="1" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="1" data-max-courses="8"></td><td data-year="2" data-semester="1" data-max-courses="8"></td><td data-year="3" data-semester="1" data-max-courses="8"></td><td data-year="4" data-semester="1" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="1" data-max-courses="8"></td><td data-year="2" data-semester="1" data-max-courses="8"></td><td data-year="3" data-semester="1" data-max-courses="8"></td><td data-year="4" data-semester="1" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="1" data-max-courses="8"></td><td data-year="2" data-semester="1" data-max-courses="8"></td><td data-year="3" data-semester="1" data-max-courses="8"></td><td data-year="4" data-semester="1" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="1" data-max-courses="8"></td><td data-year="2" data-semester="1" data-max-courses="8"></td><td data-year="3" data-semester="1" data-max-courses="8"></td><td data-year="4" data-semester="1" data-max-courses="8"></td></tr>
-                        <!-- Semester 2 with 8 rows -->
-                        <tr><td>Semester 2</td><td data-year="1" data-semester="2" data-max-courses="8"></td><td data-year="2" data-semester="2" data-max-courses="8"></td><td data-year="3" data-semester="2" data-max-courses="8"></td><td data-year="4" data-semester="2" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="2" data-max-courses="8"></td><td data-year="2" data-semester="2" data-max-courses="8"></td><td data-year="3" data-semester="2" data-max-courses="8"></td><td data-year="4" data-semester="2" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="2" data-max-courses="8"></td><td data-year="2" data-semester="2" data-max-courses="8"></td><td data-year="3" data-semester="2" data-max-courses="8"></td><td data-year="4" data-semester="2" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="2" data-max-courses="8"></td><td data-year="2" data-semester="2" data-max-courses="8"></td><td data-year="3" data-semester="2" data-max-courses="8"></td><td data-year="4" data-semester="2" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="2" data-max-courses="8"></td><td data-year="2" data-semester="2" data-max-courses="8"></td><td data-year="3" data-semester="2" data-max-courses="8"></td><td data-year="4" data-semester="2" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="2" data-max-courses="8"></td><td data-year="2" data-semester="2" data-max-courses="8"></td><td data-year="3" data-semester="2" data-max-courses="8"></td><td data-year="4" data-semester="2" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="2" data-max-courses="8"></td><td data-year="2" data-semester="2" data-max-courses="8"></td><td data-year="3" data-semester="2" data-max-courses="8"></td><td data-year="4" data-semester="2" data-max-courses="8"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="2" data-max-courses="8"></td><td data-year="2" data-semester="2" data-max-courses="8"></td><td data-year="3" data-semester="2" data-max-courses="8"></td><td data-year="4" data-semester="2" data-max-courses="8"></td></tr>
-                        <!-- Semester 3 with 3 rows -->
-                        <tr><td>Semester 3</td><td data-year="1" data-semester="3" data-max-courses="3"></td><td data-year="2" data-semester="3" data-max-courses="3"></td><td data-year="3" data-semester="3" data-max-courses="3"></td><td data-year="4" data-semester="3" data-max-courses="3"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="3" data-max-courses="3"></td><td data-year="2" data-semester="3" data-max-courses="3"></td><td data-year="3" data-semester="3" data-max-courses="3"></td><td data-year="4" data-semester="3" data-max-courses="3"></td></tr>
-                        <tr><td></td><td data-year="1" data-semester="3" data-max-courses="3"></td><td data-year="2" data-semester="3" data-max-courses="3"></td><td data-year="3" data-semester="3" data-max-courses="3"></td><td data-year="4" data-semester="3" data-max-courses="3"></td></tr>
+                        <!-- Semester 1 (1 row, max 8 courses per cell) -->
+                        <tr>
+                            <td>Semester 1</td>
+                            <td data-year="1" data-semester="1" data-max-courses="8"></td>
+                            <td data-year="2" data-semester="1" data-max-courses="8"></td>
+                            <td data-year="3" data-semester="1" data-max-courses="8"></td>
+                            <td data-year="4" data-semester="1" data-max-courses="8"></td>
+                        </tr>
+                        <!-- Semester 2 (1 row, max 8 courses per cell) -->
+                        <tr>
+                            <td>Semester 2</td>
+                            <td data-year="1" data-semester="2" data-max-courses="8"></td>
+                            <td data-year="2" data-semester="2" data-max-courses="8"></td>
+                            <td data-year="3" data-semester="2" data-max-courses="8"></td>
+                            <td data-year="4" data-semester="2" data-max-courses="8"></td>
+                        </tr>
+                        <!-- Semester 3 (1 row, max 3 courses per cell) -->
+                        <tr>
+                            <td>Semester 3</td>
+                            <td data-year="1" data-semester="3" data-max-courses="3"></td>
+                            <td data-year="2" data-semester="3" data-max-courses="3"></td>
+                            <td data-year="3" data-semester="3" data-max-courses="3"></td>
+                            <td data-year="4" data-semester="3" data-max-courses="3"></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -104,19 +105,23 @@
         <div class="course-details">
             <h3>Graduation Progress</h3>
             <div class="details-content">
-                <p>Major (80 credits): <span id="majorCredits">0</span></p>
+                <p>Major (75 credits): <span id="majorCredits">0</span></p>
                 <div class="progress-bar">
                     <div id="majorProgress" style="width: 0%;"></div>
                 </div>
-                <p>UG Core (30 credits): <span id="ugCoreCredits">0</span></p>
+                <p>UG Core (33 credits): <span id="ugCoreCredits">0</span></p>
                 <div class="progress-bar">
                     <div id="ugCoreProgress" style="width: 0%;"></div>
                 </div>
-                <p>Free Credits (10 credits): <span id="freeCredits">0</span></p>
+                <p>Free Credits (9credits): <span id="freeCredits">0</span></p>
                 <div class="progress-bar">
                     <div id="freeProgress" style="width: 0%;"></div>
                 </div>
-                <p>Total (120 credits): <span id="totalCredits">0</span></p>
+                <p>College (6 credits): <span id="CollegeCredits">0</span></p>
+                <div class="progress-bar">
+                    <div id="CollegeProgress" style="width: 0%;"></div>
+                </div>
+                <p>Total (123 credits): <span id="totalCredits">0</span></p>
                 <div class="progress-bar">
                     <div id="totalProgress" style="width: 0%;"></div>
                 </div>
@@ -125,18 +130,14 @@
                 <button id="saveBtn" class="action-btn save-btn">
                     <i class="fas fa-save"></i> Save
                 </button>
-                <div class="button-row">
-                    <button id="exportTimetableBtn" class="action-btn export-btn">
-                        <i class="fas fa-file-export"></i> Export Timetable
-                    </button>
-                    <button id="saveImageBtn" class="action-btn save-btn">
-                        <i class="fas fa-image"></i> Save Image
-                    </button>
-                </div>
+                <button id="saveImageBtn" class="action-btn save-btn">
+                    <i class="fas fa-image"></i> Save Image
+                </button>
             </div>
         </div>
     </div>
 
     <script src="/js/studyPlanner.js"></script>
+    <script src="/js/session-manager.js"></script>
 </body>
 </html>

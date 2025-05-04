@@ -1,4 +1,26 @@
+/**
+ * Authentication Module
+ * 
+ * This module handles all authentication-related functionality including:
+ * - User login and registration
+ * - Logout functionality
+ * - Email verification
+ * - UI interactions for auth forms
+ * - Password visibility toggling
+ */
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Check for verification success message
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('verified') === 'true') {
+        showMessage('Your email has been verified successfully. You can now log in.', 'success');
+    }
+    
+    // Check for session timeout parameter
+    if (urlParams.get('timeout') === 'true') {
+        showMessage('Your session has timed out. Please login again.', 'warning');
+    }
+
     // Check if user is already logged in
     checkAuthStatus();
 
@@ -44,7 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
     const logoutBtn = document.getElementById('logoutBtn');
+    const resendVerificationBtn = document.getElementById('resendVerificationBtn');
 
+    /**
+     * Login form submission handler
+     * Authenticates user credentials and redirects to timetable on success
+     */
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const submitBtn = loginForm.querySelector('.submit-btn');
@@ -83,6 +110,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    /**
+     * Registration form submission handler
+     * Creates a new user account and sends verification email
+     */
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const submitBtn = registerForm.querySelector('.submit-btn');
@@ -109,7 +140,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             
             if (response.ok) {
-                window.location.href = '/timetable';
+                // Show verification message instead of redirecting
+                showMessage(`Account created successfully! Please check your email to verify your account. ${!data.verificationEmailSent ? 'There was an issue sending the verification email. Please request a new one after logging in.' : ''}`, 'success');
+                
+                // Switch to login tab
+                document.querySelector('.tab-btn[data-tab="login"]').click();
             } else {
                 errorElement.textContent = data.message;
             }
@@ -122,6 +157,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    /**
+     * Email verification resend handler
+     * Allows users to request a new verification email if needed
+     */
+    if (resendVerificationBtn) {
+        resendVerificationBtn.addEventListener('click', async () => {
+            try {
+                resendVerificationBtn.disabled = true;
+                resendVerificationBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                
+                const response = await fetch('/api/auth/resend-verification', {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showMessage('Verification email sent successfully. Please check your inbox.', 'success');
+                } else {
+                    showMessage(data.message || 'Failed to send verification email. Please try again later.', 'error');
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', 'error');
+            } finally {
+                resendVerificationBtn.disabled = false;
+                resendVerificationBtn.innerHTML = 'Resend Verification Email';
+            }
+        });
+    }
+
+    /**
+     * Logout button handler
+     * Signs out the current user and redirects to home page
+     */
     logoutBtn?.addEventListener('click', async () => {
         const originalText = logoutBtn.innerHTML;
         
@@ -145,6 +214,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+/**
+ * Checks if user is already authenticated
+ * Redirects to timetable page if user is logged in
+ * @returns {Promise<void>}
+ */
 async function checkAuthStatus() {
     try {
         const response = await fetch('/api/auth/login', {
@@ -159,15 +233,80 @@ async function checkAuthStatus() {
     }
 }
 
+/**
+ * Displays user dashboard with user information
+ * Shows verification status and conditionally displays verification options
+ * @param {Object} user - User object containing username, email and verification status
+ */
 function showDashboard(user) {
     document.querySelector('.auth-container').style.display = 'none';
     const dashboard = document.querySelector('.dashboard');
     dashboard.style.display = 'block';
     document.getElementById('userUsername').textContent = user.username;
     document.getElementById('userEmail').textContent = user.email;
+    
+    // Show verification status and button if needed
+    const verificationStatus = document.getElementById('verificationStatus');
+    const resendVerificationBtn = document.getElementById('resendVerificationBtn');
+    
+    if (verificationStatus && resendVerificationBtn) {
+        if (user.isEmailVerified) {
+            verificationStatus.textContent = 'Verified';
+            verificationStatus.className = 'verified';
+            resendVerificationBtn.style.display = 'none';
+        } else {
+            verificationStatus.textContent = 'Not Verified';
+            verificationStatus.className = 'not-verified';
+            resendVerificationBtn.style.display = 'block';
+        }
+    }
 }
 
+/**
+ * Shows authentication forms and hides dashboard
+ * Used when user is not authenticated
+ */
 function showAuthForms() {
     document.querySelector('.auth-container').style.display = 'block';
     document.querySelector('.dashboard').style.display = 'none';
+}
+
+/**
+ * Displays notification messages to the user
+ * @param {string} message - The message to display
+ * @param {string} type - Message type (info, success, error, warning)
+ */
+function showMessage(message, type = 'info') {
+    const messageContainer = document.querySelector('.message-container') || createMessageContainer();
+    
+    const messageElement = document.createElement('div');
+    messageElement.className = `message ${type}`;
+    messageElement.textContent = message;
+    
+    // Add close button
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.addEventListener('click', () => messageElement.remove());
+    messageElement.appendChild(closeBtn);
+    
+    messageContainer.appendChild(messageElement);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (messageElement.parentNode) {
+            messageElement.remove();
+        }
+    }, 5000);
+}
+
+/**
+ * Creates a container for notification messages
+ * @returns {HTMLElement} The created message container
+ */
+function createMessageContainer() {
+    const container = document.createElement('div');
+    container.className = 'message-container';
+    document.body.appendChild(container);
+    return container;
 } 

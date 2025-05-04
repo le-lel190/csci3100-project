@@ -1,0 +1,1084 @@
+:root {
+    --primary-color: #663399;
+    --primary-light: #f0e6ff;
+    --secondary-color: #9370DB;
+    --accent-color: #ffb700;
+    --text-color: #2c3e50;
+    --text-light: #7f8c8d;
+    --border-color: #dcdde1;
+    --background-color: #f5f6fa;
+    --white: #ffffff;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --transition-speed: 0.3s;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* Navbar Styles */
+.navbar {
+    background: var(--white);
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.nav-brand {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-links {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all var(--transition-speed) ease;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.btn-logout {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: color var(--transition-speed) ease;
+}
+
+.btn-logout:hover {
+    color: var(--primary-color);
+}
+
+/* Main Layout */
+.container {
+    display: grid;
+    grid-template-columns: minmax(250px, 18%) minmax(0, 1fr) minmax(250px, 18%);
+    gap: 1rem;
+    padding: 1rem;
+    max-height: calc(100vh - 4rem);
+    height: calc(100vh - 4rem);
+    overflow: hidden;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.semester-selector {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.25rem;
+}
+
+.semester-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.semester-btn {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+    font-weight: 500;
+}
+
+.semester-btn.active {
+    background: var(--primary-color);
+    color: var(--white);
+    border-color: var(--primary-color);
+}
+
+.semester-btn:hover:not(.active) {
+    background: var(--background-color);
+    border-color: var(--primary-color);
+}
+
+.search-box {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all var(--transition-speed) ease;
+}
+
+.search-box::before {
+    content: '\f002';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(44, 122, 79, 0.15);
+}
+
+.course-list {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.course-items {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Fix for course items to prevent indentation */
+.course-info {
+    width: 100%;
+    padding-left: 0.5rem;
+}
+
+.course-item {
+    padding: 0.75rem;
+    border-radius: 8px;
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-speed) ease;
+    margin-bottom: 0.5rem;
+}
+
+.course-item:hover, .course-item.highlighted {
+    background-color: var(--primary-light);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.course-item label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    cursor: pointer;
+    width: 100%;
+}
+
+.course-id {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-color);
+    margin-bottom: 2px;
+}
+
+.course-name {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 3px;
+}
+
+/* Checkbox styling */
+.course-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    position: relative;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: all var(--transition-speed) ease;
+}
+
+.course-item input[type="checkbox"]:checked {
+    background-color: var(--primary-color);
+}
+
+.course-item input[type="checkbox"]:checked::after {
+    content: '\f00c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    color: white;
+    position: absolute;
+    font-size: 0.75rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.course-item input[type="checkbox"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(44, 122, 79, 0.15);
+}
+
+/* Fix checkbox alignment in course items */
+.course-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.timetable {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    min-height: 600px;
+}
+
+.timetable-header {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    background-color: var(--primary-light);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    min-width: 800px;
+}
+
+/* Ensure header cells are properly sized and aligned */
+.header-cell {
+    padding: 1rem 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    color: var(--primary-color);
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    min-width: 100px; /* Ensure minimum width for header cells */
+}
+
+.timetable-grid-container {
+    flex: 1;
+    overflow-x: auto;  /* Enable horizontal scrolling */
+    overflow-y: auto;
+    position: relative;
+    border-top: 1px solid var(--border-color);
+    padding-bottom: 20px; /* Add some padding at the bottom */
+}
+
+/* Ensure timetable grid cells have proper borders and sizing */
+.timetable-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(7, 1fr);
+    position: relative;
+    min-width: 800px;
+}
+
+.time-label {
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-light);
+    background-color: var(--white);
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    height: 8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    width: 80px;
+}
+
+.day-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.time-slot {
+    height: 8rem;
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    min-width: 100px; /* Ensure minimum width for time slots */
+}
+
+/* Course Event Styling */
+.course-event {
+    position: absolute;
+    left: 0.25rem;
+    right: 0.25rem;
+    border-radius: 8px; /* Slightly increased border radius */
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    z-index: 2;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-height: 7rem; /* Ensure minimum height for visibility */
+}
+
+.course-event:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-hover);
+    z-index: 20;
+}
+
+.course-event-title {
+    font-weight: 700; /* Make title bolder */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1rem;
+    margin-bottom: 0.2rem; /* Add small margin below title */
+}
+
+.course-event-type,
+.course-event-time,
+.course-event-location {
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+
+/* Placeholder styling */
+.placeholder-course {
+    opacity: 0.85;
+}
+
+.placeholder-indicator {
+    font-size: 0.8em;
+    color: #d32f2f;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+.placeholder-event {
+    border: 2px dashed rgba(0, 0, 0, 0.3) !important;
+    opacity: 0.75;
+}
+
+.placeholder-event::after {
+    content: "Tentative";
+    position: absolute;
+    bottom: 2px;
+    right: 5px;
+    font-size: 9px;
+    color: rgba(0, 0, 0, 0.6);
+    font-style: italic;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+
+/* Preview event styling */
+.preview-event {
+    border: 2px dashed var(--secondary-color) !important;
+    opacity: 0.85;
+}
+
+.preview-event::after {
+    content: "Preview";
+    position: absolute;
+    bottom: 2px;
+    right: 5px;
+    font-size: 9px;
+    color: var(--secondary-color);
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+/* Course Details Panel */
+.course-details {
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.details-content {
+    background: var(--primary-light);
+    padding: 1.25rem;
+    border-radius: 8px;
+    color: var(--text-color);
+    font-size: 0.9rem;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.details-content h4 {
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(44, 122, 79, 0.2);
+}
+
+.course-name-details {
+    font-weight: 500;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    line-height: 1.4;
+}
+
+.course-schedule {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.course-schedule h3 {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.schedule-item {
+    border-left: 3px solid var(--primary-color);
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.schedule-detail {
+    padding: 0.75rem;
+    margin: 0.5rem 0;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 6px;
+    transition: all var(--transition-speed) ease;
+}
+
+.schedule-detail.selected-section {
+    background-color: rgba(44, 122, 79, 0.1);
+    border-left: 3px solid var(--primary-color);
+}
+
+.section-header {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.selected-indicator {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background-color: rgba(44, 122, 79, 0.2);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.location {
+    display: flex;
+    align-items: center;
+    color: var(--text-light);
+    margin-top: 0.5rem;
+}
+
+.location::before {
+    content: '\f3c5';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    margin-right: 0.5rem;
+}
+
+/* Action buttons */
+.timetable-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.action-btn {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.action-btn:first-child {
+    grid-column: span 2;
+}
+
+.save-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.save-btn:hover {
+    background-color: #236a3f;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.export-btn {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.export-btn:hover {
+    background-color: #3a7bc8;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+/* Section selectors */
+.section-selectors {
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 6px;
+}
+
+.section-selector {
+    margin-bottom: 0.5rem;
+}
+
+.section-label {
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.section-dropdown {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    transition: all var(--transition-speed) ease;
+}
+
+.section-dropdown:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(44, 122, 79, 0.15);
+}
+
+/* Demo button */
+.demo-button-container {
+    margin-top: 1rem;
+}
+
+.demo-btn {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.demo-btn::before {
+    content: '\f15c';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+}
+
+.demo-btn:hover {
+    background-color: #e67e22;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+/* Loading and error states */
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--text-light);
+    gap: 1rem;
+}
+
+.loading-indicator::after {
+    content: '';
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 6px;
+    border-left: 3px solid #c62828;
+}
+
+.error-message button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-top: 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--transition-speed) ease;
+}
+
+.error-message button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .container {
+        grid-template-columns: 250px minmax(0, 1fr) 250px;
+        padding: 1rem;
+        gap: 1rem;
+    }
+    
+    .course-event {
+        padding: 0.4rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .container {
+        grid-template-columns: 220px minmax(0, 1fr) 220px;
+    }
+    
+    .sidebar, .course-details {
+        padding: 1rem;
+    }
+    
+    .details-content {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr auto;
+        height: auto;
+        max-height: none;
+    }
+    
+    .sidebar, .course-details {
+        max-height: 300px;
+    }
+    
+    .navbar {
+        padding: 0.75rem 1rem;
+    }
+    
+    .nav-links {
+        gap: 0.5rem;
+    }
+    
+    .nav-links a {
+        padding: 0.4rem 0.75rem;
+    }
+}
+
+/* Main Content Centering and Layout */
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 2rem;
+    overflow-y: auto;
+  }
+
+
+  /* Comment Section Styling */
+  .comment-section {
+    width: 100%;
+    max-width: 750px;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-top: 0; /* Remove extra margin */
+  }
+  
+  /* Comment Header Styling */
+  .comment-header {
+    margin-top: 1rem; /* Move the entire header down */
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+  
+  .comment-header h2 {
+    color: var(--primary-color); /* Use primary color for emphasis */
+    font-size: 1.5rem; /* Adjust font size if needed */
+    font-weight: 700; /* Make it bold */
+}
+  
+  .course-title {
+    color: var(--text-light);
+    font-size: 1rem;
+  }
+  
+  /* Course Info Styling */
+  .course-info {
+    background-color: var(--primary-light);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Comments Container */
+  .comments-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    overflow: visible; /* Ensure no scrollable area within this container */
+    max-height: none; /* Remove height restrictions */
+  }
+  
+  /* Individual Comment Styling */
+  .comment-block {
+    position: relative; /* Required for positioning child elements like .rating-box */
+    background-color: var(--background-color);
+    border-left: 4px solid var(--primary-color);
+    border-radius: 8px;
+    padding: 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+  
+  .comment-block:hover {
+    transform: translateX(3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .comment-author {
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 0.25rem;
+  }
+  
+  .comment-date {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+  }
+  
+  .comment-content {
+    color: var(--text-color);
+    line-height: 1.5;
+  }
+  
+  /* Comment Form Styling */
+  .comment-form {
+    background-color: var(--white);
+    border-radius: 8px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  #newComment {
+    width: 100%;
+    min-height: 100px;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  #newComment:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(44, 122, 79, 0.1);
+  }
+  
+  #postComment {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  
+  #postComment:hover {
+    background-color: #236b42;
+    transform: translateY(-2px);
+  }
+  
+  #postComment:active {
+    transform: translateY(0);
+  }
+  
+  /* Style for the rating box */
+.rating-box {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    gap: 0.5rem; /* Space between label and dropdown */
+    margin-bottom: 1rem; /* Add space below the rating dropdown */
+}
+
+/* Style for the dropdown */
+.rating-dropdown {
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 0.25rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    margin-bottom: 1rem; /* Add space below the rating dropdown */
+}
+
+/* Add hover effect for dropdown */
+.rating-dropdown:hover {
+    border-color: var(--primary-color);
+}
+
+/* Styling for low ratings (1-2 stars) */
+.comment-block.low-rating {
+    background-color: #ffebee; /* Light red background */
+    border-left-color: #e53935; /* Red border */
+}
+
+/* Styling for neutral ratings (3 stars) */
+.comment-block.neutral-rating {
+    background-color:  #dceefb; /* Keep current design */
+    border-left-color: #3a7bc8; /* Default border color */
+}
+
+/* Styling for high ratings (4-5 stars) */
+.comment-block.high-rating {
+    background-color: #e8f5e9; /* Light green background */
+    border-left-color: #2e7d32; /* Green border */
+}
+
+/* Styling for sort buttons */
+.sort-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+.sort-btn {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+}
+
+.sort-btn:hover {
+    background-color: #236b42; /* Darker green on hover */
+}
+
+.sort-btn:active {
+    transform: translateY(2px); /* Button press effect */
+}
+
+
+/* Modal styles */
+.comment-modal {
+    display: none;
+    position: fixed;
+    z-index: 200;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+  }
+  
+  .modal-content {
+    background-color: var(--white);
+    margin: 10% auto;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-hover);
+    width: 80%;
+    max-width: 600px;
+    position: relative;
+    animation: modalFadeIn 0.3s;
+  }
+  
+  @keyframes modalFadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.5rem;
+    color: var(--text-light);
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  .close-modal:hover {
+    color: var(--primary-color);
+  }
+  
+  #editCommentForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  #editCommentText {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: inherit;
+    resize: vertical;
+  }
+  
+  #editCommentText:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(44, 122, 79, 0.1);
+  }
+  
+  #saveEditBtn {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    align-self: flex-end;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  
+  #saveEditBtn:hover {
+    background-color: #236b42;
+    transform: translateY(-2px);
+  }
+  
+  .edit-comment-btn:hover {
+    color: var(--primary-color);
+    transform: scale(1.2);
+  }
+
+  #editCommentRating {
+    width: 150px;          /* Set the width of the dropdown */
+    padding: 8px 12px;     /* Increase padding for better appearance */
+    font-size: 1rem;     /* Match existing font size */
+    border: 1px solid var(--border-color);
+    border-radius: 6px;    /* Consistent with other form elements */
+    background-color: var(--white);
+    color: var(--text-color);
+    appearance: menulist;  /* Ensure dropdown appearance */
+    cursor: pointer;
+    margin-right: 40px;
+    margin-top: 20px;
+  }
+  
+  /* Add hover effect consistent with your design */
+  #editCommentRating:hover {
+    border-color: var(--primary-color);
+  }
+  

@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Planner - Study Planner</title>
+    <title>Course Planner - Configuration</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="/css/config.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <nav class="navbar">
@@ -17,9 +16,11 @@
         </div>
         <div class="nav-links">
             <a href="/timetable">Timetable</a>
-            <a href="./studyPlanner.html">Study Planner</a>
+            <a href="./studyPlanner.html">Study Plan</a>
             <a href="./degreeRoadmap.html">Degree Roadmap</a>
-            <a href="./config.html"  class="active">Config</a>
+            <a href="./config.html" class="active">Config</a>
+            <a href="./comment.html">Comment</a>
+
         </div>
         <div class="nav-user">
             <span id="userUsername"></span>
@@ -28,6 +29,54 @@
             </button>
         </div>
     </nav>
+
+    <div class="containerText">
+        <div class="config-message">
+            <h2>Hello👋</h2>
+            <p>As you may have noticed, the current list of courses supported in <a href="/studyPlanner.html">Study Plan</a> and <a href="/degreeRoadmap.html">Degree Roadmap</a> is quite limited. We would greatly appreciate your assistance in adding more details. 
+                <br><br>Therefore, you can help by providing snapshots of the official Degree Roadmap and courses provided by your faculty.
+                <br><br>Please visit our GitHub page <a href="https://github.com/le-lel190/csci3100-project">AIO Course Planner</a> or email us at 1155193612@link.cuhk.edu.hk! </p>
+            </p>
+          </div>
+    </div>
+
+    <!-- Email Verification Section -->
+    <div class="verification-section" id="emailVerificationSection">
+        <div class="verification-container">
+            <h3>Email Verification</h3>
+            <div id="verification-status-message"></div>
+            
+            <div class="verification-form">
+                <div class="input-group">
+                    <label for="verification-token">Verification Token</label>
+                    <input type="text" id="verification-token" placeholder="Enter your verification token">
+                </div>
+                
+                <div class="verification-actions">
+                    <button id="verify-token-btn" class="btn-primary">Verify Token</button>
+                    <button id="resend-verification-btn" class="btn-secondary">Resend Verification Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-text-left">
+          <p><span class="contributor-label">Contributors:</span></p>
+          <span class="team-names">Anson </span><br>
+          <span class="team-names">Jason </span><br>
+          <span class="team-names">Jonathan</span><br>
+          <span class="team-names">Eddy</span><br>
+        
+        </div>
+        <div class="footer-content-right">
+          <div id="qr-code">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://www.youtube.com/watch?v=dQw4w9WgXcQ" alt="QR Code">
+          </div>
+        </div>
+      </div>
+
     <script src="/js/config.js"></script>
+    <script src="/js/session-manager.js"></script>
 </body>
 </html>
