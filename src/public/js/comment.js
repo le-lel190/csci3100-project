@@ -681,8 +681,8 @@ function loadUserInfo() {
             // Store email verification status and admin status
             window.isEmailVerified = data.user.isEmailVerified || false;
             window.isAdmin = data.user.isAdmin || false;
-            console.log('Email verified:', window.isEmailVerified);
-            console.log('Admin status:', window.isAdmin);
+            // console.log('Email verified:', window.isEmailVerified); // Debug log
+            // console.log('Admin status:', window.isAdmin); // Debug log
         }
     })
     .catch(error => {

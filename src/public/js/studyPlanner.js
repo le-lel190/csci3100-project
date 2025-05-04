@@ -318,7 +318,7 @@ function populateCourseList(courses) {
     courseItems.innerHTML = '';
 
     courses.forEach(course => {
-        console.log(`Course ${course.id}: Units = ${course.units}, Type = ${course.type}`); // Debug log
+        // console.log(`Course ${course.id}: Units = ${course.units}, Type = ${course.type}`); // Debug log
 
         const courseItem = document.createElement('div');
         courseItem.className = 'course-item';
@@ -956,8 +956,8 @@ function loadUserStudyPlan() {
         credentials: 'include'
     })
     .then(response => {
-        console.log('GET /api/studyplan response status:', response.status);
-        console.log('GET /api/studyplan response ok:', response.ok);
+        // console.log('GET /api/studyplan response status:', response.status); // Debug log
+        // console.log('GET /api/studyplan response ok:', response.ok); // Debug log
         if (!response.ok) {
             return response.json().then(data => {
                 throw new Error(`Failed to load study plan: ${data.error || data.message || 'Unknown error'}`);
@@ -966,7 +966,7 @@ function loadUserStudyPlan() {
         return response.json();
     })
     .then(studyPlan => {
-        console.log('Loaded study plan:', studyPlan);
+        // console.log('Loaded study plan:', studyPlan); // Debug log
         const timetableCells = document.querySelectorAll('.timetable td:not(:first-child)');
         timetableCells.forEach(cell => {
             cell.innerHTML = '';

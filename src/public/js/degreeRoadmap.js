@@ -106,20 +106,24 @@ function setupDegreeSelection() {
   });
 
   // Keep modal code for future use with local images
-  closeBtn.addEventListener('click', function() {
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-  });
-
-  modal.addEventListener('click', function(e) {
-    if (e.target === modal) {
+  if (closeBtn) {
+    closeBtn.addEventListener('click', function() {
       modal.style.display = 'none';
       document.body.style.overflow = 'auto';
-    }
-  });
+    });
+  }
+
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    });
+  }
 
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && modal.style.display === 'block') {
+    if (e.key === 'Escape' && modal && modal.style.display === 'block') {
       modal.style.display = 'none';
       document.body.style.overflow = 'auto';
     }
